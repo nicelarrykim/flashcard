@@ -1268,6 +1268,30 @@ export class WordManager {
           </div>
         </div>
 
+        <!-- 추천 외부 그림 힌트 검색 사이트 (원클릭 퀵 링크) -->
+        <div class="bg-indigo-50/70 dark:bg-indigo-950/40 p-3.5 rounded-2xl border border-indigo-100 dark:border-indigo-900/50">
+          <label class="block text-xs font-bold text-indigo-900 dark:text-indigo-200 mb-1.5 flex items-center justify-between">
+            <span>🌐 추천 영단어 그림 힌트 사이트 (클릭 시 새 탭 검색):</span>
+          </label>
+          <div class="flex flex-wrap gap-1.5 mb-2">
+            <a href="https://pixabay.com/ko/illustrations/search/${encodeURIComponent(word)}/" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-xs font-bold border border-amber-200 dark:border-amber-800 shadow-sm transition">
+              <span>🎨 Pixabay 일러스트</span>
+            </a>
+            <a href="https://commons.wikimedia.org/w/index.php?search=${encodeURIComponent(word)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-xs font-bold border border-blue-200 dark:border-blue-800 shadow-sm transition">
+              <span>📖 위키미디어 사전</span>
+            </a>
+            <a href="https://www.google.com/search?tbm=isch&tbs=itp:clipart&q=${encodeURIComponent(word)}+meaning+clipart" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-800 shadow-sm transition">
+              <span>🔍 구글 교육용 클립아트</span>
+            </a>
+            <a href="https://openverse.org/search/image?q=${encodeURIComponent(word)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-purple-700 dark:text-purple-400 text-xs font-bold border border-purple-200 dark:border-purple-800 shadow-sm transition">
+              <span>🌐 Openverse 오픈 이미지</span>
+            </a>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+            💡 <strong>사용 팁</strong>: 위 버튼을 누르면 해당 사이트의 일러스트 검색 결과가 새 탭에서 열립니다. 마음에 드는 그림 위에서 <strong>마우스 우클릭 ➔ [이미지 주소 복사]</strong> 후 아래 입력창에 붙여넣으시면 원하는 그림으로 즉시 적용됩니다!
+          </p>
+        </div>
+
         <!-- 키워드로 위키백과/사전 사진 검색 -->
         <div class="bg-slate-50 dark:bg-slate-750 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">

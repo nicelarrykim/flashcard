@@ -50,16 +50,14 @@ export class StorageManager {
           deck.words = deck.words.filter(Boolean);
           deck.words.forEach(word => {
             if (word) {
-              const img = word.imageUrl || '';
-              if (!img || img.includes('photo-1456513080510-7bf3a84b82f8') || img.includes('pollinations.ai')) {
-                const match = TEXTBOOK_WORDS.find(t => 
-                  (t.number && word.number && t.number === word.number) ||
-                  (t.word && word.word && String(t.word).toLowerCase().trim() === String(word.word).toLowerCase().trim())
-                );
-                if (match && match.imageUrl) {
-                  word.imageUrl = match.imageUrl;
-                  upgraded = true;
-                }
+              // 교재 단어라면 엄선된 직관적인 연상 일러스트/사진으로 자동 동기화
+              const match = TEXTBOOK_WORDS.find(t => 
+                (t.number && word.number && t.number === word.number) ||
+                (t.word && word.word && String(t.word).toLowerCase().trim() === String(word.word).toLowerCase().trim())
+              );
+              if (match && match.imageUrl && (word.imageUrl !== match.imageUrl)) {
+                word.imageUrl = match.imageUrl;
+                upgraded = true;
               }
             }
           });
