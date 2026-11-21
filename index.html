@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VocaQuest - 영단어 플래시카드 & 맞추기 게임</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              750: '#243044'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- 커스텀 스타일 (3D 플립 등) -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Tesseract.js OCR 라이브러리 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <!-- Confetti 축하 애니메이션 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200 bg-grid-pattern">
+
+  <!-- 상단 네비게이션 헤더 -->
+  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- 로고 및 서비스명 -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-500/30 font-black">
+          VQ
+        </div>
+        <div>
+          <h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+            <span>VocaQuest</span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400">
+              Web App
+            </span>
+          </h1>
+          <p class="text-[11px] text-slate-400 hidden sm:block">이미지 OCR 기반 영단어 암기 & 맞추기 게임</p>
+        </div>
+      </div>
+
+      <!-- 중앙/우측 학습 요약 뱃지 -->
+      <div class="flex items-center gap-2 sm:gap-4">
+        <!-- 단어 통계 pill -->
+        <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 rounded-2xl text-xs font-semibold border border-slate-200/50 dark:border-slate-700/50">
+          <span class="text-slate-500 dark:text-slate-400">총 <strong id="stat-total-words" class="text-indigo-600 dark:text-indigo-400">0</strong></span>
+          <span class="text-slate-300 dark:text-slate-600">|</span>
+          <span class="text-emerald-600 dark:text-emerald-400">암기 <strong id="stat-memorized-words">0</strong></span>
+          <span class="text-slate-300 dark:text-slate-600">|</span>
+          <span class="text-rose-500 dark:text-rose-400">오답 <strong id="stat-wrong-words">0</strong></span>
+        </div>
+
+        <!-- 효과음 토글 -->
+        <button id="header-sound-btn" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition" title="효과음 켜짐">
+          🔊
+        </button>
+
+        <!-- 다크모드 토글 -->
+        <button id="header-theme-btn" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition" title="다크 모드 전환">
+          🌙
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- 메인 게임/기능 탭 바 -->
+  <nav class="bg-white/60 dark:bg-slate-900/60 backdrop-blur border-b border-slate-200/60 dark:border-slate-800/60 px-4 py-2">
+    <div class="max-w-4xl mx-auto flex items-center justify-start sm:justify-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+      <button data-tab="flashcard" class="nav-tab active px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition whitespace-nowrap">
+        <span>🗂️</span> <span>플래시카드</span>
+      </button>
+
+      <button data-tab="quiz" class="nav-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition whitespace-nowrap">
+        <span>⚡</span> <span>스피드 퀴즈</span>
+      </button>
+
+      <button data-tab="match" class="nav-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition whitespace-nowrap">
+        <span>🧩</span> <span>카드 짝맞추기</span>
+      </button>
+
+      <button data-tab="scramble" class="nav-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition whitespace-nowrap">
+        <span>🔤</span> <span>스펠링 맞추기</span>
+      </button>
+
+      <button data-tab="speed-drop" class="nav-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition whitespace-nowrap">
+        <span>☄️</span> <span>단어 낙하</span>
+      </button>
+
+      <button data-tab="manager" class="nav-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition whitespace-nowrap text-indigo-600 dark:text-indigo-400">
+        <span>📚</span> <span>단어장 & OCR</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 md:p-8">
+    
+    <!-- 1. 플래시카드 탭 -->
+    <section id="tab-flashcard" class="tab-content"></section>
+
+    <!-- 2. 스피드 사지선다 퀴즈 탭 -->
+    <section id="tab-quiz" class="tab-content hidden"></section>
+
+    <!-- 3. 카드 짝맞추기 탭 -->
+    <section id="tab-match" class="tab-content hidden"></section>
+
+    <!-- 4. 스펠링 맞추기 (스크램블) 탭 -->
+    <section id="tab-scramble" class="tab-content hidden"></section>
+
+    <!-- 5. 단어 낙하 디펜스 탭 -->
+    <section id="tab-speed-drop" class="tab-content hidden"></section>
+
+    <!-- 6. 단어장 관리 및 OCR 탭 -->
+    <section id="tab-manager" class="tab-content hidden"></section>
+
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="mt-auto py-6 border-t border-slate-200/80 dark:border-slate-800/80 text-center text-xs text-slate-400">
+    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p>💡 <strong>VocaQuest</strong> - 영어 단어 이미지 인식 플래시카드 & 맞추기 게임</p>
+      <p class="flex items-center gap-2">
+        <span>배포: GitHub Pages</span>
+        <span>•</span>
+        <span>오프라인 LocalStorage 지원</span>
+      </p>
+    </div>
+  </footer>
+
+  <!-- 앱 메인 스크립트 (ES Module) -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
