@@ -6,6 +6,7 @@ import { SoundManager } from '../tts.js';
 
 export class SpeedDropGame {
   constructor(containerId) {
+    this.containerId = containerId;
     this.container = document.getElementById(containerId);
     this.words = [];
     this.fallingWord = null;
@@ -18,10 +19,12 @@ export class SpeedDropGame {
   }
 
   init() {
+    this.container = this.container || document.getElementById(this.containerId);
     this.renderStartScreen();
   }
 
   renderStartScreen() {
+    this.container = this.container || document.getElementById(this.containerId);
     if (!this.container) return;
     const allWords = StorageManager.getWords();
     const activeDeck = StorageManager.getActiveDeck();

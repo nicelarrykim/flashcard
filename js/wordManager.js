@@ -8,6 +8,7 @@ import { ImageFinder } from './imageFinder.js';
 
 export class WordManager {
   constructor(containerId) {
+    this.containerId = containerId;
     this.container = document.getElementById(containerId);
     this.filterSearch = '';
     this.filterCategory = 'all'; // 'all', 'wrong', 'memorized'
@@ -19,10 +20,12 @@ export class WordManager {
   }
 
   init() {
+    this.container = this.container || document.getElementById(this.containerId);
     this.render();
   }
 
   render() {
+    this.container = this.container || document.getElementById(this.containerId);
     if (!this.container) return;
 
     const decks = StorageManager.getDecks();

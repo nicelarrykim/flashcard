@@ -211,7 +211,19 @@ class App {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const app = new App();
-  app.init();
-});
+function startApp() {
+  try {
+    const app = new App();
+    app.init();
+    window.vocaQuestApp = app;
+  } catch (err) {
+    console.error('VocaQuest App initialization error:', err);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  // DOMContentLoaded가 이미 발생한 경우 (ES Module 지연 로딩 특성) 즉시 실행
+  startApp();
+}

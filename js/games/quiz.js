@@ -6,6 +6,7 @@ import { SoundManager } from '../tts.js';
 
 export class QuizGame {
   constructor(containerId) {
+    this.containerId = containerId;
     this.container = document.getElementById(containerId);
     this.words = [];
     this.currentIndex = 0;
@@ -22,10 +23,12 @@ export class QuizGame {
   }
 
   init() {
+    this.container = this.container || document.getElementById(this.containerId);
     this.renderStartScreen();
   }
 
   renderStartScreen() {
+    this.container = this.container || document.getElementById(this.containerId);
     if (!this.container) return;
     const allWords = StorageManager.getWords();
     const activeDeck = StorageManager.getActiveDeck();

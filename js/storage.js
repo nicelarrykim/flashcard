@@ -42,15 +42,23 @@ export class StorageManager {
         // 기존 더미 Unsplash 이미지가 저장되어 있다면 최신 영영사전/일러스트 이미지로 자동 갱신
         let upgraded = false;
         decks.forEach(deck => {
-          deck.words.forEach(word => {
-            if (!word.imageUrl || word.imageUrl.includes('photo-1456513080510-7bf3a84b82f8') || word.imageUrl.includes('pollinations.ai')) {
-              const match = TEXTBOOK_WORDS.find(t => (t.number && t.number === word.number) || t.word.toLowerCase() === word.word.toLowerCase());
-              if (match && match.imageUrl) {
-                word.imageUrl = match.imageUrl;
-                upgraded = true;
+          if (deck && Array.isArray(deck.words)) {
+            deck.words.forEach(word => {
+              if (word) {
+                const img = word.imageUrl || '';
+                if (!img || img.includes('photo-1456513080510-7bf3a84b82f8') || img.includes('pollinations.ai')) {
+                  const match = TEXTBOOK_WORDS.find(t => 
+                    (t.number && word.number && t.number === word.number) ||
+                    (t.word && word.word && String(t.word).toLowerCase().trim() === String(word.word).toLowerCase().trim())
+                  );
+                  if (match && match.imageUrl) {
+                    word.imageUrl = match.imageUrl;
+                    upgraded = true;
+                  }
+                }
               }
-            }
-          });
+            });
+          }
         });
         if (upgraded) {
           localStorage.setItem(DECKS_KEY, JSON.stringify(decks));

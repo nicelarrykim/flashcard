@@ -6,6 +6,7 @@ import { SoundManager } from '../tts.js';
 
 export class FlashcardGame {
   constructor(containerId) {
+    this.containerId = containerId;
     this.container = document.getElementById(containerId);
     this.words = [];
     this.currentIndex = 0;
@@ -15,6 +16,7 @@ export class FlashcardGame {
   }
 
   init() {
+    this.container = this.container || document.getElementById(this.containerId);
     this.loadWords();
     this.render();
     this.bindGlobalKeyboard();
