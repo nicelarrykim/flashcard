@@ -43,7 +43,7 @@ export class StorageManager {
         let upgraded = false;
         decks.forEach(deck => {
           deck.words.forEach(word => {
-            if (!word.imageUrl || word.imageUrl.includes('photo-1456513080510-7bf3a84b82f8')) {
+            if (!word.imageUrl || word.imageUrl.includes('photo-1456513080510-7bf3a84b82f8') || word.imageUrl.includes('pollinations.ai')) {
               const match = TEXTBOOK_WORDS.find(t => (t.number && t.number === word.number) || t.word.toLowerCase() === word.word.toLowerCase());
               if (match && match.imageUrl) {
                 word.imageUrl = match.imageUrl;

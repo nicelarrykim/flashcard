@@ -892,7 +892,7 @@ export class WordManager {
           meaning: '새 뜻',
           partOfSpeech: 'noun',
           phonetic: '',
-          imageUrl: ImageFinder.generateIllustrationUrl('new word', '새 뜻'),
+          imageUrl: ImageFinder.generateFallbackUrl('new word'),
           audioUrl: OCRParser.generateAudioUrl('new word'),
           tags: ['photo-scan']
         });
@@ -1265,16 +1265,16 @@ export class WordManager {
           </div>
         </div>
 
-        <!-- 커스텀 키워드로 새 일러스트 생성 -->
+        <!-- 키워드로 위키백과/사전 사진 검색 -->
         <div class="bg-slate-50 dark:bg-slate-750 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-            🎨 원하는 장면/키워드로 새 일러스트 즉시 생성:
+            🔍 영단어/키워드로 위키백과 사전 사진 즉시 검색:
           </label>
           <div class="flex gap-2">
-            <input type="text" id="custom-img-keyword" placeholder="예: puppy running with ball, beautiful sunset" value="${word} ${meaning}"
+            <input type="text" id="custom-img-keyword" placeholder="영단어 입력 (예: planet, tourist, gym, apple)" value="${word}"
               class="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-            <button type="button" id="generate-custom-img-btn" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow transition shrink-0">
-              생성 🪄
+            <button type="button" id="generate-custom-img-btn" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow transition shrink-0">
+              사전 검색 📖
             </button>
           </div>
         </div>
@@ -1327,13 +1327,17 @@ export class WordManager {
     const genBtn = modal.querySelector('#generate-custom-img-btn');
     const kwInput = modal.querySelector('#custom-img-keyword');
     if (genBtn && kwInput) {
-      genBtn.onclick = () => {
+      genBtn.onclick = async () => {
         const kw = kwInput.value.trim();
         if (kw) {
-          const generatedUrl = ImageFinder.generateIllustrationFromPrompt(
-            `educational friendly illustration for english learning: ${kw}, vibrant colors, clean white background, high quality vector art`
-          );
-          updateSelected(generatedUrl);
+          genBtn.innerText = '검색 중...';
+          const wikiImg = await ImageFinder.fetchWikipediaThumbnail(kw);
+          genBtn.innerText = '사전 검색 📖';
+          if (wikiImg) {
+            updateSelected(wikiImg);
+          } else {
+            updateSelected(ImageFinder.generateFallbackUrl(kw));
+          }
         }
       };
     }

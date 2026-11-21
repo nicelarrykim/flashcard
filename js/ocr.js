@@ -430,9 +430,9 @@ export class OCRParser {
     return `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(clean)}&type=2`;
   }
 
-  static generateAutoImageUrl(word, meaning = '') {
+  static generateAutoImageUrl(word, meaning = '', number = null) {
     if (!word) return '';
-    return ImageFinder.generateIllustrationUrl(word, meaning);
+    return (number && ImageFinder.CURATED_IMAGES[number]) ? ImageFinder.CURATED_IMAGES[number] : ImageFinder.generateFallbackUrl(word);
   }
 
   static deduplicateAndSort(words) {

@@ -161,7 +161,7 @@ export class FlashcardGame {
                 <!-- 그림 힌트 팝오버 박스 -->
                 ${word.imageUrl ? `
                   <div id="fc-hint-preview" class="hidden mt-3 p-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-amber-300 dark:border-amber-700 max-w-[220px]">
-                    <img src="${word.imageUrl}" alt="" class="w-full h-28 object-cover rounded-xl mb-1">
+                    <img src="${word.imageUrl}" alt="" class="w-full h-28 object-cover rounded-xl mb-1" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80';">
                     <p class="text-[10px] font-bold text-amber-600 dark:text-amber-400 text-center">💡 시각적 연상 힌트</p>
                   </div>
                 ` : ''}
@@ -177,7 +177,7 @@ export class FlashcardGame {
               <!-- 배경 은은한 연상 이미지 (있을 경우) -->
               ${word.imageUrl ? `
                 <div class="absolute inset-0 w-full h-full opacity-15 pointer-events-none">
-                  <img src="${word.imageUrl}" alt="" class="w-full h-full object-cover">
+                  <img src="${word.imageUrl}" alt="" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80';">
                 </div>
               ` : ''}
 
@@ -204,7 +204,7 @@ export class FlashcardGame {
 
                 ${word.imageUrl ? `
                   <div class="w-48 sm:w-56 h-32 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/30 relative group bg-black/40 my-1.5">
-                    <img src="${word.imageUrl}" alt="${word.meaning}" class="w-full h-full object-cover transition transform duration-300 group-hover:scale-105" loading="lazy">
+                    <img src="${word.imageUrl}" alt="${word.meaning}" class="w-full h-full object-cover transition transform duration-300 group-hover:scale-105" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80';">
                     <div class="absolute bottom-1 right-2 px-2 py-0.5 rounded-md bg-black/70 text-[10px] text-white/90 backdrop-blur font-bold flex items-center gap-1">
                       <span>🎨</span> <span>연상 그림</span>
                     </div>
