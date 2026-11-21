@@ -215,7 +215,7 @@ export class ScrambleGame {
     });
 
     const ttsBtn = document.getElementById('scramble-tts-btn');
-    if (ttsBtn) ttsBtn.addEventListener('click', () => SoundManager.speak(this.currentWord.word));
+    if (ttsBtn) ttsBtn.addEventListener('click', () => SoundManager.speak(this.currentWord.word, this.currentWord.audioUrl));
 
     const hintBtn = document.getElementById('scramble-hint-btn');
     if (hintBtn) hintBtn.addEventListener('click', () => this.useHint());
@@ -286,7 +286,7 @@ export class ScrambleGame {
         this.score += points;
         StorageManager.markMemorized(this.currentWord.id, true);
         SoundManager.playTone('correct');
-        SoundManager.speak(this.currentWord.word);
+        SoundManager.speak(this.currentWord.word, this.currentWord.audioUrl);
 
         if (typeof window.confetti === 'function') {
           window.confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });

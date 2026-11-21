@@ -256,7 +256,7 @@ export class FlashcardGame {
       this.render();
       // 단어 변경 시 자동 발음 (설정에 따라)
       const currentWord = this.words[this.currentIndex];
-      SoundManager.speak(currentWord.word);
+      SoundManager.speak(currentWord.word, currentWord.audioUrl);
     }
   }
 
@@ -309,7 +309,7 @@ export class FlashcardGame {
     if (ttsBtn) {
       ttsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        SoundManager.speak(word.word);
+        SoundManager.speak(word.word, word.audioUrl);
       });
     }
 
@@ -317,7 +317,7 @@ export class FlashcardGame {
     if (ttsBackBtn) {
       ttsBackBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        SoundManager.speak(word.word);
+        SoundManager.speak(word.word, word.audioUrl);
       });
     }
 

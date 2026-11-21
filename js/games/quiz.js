@@ -173,11 +173,11 @@ export class QuizGame {
       </div>
     `;
 
-    // TTS 자동 재생
-    SoundManager.speak(currentWord.word);
+    // TTS 자동 재생 (원어민 MP3)
+    SoundManager.speak(currentWord.word, currentWord.audioUrl);
 
     const ttsBtn = document.getElementById('quiz-tts-btn');
-    if (ttsBtn) ttsBtn.addEventListener('click', () => SoundManager.speak(currentWord.word));
+    if (ttsBtn) ttsBtn.addEventListener('click', () => SoundManager.speak(currentWord.word, currentWord.audioUrl));
 
     this.bindOptions(currentWord);
     this.startTimer(currentWord);

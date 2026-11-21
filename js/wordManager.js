@@ -116,7 +116,7 @@ export class WordManager {
                       <!-- 단어 & 발음 -->
                       <td class="py-3.5 px-4">
                         <div class="flex items-center gap-2">
-                          <button class="mgr-tts-btn text-slate-400 hover:text-indigo-600 transition" data-word="${w.word}" title="발음 듣기">
+                          <button class="mgr-tts-btn text-slate-400 hover:text-indigo-600 transition" data-word="${w.word}" data-audio="${w.audioUrl || ''}" title="발음 듣기">
                             🔊
                           </button>
                           <div>
@@ -231,7 +231,7 @@ export class WordManager {
     // TTS 발음
     document.querySelectorAll('.mgr-tts-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        SoundManager.speak(btn.dataset.word);
+        SoundManager.speak(btn.dataset.word, btn.dataset.audio);
       });
     });
 

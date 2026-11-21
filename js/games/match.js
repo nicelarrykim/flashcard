@@ -68,6 +68,7 @@ export class MatchGame {
         text: word.word,
         subtext: word.phonetic || '',
         imageUrl: word.imageUrl,
+        audioUrl: word.audioUrl,
         isFlipped: false,
         isMatched: false
       });
@@ -188,7 +189,7 @@ export class MatchGame {
     SoundManager.playTone('flip');
 
     if (card.type === 'word') {
-      SoundManager.speak(card.text);
+      SoundManager.speak(card.text, card.audioUrl);
     }
 
     this.updateCardUI(index);

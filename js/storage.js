@@ -3,17 +3,38 @@
 
 import { DEFAULT_WORDS } from './data/defaultWords.js';
 
-const STORAGE_KEY = 'vocaquest_words_v1';
+const STORAGE_KEY = 'vocaquest_words_v2';
+const OLD_STORAGE_KEY = 'vocaquest_words_v1';
 const SETTINGS_KEY = 'vocaquest_settings_v1';
 
 export class StorageManager {
   static getWords() {
     try {
-      const data = localStorage.getItem(STORAGE_KEY);
+      let data = localStorage.getItem(STORAGE_KEY);
+      
+      // v1 데이터가 있다면 마이그레이션 (audioUrl 보강)
       if (!data) {
+        const oldData = localStorage.getItem(OLD_STORAGE_KEY);
+        if (oldData) {
+          const oldWords = JSON.parse(oldData);
+          if (Array.isArray(oldWords) && oldWords.length > 0) {
+            // 기본 단어들의 audioUrl 매핑
+            const migrated = oldWords.map(w => {
+              const def = DEFAULT_WORDS.find(d => d.word.toLowerCase() === w.word.toLowerCase());
+              return {
+                ...w,
+                audioUrl: w.audioUrl || def?.audioUrl || `https://ssl.gstatic.com/dictionary/static/sounds/20200429/${w.word.toLowerCase()}--_us_1.mp3`
+              };
+            });
+            this.saveWords(migrated);
+            return migrated;
+          }
+        }
+
         this.saveWords(DEFAULT_WORDS);
         return DEFAULT_WORDS;
       }
+
       const words = JSON.parse(data);
       return Array.isArray(words) && words.length > 0 ? words : DEFAULT_WORDS;
     } catch (e) {
@@ -25,7 +46,6 @@ export class StorageManager {
   static saveWords(words) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
-      // 저장 이벤트 디스패치
       window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: words }));
     } catch (e) {
       console.error('Failed to save words to localStorage:', e);
@@ -34,6 +54,7 @@ export class StorageManager {
 
   static addWord(wordData) {
     const words = this.getWords();
+    const cleanWord = wordData.word.trim().toLowerCase();
     const newWord = {
       id: 'w_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
       word: wordData.word.trim(),
@@ -43,6 +64,7 @@ export class StorageManager {
       example: wordData.example?.trim() || '',
       exampleMeaning: wordData.exampleMeaning?.trim() || '',
       imageUrl: wordData.imageUrl?.trim() || '',
+      audioUrl: wordData.audioUrl?.trim() || `https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanWord}--_us_1.mp3`,
       tags: wordData.tags || ['custom'],
       level: wordData.level || 'beginner',
       memorized: false,
@@ -56,21 +78,25 @@ export class StorageManager {
 
   static addWordsBatch(wordsArray) {
     const currentWords = this.getWords();
-    const createdList = wordsArray.map((w, index) => ({
-      id: 'w_' + (Date.now() + index) + '_' + Math.random().toString(36).substr(2, 5),
-      word: w.word.trim(),
-      phonetic: w.phonetic?.trim() || '',
-      partOfSpeech: w.partOfSpeech?.trim() || 'noun',
-      meaning: w.meaning.trim(),
-      example: w.example?.trim() || '',
-      exampleMeaning: w.exampleMeaning?.trim() || '',
-      imageUrl: w.imageUrl?.trim() || '',
-      tags: w.tags || ['imported'],
-      level: w.level || 'intermediate',
-      memorized: false,
-      wrongCount: 0,
-      createdAt: Date.now()
-    }));
+    const createdList = wordsArray.map((w, index) => {
+      const cleanWord = w.word.trim().toLowerCase();
+      return {
+        id: 'w_' + (Date.now() + index) + '_' + Math.random().toString(36).substr(2, 5),
+        word: w.word.trim(),
+        phonetic: w.phonetic?.trim() || '',
+        partOfSpeech: w.partOfSpeech?.trim() || 'noun',
+        meaning: w.meaning.trim(),
+        example: w.example?.trim() || '',
+        exampleMeaning: w.exampleMeaning?.trim() || '',
+        imageUrl: w.imageUrl?.trim() || '',
+        audioUrl: w.audioUrl?.trim() || `https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanWord}--_us_1.mp3`,
+        tags: w.tags || ['imported'],
+        level: w.level || 'intermediate',
+        memorized: false,
+        wrongCount: 0,
+        createdAt: Date.now()
+      };
+    });
     const updated = [...createdList, ...currentWords];
     this.saveWords(updated);
     return createdList;

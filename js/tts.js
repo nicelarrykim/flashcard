@@ -1,160 +1,77 @@
 // js/tts.js
-// 고품질 원어민 오디오 스트리밍 및 브라우저 Web Speech API 하이브리드 발음 모듈
+// 100% 실제 원어민 성우 녹음 MP3 스트리밍 발음 엔진
 
 export class SoundManager {
-  static synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
-  static selectedVoice = null;
   static soundEnabled = true;
   static currentAudio = null;
-  static audioCache = new Map();
-
-  static init() {
-    if (!this.synth) return;
-
-    const loadVoices = () => {
-      const voices = this.synth.getVoices();
-      // 영어 네이티브 음성 우선 선택 (Google US English, Samantha, Microsoft Zira, en-US)
-      this.selectedVoice = voices.find(v => (v.name.includes('Google') || v.name.includes('Natural')) && v.lang.startsWith('en'))
-        || voices.find(v => v.lang.startsWith('en-US') && !v.localService)
-        || voices.find(v => v.lang.startsWith('en-US'))
-        || voices.find(v => v.lang.startsWith('en'))
-        || null;
-    };
-
-    loadVoices();
-    if (this.synth.onvoiceschanged !== undefined) {
-      this.synth.onvoiceschanged = loadVoices;
-    }
-  }
 
   /**
-   * 고품질 원어민 발음 재생
-   * 1순위: Google 번역 고품질 신경망 원어민 오디오 (MP3 스트림)
-   * 2순위: Free Dictionary 원어민 녹음 오디오
-   * 3순위 (Fallback): 브라우저 Web Speech API
+   * 실제 미국식 원어민 음성 재생
+   * @param {string} text 단어 또는 문장
+   * @param {string} [directAudioUrl] 미리 검증된 오디오 URL (있을 경우 최우선)
    */
-  static async speak(text, rate = 0.9) {
+  static speak(text, directAudioUrl = '') {
     if (!this.soundEnabled || !text) return;
-    const cleanText = text.trim();
-    if (!cleanText) return;
+    const cleanWord = text.trim().toLowerCase().replace(/[^a-z\-]/g, '');
+    if (!cleanWord) return;
 
-    // 현재 재생 중인 오디오가 있다면 중지
+    // 현재 재생 중인 오디오 정지
     if (this.currentAudio) {
       try {
         this.currentAudio.pause();
         this.currentAudio.currentTime = 0;
       } catch (e) {}
     }
-    if (this.synth) {
-      this.synth.cancel();
+
+    // 후보 음원 URL 목록 (모두 실제 사람/원어민 성우 녹음 MP3)
+    const audioCandidates = [];
+
+    // 1. 단어 객체에 직접 지정된 URL (가장 확실함)
+    if (directAudioUrl) {
+      audioCandidates.push(directAudioUrl);
     }
 
-    // 1. 단어 단위인 경우 캐시된 원어민 오디오 URL 확인
-    if (this.audioCache.has(cleanText.toLowerCase())) {
-      const cachedUrl = this.audioCache.get(cleanText.toLowerCase());
-      if (cachedUrl) {
-        this.playAudioUrl(cachedUrl, () => this.speakWithGoogleTTS(cleanText));
-        return;
-      }
-    }
+    // 2. Google 공식 사전 미국식 원어민 녹음 MP3 (Google Dictionary US)
+    audioCandidates.push(`https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanWord}--_us_1.mp3`);
+    audioCandidates.push(`https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanWord}--_us_2.mp3`);
 
-    // 2. 단일 단어인 경우 Free Dictionary API 원어민 녹음 오디오 검색 시도
-    if (!cleanText.includes(' ') && cleanText.length < 25) {
-      try {
-        const audioUrl = await this.fetchDictionaryAudio(cleanText.toLowerCase());
-        if (audioUrl) {
-          this.audioCache.set(cleanText.toLowerCase(), audioUrl);
-          this.playAudioUrl(audioUrl, () => this.speakWithGoogleTTS(cleanText));
-          return;
-        }
-      } catch (e) {
-        // 계속 진행
-      }
-    }
+    // 3. 글로벌 사전 표준 미국식 원어민 음성 스트림 (Youdao US Pronunciation)
+    audioCandidates.push(`https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`);
 
-    // 3. 구글 고품질 원어민 오디오 재생
-    this.speakWithGoogleTTS(cleanText);
+    // 4. Free Dictionary API US 녹음
+    audioCandidates.push(`https://api.dictionaryapi.dev/media/pronunciations/en/${cleanWord}-us.mp3`);
+
+    // 순차 재생 시도 (첫 번째로 성공하는 고음질 원어민 음원 재생)
+    this.playCandidatesSequentially(audioCandidates, 0);
   }
 
-  /**
-   * Google 고품질 TTS 오디오 스트림 재생
-   */
-  static speakWithGoogleTTS(text) {
-    try {
-      const encoded = encodeURIComponent(text);
-      const googleTTSUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encoded}`;
-      this.playAudioUrl(googleTTSUrl, () => {
-        // 구글 오디오 차단 또는 네트워크 실패 시 Web Speech API로 폴백
-        this.speakWithWebSpeech(text);
+  static playCandidatesSequentially(candidates, index) {
+    if (index >= candidates.length) {
+      console.warn('모든 원어민 오디오 소스 재생 실패');
+      return;
+    }
+
+    const url = candidates[index];
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audio.src = url;
+    this.currentAudio = audio;
+
+    const playPromise = audio.play();
+
+    if (playPromise !== undefined) {
+      playPromise.catch((err) => {
+        // 현재 음원이 로드 실패하면 즉시 다음 후보 음원 시도
+        this.playCandidatesSequentially(candidates, index + 1);
       });
-    } catch (err) {
-      this.speakWithWebSpeech(text);
     }
+
+    audio.onerror = () => {
+      this.playCandidatesSequentially(candidates, index + 1);
+    };
   }
 
-  /**
-   * HTML5 Audio 재생
-   */
-  static playAudioUrl(url, onErrorFallback) {
-    try {
-      const audio = new Audio(url);
-      this.currentAudio = audio;
-      
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          console.warn('Audio stream play failed, falling back:', err);
-          if (onErrorFallback) onErrorFallback();
-        });
-      }
-    } catch (err) {
-      if (onErrorFallback) onErrorFallback();
-    }
-  }
-
-  /**
-   * Free Dictionary API에서 실제 사람이 녹음한 미국/영국식 원어민 오디오 URL 탐색
-   */
-  static async fetchDictionaryAudio(word) {
-    try {
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
-      if (!res.ok) return null;
-      const data = await res.json();
-      if (Array.isArray(data) && data[0]?.phonetics) {
-        // 미국식(-us) 또는 유효한 mp3 오디오 찾기
-        const usAudio = data[0].phonetics.find(p => p.audio && p.audio.includes('-us.mp3'));
-        if (usAudio?.audio) return usAudio.audio;
-
-        const anyAudio = data[0].phonetics.find(p => p.audio && p.audio.length > 5);
-        if (anyAudio?.audio) return anyAudio.audio;
-      }
-    } catch (e) {
-      // ignore
-    }
-    return null;
-  }
-
-  /**
-   * 브라우저 내장 Web Speech API (Fallback)
-   */
-  static speakWithWebSpeech(text, rate = 0.9) {
-    if (!this.synth || !this.soundEnabled || !text) return;
-
-    try {
-      this.synth.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = rate;
-      if (this.selectedVoice) {
-        utterance.voice = this.selectedVoice;
-      }
-      this.synth.speak(utterance);
-    } catch (e) {
-      console.warn('Web Speech API failed:', e);
-    }
-  }
-
-  // 간단한 효과음 (정답/오답/카드 뒤집기/팡파르) - AudioContext 활용
+  // 간단한 효과음 (정답/오답/카드 뒤집기/팡파르) - Web Audio API
   static playTone(type = 'correct') {
     if (!this.soundEnabled) return;
     try {
@@ -209,5 +126,3 @@ export class SoundManager {
     }
   }
 }
-
-SoundManager.init();

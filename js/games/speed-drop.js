@@ -73,7 +73,7 @@ export class SpeedDropGame {
     this.fallingWord = this.words.pop();
     this.dropY = 5; // 상단 5%에서 시작
     this.dropSpeed = Math.min(0.9, 0.35 + (this.score / 1500) * 0.2); // 점수가 오를수록 가속
-    SoundManager.speak(this.fallingWord.word);
+    SoundManager.speak(this.fallingWord.word, this.fallingWord.audioUrl);
   }
 
   renderGameField() {
@@ -130,7 +130,7 @@ export class SpeedDropGame {
     const ttsBtn = document.getElementById('drop-tts-btn');
     if (ttsBtn) {
       ttsBtn.addEventListener('click', () => {
-        if (this.fallingWord) SoundManager.speak(this.fallingWord.word);
+        if (this.fallingWord) SoundManager.speak(this.fallingWord.word, this.fallingWord.audioUrl);
       });
     }
   }
