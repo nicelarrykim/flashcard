@@ -130,12 +130,6 @@ export class ScrambleGame {
             <p class="text-xs text-slate-400 dark:text-slate-400 italic mb-2">"${word.example}"</p>
           ` : ''}
 
-          ${word.imageUrl ? `
-            <div class="w-24 h-16 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700 mt-1">
-              <img src="${word.imageUrl}" alt="" class="w-full h-full object-cover">
-            </div>
-          ` : ''}
-
           <!-- 힌트 & 발음 버튼 -->
           <div class="flex items-center gap-2 mt-4">
             <button id="scramble-tts-btn" class="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-300 text-xs font-semibold transition flex items-center gap-1">

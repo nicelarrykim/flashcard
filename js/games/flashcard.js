@@ -155,26 +155,13 @@ export class FlashcardGame {
                   </p>
                 ` : ''}
 
-                <!-- 발음 재생 및 그림 힌트 버튼 바 -->
+                <!-- 발음 재생 버튼 바 -->
                 <div class="flex items-center gap-2 mt-2">
-                  <button id="fc-tts-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 font-medium transition transform hover:scale-105 active:scale-95 shadow-sm">
-                    <span class="text-lg">🔊</span>
+                  <button id="fc-tts-btn" class="flex items-center gap-2 px-6 py-3 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 font-bold transition transform hover:scale-105 active:scale-95 shadow-sm">
+                    <span class="text-xl">🔊</span>
                     <span>발음 듣기</span>
                   </button>
-                  ${word.imageUrl ? `
-                    <button id="fc-hint-btn" type="button" class="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold transition transform hover:scale-105 active:scale-95 shadow-sm border border-amber-200 dark:border-amber-800 text-xs" title="카드를 뒤집기 전 연상 그림 힌트 확인">
-                      <span>🖼️ 그림 힌트</span>
-                    </button>
-                  ` : ''}
                 </div>
-
-                <!-- 그림 힌트 팝오버 박스 -->
-                ${word.imageUrl ? `
-                  <div id="fc-hint-preview" class="hidden mt-3 p-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-amber-300 dark:border-amber-700 max-w-[220px]">
-                    <img src="${word.imageUrl}" alt="" class="w-full h-28 object-cover rounded-xl mb-1" onerror="window.handleImageFallback && window.handleImageFallback(this)">
-                    <p class="text-[10px] font-bold text-amber-600 dark:text-amber-400 text-center">💡 시각적 연상 힌트</p>
-                  </div>
-                ` : ''}
               </div>
 
               <div class="text-xs text-slate-400">
@@ -182,19 +169,12 @@ export class FlashcardGame {
               </div>
             </div>
 
-            <!-- 뒷면 (Back: 한국어 뜻 + 예문 + 연상 이미지) -->
-            <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 flex flex-col justify-between items-center text-center border-2 border-purple-500/40 shadow-2xl overflow-hidden">
-              <!-- 배경 은은한 연상 이미지 (있을 경우) -->
-              ${word.imageUrl ? `
-                <div class="absolute inset-0 w-full h-full opacity-15 pointer-events-none">
-                  <img src="${word.imageUrl}" alt="" class="w-full h-full object-cover" onerror="this.remove()">
-                </div>
-              ` : ''}
-
+            <!-- 뒷면 (Back: 한국어 뜻 + 예문) -->
+            <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-8 flex flex-col justify-between items-center text-center border-2 border-purple-500/40 shadow-2xl overflow-hidden">
               <div class="relative z-10 w-full flex justify-between items-center">
                 <div class="flex items-center gap-2">
                   ${word.number ? `
-                    <span class="px-2 py-0.5 text-xs font-black font-mono rounded-lg bg-white/20 text-white">
+                    <span class="px-2.5 py-1 text-xs font-black font-mono rounded-lg bg-white/20 text-white">
                       #${word.number}
                     </span>
                   ` : ''}
@@ -207,27 +187,18 @@ export class FlashcardGame {
                 </button>
               </div>
 
-              <div class="relative z-10 my-auto flex flex-col items-center max-w-md w-full">
-                <h3 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-200 to-indigo-200 mb-2">
+              <div class="relative z-10 my-auto flex flex-col items-center max-w-lg w-full">
+                <h3 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-200 to-indigo-200 mb-6 tracking-tight">
                   ${word.meaning}
                 </h3>
 
-                ${word.imageUrl ? `
-                  <div class="w-48 sm:w-56 h-32 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/30 relative group bg-black/40 my-1.5">
-                    <img src="${word.imageUrl}" alt="${word.meaning}" class="w-full h-full object-cover transition transform duration-300 group-hover:scale-105" loading="lazy" onerror="window.handleImageFallback && window.handleImageFallback(this)">
-                    <div class="absolute bottom-1 right-2 px-2 py-0.5 rounded-md bg-black/70 text-[10px] text-white/90 backdrop-blur font-bold flex items-center gap-1">
-                      <span>🎨</span> <span>연상 그림</span>
-                    </div>
-                  </div>
-                ` : ''}
-
                 ${word.example ? `
-                  <div class="bg-black/30 backdrop-blur-md rounded-2xl p-3 border border-white/10 text-left w-full my-1">
-                    <p class="text-xs sm:text-sm font-medium text-slate-200 mb-0.5 leading-relaxed">
+                  <div class="bg-black/30 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-left w-full my-2 shadow-inner">
+                    <p class="text-sm sm:text-base font-medium text-slate-200 mb-1 leading-relaxed">
                       "${word.example}"
                     </p>
                     ${word.exampleMeaning ? `
-                      <p class="text-[11px] text-slate-400">
+                      <p class="text-xs sm:text-sm text-slate-400">
                         ${word.exampleMeaning}
                       </p>
                     ` : ''}
@@ -356,15 +327,6 @@ export class FlashcardGame {
       ttsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         SoundManager.speak(word.word, word.audioUrl);
-      });
-    }
-
-    const hintBtn = document.getElementById('fc-hint-btn');
-    const hintPreview = document.getElementById('fc-hint-preview');
-    if (hintBtn && hintPreview) {
-      hintBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        hintPreview.classList.toggle('hidden');
       });
     }
 

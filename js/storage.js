@@ -1,8 +1,8 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261122_02';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_02';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261122_03';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_03';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -49,19 +49,9 @@ export class StorageManager {
           }
           deck.words = deck.words.filter(Boolean);
           deck.words.forEach(word => {
-            if (word) {
-              // 교재 단어라면 엄선된 직관적인 연상 일러스트/사진으로 자동 동기화
-              const match = TEXTBOOK_WORDS.find(t => 
-                (t.number && word.number && t.number === word.number) ||
-                (t.word && word.word && String(t.word).toLowerCase().trim() === String(word.word).toLowerCase().trim())
-              );
-              if (match && match.imageUrl && (word.imageUrl !== match.imageUrl)) {
-                word.imageUrl = match.imageUrl;
-                upgraded = true;
-              } else if (!word.imageUrl || (!word.imageUrl.startsWith('http') && !word.imageUrl.startsWith('data:'))) {
-                word.imageUrl = match?.imageUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80';
-                upgraded = true;
-              }
+            if (word && word.imageUrl) {
+              word.imageUrl = '';
+              upgraded = true;
             }
           });
         });

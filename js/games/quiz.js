@@ -138,12 +138,6 @@ export class QuizGame {
 
         <!-- 문제 카드 -->
         <div class="w-full bg-gradient-to-br from-indigo-500 via-purple-600 to-indigo-700 text-white rounded-3xl p-8 mb-6 text-center shadow-xl relative overflow-hidden">
-          ${currentWord.imageUrl ? `
-            <div class="absolute right-4 top-4 w-14 h-14 rounded-2xl overflow-hidden border border-white/20 shadow opacity-80 hidden sm:block">
-              <img src="${currentWord.imageUrl}" alt="" class="w-full h-full object-cover">
-            </div>
-          ` : ''}
-          
           <div class="text-xs uppercase tracking-widest text-indigo-200 mb-1 flex items-center justify-center gap-2">
             ${currentWord.number ? `<span class="px-2 py-0.5 rounded-md bg-white/20 font-mono font-bold">No. ${currentWord.number}</span>` : ''}
             <span>${this.mode === 'en-to-ko' ? '다음 단어의 올바른 뜻은?' : '다음 뜻에 알맞은 영어 단어는?'}</span>
