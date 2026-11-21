@@ -1,8 +1,8 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261121_13';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261121_13';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261122_01';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_01';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';

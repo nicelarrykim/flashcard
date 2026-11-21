@@ -10,7 +10,7 @@ export const DEFAULT_WORDS = [
     meaning: "은유, 비유",
     example: "The poet used a bird as a metaphor for freedom.",
     exampleMeaning: "시인은 새를 자유의 은유로 사용했다.",
-    imageUrl: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80",
     audioUrl: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/metaphor--_us_1.mp3",
     tags: ["academic", "literature"],
     level: "intermediate",

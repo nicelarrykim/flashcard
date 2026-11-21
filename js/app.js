@@ -1,14 +1,14 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261121_13';
-import { SoundManager } from './tts.js?v=20261121_13';
-import { FlashcardGame } from './games/flashcard.js?v=20261121_13';
-import { QuizGame } from './games/quiz.js?v=20261121_13';
-import { MatchGame } from './games/match.js?v=20261121_13';
-import { ScrambleGame } from './games/scramble.js?v=20261121_13';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261121_13';
-import { WordManager } from './wordManager.js?v=20261121_13';
+import { StorageManager } from './storage.js?v=20261122_01';
+import { SoundManager } from './tts.js?v=20261122_01';
+import { FlashcardGame } from './games/flashcard.js?v=20261122_01';
+import { QuizGame } from './games/quiz.js?v=20261122_01';
+import { MatchGame } from './games/match.js?v=20261122_01';
+import { ScrambleGame } from './games/scramble.js?v=20261122_01';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261122_01';
+import { WordManager } from './wordManager.js?v=20261122_01';
 
 class App {
   constructor() {
