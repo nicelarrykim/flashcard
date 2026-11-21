@@ -1,8 +1,8 @@
 // js/ocr.js
 // 최첨단 듀얼 엔진: Gemini Vision AI (정확도 100%) + Tesseract PSM 6 정밀 전처리 & 교재 스마트 복원 모듈
 
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_01';
-import { ImageFinder } from './imageFinder.js?v=20261122_01';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_02';
+import { ImageFinder } from './imageFinder.js?v=20261122_02';
 
 const GEMINI_API_KEY_STORAGE = 'vocaquest_gemini_api_key';
 
