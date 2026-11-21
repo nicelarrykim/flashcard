@@ -533,7 +533,7 @@ export class WordManager {
                     <div class="relative bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-700 rounded-2xl p-2 flex flex-col items-center group">
                       <div class="w-full h-24 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 mb-2 relative">
                         <img src="${item.url}" alt="${item.name}" class="w-full h-full object-cover">
-                        <span class="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                        <span id="badge-${item.id}" class="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
                           item.status === 'done' ? 'bg-emerald-500 text-white' :
                           item.status === 'processing' ? 'bg-indigo-600 text-white animate-pulse' :
                           item.status === 'error' ? 'bg-rose-500 text-white' :
@@ -868,36 +868,64 @@ export class WordManager {
     const percentEl = document.getElementById('ocr-overall-percent');
     const progressBar = document.getElementById('ocr-overall-progress-bar');
 
-    if (startBtn) startBtn.disabled = true;
-    if (progressContainer) progressContainer.classList.remove('hidden');
+    if (startBtn) {
+      startBtn.disabled = true;
+      startBtn.innerHTML = '<span>⏳</span> <span>사진 정밀 판독 진행 중...</span>';
+      startBtn.classList.add('opacity-70', 'cursor-not-allowed');
+    }
+    if (progressContainer) {
+      progressContainer.classList.remove('hidden');
+    }
 
     let allExtracted = [];
 
     for (let i = 0; i < this.uploadQueue.length; i++) {
       const item = this.uploadQueue[i];
       item.status = 'processing';
-      this.renderMultiOCRModal();
+      
+      const badge = document.getElementById(`badge-${item.id}`);
+      if (badge) {
+        badge.className = 'absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white animate-pulse';
+        badge.innerText = '분석중...';
+      }
 
       try {
         const words = await OCRParser.extractFromSingleImage(item.file, { columnMode: this.columnMode }, (pct, msg) => {
           item.progress = pct;
-          const overall = Math.round(((i + pct / 100) / this.uploadQueue.length) * 100);
+          const overall = Math.min(99, Math.round(((i + pct / 100) / this.uploadQueue.length) * 100));
           if (percentEl) percentEl.innerText = `${overall}%`;
           if (progressBar) progressBar.style.width = `${overall}%`;
-          if (statusText) statusText.innerText = `[${i + 1}/${this.uploadQueue.length} ${item.name}] ${msg}`;
+          if (statusText) statusText.innerText = msg;
+          if (badge) badge.innerText = `${pct}%`;
         });
 
         item.status = 'done';
         item.words = words;
+        if (badge) {
+          badge.className = 'absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white';
+          badge.innerText = `완료 (${words.length}개)`;
+        }
         allExtracted = allExtracted.concat(words);
       } catch (err) {
         item.status = 'error';
+        if (badge) {
+          badge.className = 'absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500 text-white';
+          badge.innerText = '오류';
+        }
         console.error(err);
       }
     }
 
-    this.extractedWords = OCRParser.deduplicateWords(allExtracted);
-    this.renderMultiOCRModal();
+    if (percentEl) percentEl.innerText = '100%';
+    if (progressBar) progressBar.style.width = '100%';
+    if (statusText) statusText.innerText = '모든 분석이 완료되었습니다!';
+
+    this.extractedWords = OCRParser.deduplicateAndSort(allExtracted);
+    
+    // 분석 완료 후 부드럽게 검수 테이블 렌더링
+    setTimeout(() => {
+      this.renderMultiOCRModal();
+    }, 300);
   }
 
   openAddModal() {
