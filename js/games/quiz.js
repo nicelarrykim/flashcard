@@ -1,8 +1,8 @@
 // js/games/quiz.js
 // 사지선다 스피드 퀴즈 게임 모듈
 
-import { StorageManager } from '../storage.js';
-import { SoundManager } from '../tts.js';
+import { StorageManager } from '../storage.js?v=20261122_05';
+import { SoundManager } from '../tts.js?v=20261122_05';
 
 export class QuizGame {
   constructor(containerId) {
@@ -30,8 +30,11 @@ export class QuizGame {
   renderStartScreen() {
     this.container = this.container || document.getElementById(this.containerId);
     if (!this.container) return;
-    const allWords = StorageManager.getWords();
-    const activeDeck = StorageManager.getActiveDeck();
+    const mgr = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getActiveDeck === 'function')
+      ? StorageManager
+      : (window.StorageManager || null);
+    const allWords = mgr?.getWords?.() || [];
+    const activeDeck = mgr?.getActiveDeck?.() || { name: '기본 단어장' };
     const canPlay = allWords.length >= 4;
 
     this.container.innerHTML = `

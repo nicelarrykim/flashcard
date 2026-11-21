@@ -1,8 +1,8 @@
 // js/games/flashcard.js
 // 3D 플립 플래시카드 & 라이트너 암기 시스템 모듈
 
-import { StorageManager } from '../storage.js';
-import { SoundManager } from '../tts.js';
+import { StorageManager } from '../storage.js?v=20261122_05';
+import { SoundManager } from '../tts.js?v=20261122_05';
 
 export class FlashcardGame {
   constructor(containerId) {
@@ -23,7 +23,10 @@ export class FlashcardGame {
   }
 
   loadWords() {
-    const allWords = StorageManager.getWords();
+    const mgr = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getWords === 'function')
+      ? StorageManager
+      : (window.StorageManager || null);
+    const allWords = mgr?.getWords?.() || [];
     if (this.filterOnlyWrong) {
       this.words = allWords.filter(w => (w.wrongCount || 0) > 0);
     } else {
@@ -83,7 +86,10 @@ export class FlashcardGame {
     if (!word) return;
     const total = this.words.length;
     const progressPercent = Math.round(((this.currentIndex + 1) / total) * 100);
-    const activeDeck = StorageManager.getActiveDeck();
+    const mgr = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getActiveDeck === 'function')
+      ? StorageManager
+      : (window.StorageManager || null);
+    const activeDeck = mgr?.getActiveDeck?.() || { name: '단어장' };
 
     this.container.innerHTML = `
       <div class="max-w-xl mx-auto flex flex-col items-center">
