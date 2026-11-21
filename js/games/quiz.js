@@ -141,8 +141,9 @@ export class QuizGame {
             </div>
           ` : ''}
           
-          <div class="text-xs uppercase tracking-widest text-indigo-200 mb-1">
-            ${this.mode === 'en-to-ko' ? '다음 단어의 올바른 뜻은?' : '다음 뜻에 알맞은 영어 단어는?'}
+          <div class="text-xs uppercase tracking-widest text-indigo-200 mb-1 flex items-center justify-center gap-2">
+            ${currentWord.number ? `<span class="px-2 py-0.5 rounded-md bg-white/20 font-mono font-bold">No. ${currentWord.number}</span>` : ''}
+            <span>${this.mode === 'en-to-ko' ? '다음 단어의 올바른 뜻은?' : '다음 뜻에 알맞은 영어 단어는?'}</span>
           </div>
 
           <h3 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">

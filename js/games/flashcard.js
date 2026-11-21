@@ -120,9 +120,16 @@ export class FlashcardGame {
             <!-- 앞면 (Front: 영단어 + 발음기호 + TTS 버튼) -->
             <div class="absolute inset-0 w-full h-full backface-hidden bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-8 flex flex-col justify-between items-center text-center border-2 border-indigo-100 dark:border-indigo-900/50 shadow-xl">
               <div class="w-full flex justify-between items-center">
-                <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400">
-                  ${word.partOfSpeech || 'word'}
-                </span>
+                <div class="flex items-center gap-2">
+                  ${word.number ? `
+                    <span class="px-2.5 py-1 text-xs font-black font-mono rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm">
+                      No. ${word.number}
+                    </span>
+                  ` : ''}
+                  <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400">
+                    ${word.partOfSpeech || 'word'}
+                  </span>
+                </div>
                 <span class="text-xs text-slate-400 flex items-center gap-1">
                   <span>💡 클릭하여 뒤집기</span>
                 </span>
@@ -160,9 +167,16 @@ export class FlashcardGame {
               ` : ''}
 
               <div class="relative z-10 w-full flex justify-between items-center">
-                <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                  ${word.word}
-                </span>
+                <div class="flex items-center gap-2">
+                  ${word.number ? `
+                    <span class="px-2 py-0.5 text-xs font-black font-mono rounded-lg bg-white/20 text-white">
+                      #${word.number}
+                    </span>
+                  ` : ''}
+                  <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    ${word.word}
+                  </span>
+                </div>
                 <button id="fc-tts-back-btn" class="p-2 rounded-full hover:bg-white/10 text-slate-300 transition" title="발음 다시 듣기">
                   🔊
                 </button>

@@ -109,7 +109,15 @@ export class StorageManager {
    */
   static getActiveWords() {
     const deck = this.getActiveDeck();
-    return deck ? [...deck.words] : [];
+    if (!deck) return [];
+    const list = [...deck.words];
+    list.sort((a, b) => {
+      if (a.number && b.number) return a.number - b.number;
+      if (a.number) return -1;
+      if (b.number) return 1;
+      return 0;
+    });
+    return list;
   }
 
   /**
@@ -172,7 +180,8 @@ export class StorageManager {
 
     const cleanWord = wordData.word.trim();
     const newWord = {
-      id: 'w_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      id: 'w_' + (wordData.number || Date.now()) + '_' + Math.random().toString(36).substr(2, 5),
+      number: wordData.number ? parseInt(wordData.number, 10) : null,
       word: cleanWord,
       phonetic: wordData.phonetic?.trim() || '',
       partOfSpeech: wordData.partOfSpeech?.trim() || 'word',
@@ -189,6 +198,11 @@ export class StorageManager {
     };
 
     deck.words.unshift(newWord);
+    // 번호가 있다면 번호순 정렬
+    deck.words.sort((a, b) => {
+      if (a.number && b.number) return a.number - b.number;
+      return 0;
+    });
     this.saveDecks(decks);
     return newWord;
   }
@@ -204,7 +218,8 @@ export class StorageManager {
     const createdList = wordsArray.map((w, index) => {
       const cleanWord = w.word.trim();
       return {
-        id: 'w_' + (Date.now() + index) + '_' + Math.random().toString(36).substr(2, 5),
+        id: 'w_' + (w.number || (Date.now() + index)) + '_' + Math.random().toString(36).substr(2, 5),
+        number: w.number ? parseInt(w.number, 10) : null,
         word: cleanWord,
         phonetic: w.phonetic?.trim() || '',
         partOfSpeech: w.partOfSpeech?.trim() || 'word',
@@ -222,6 +237,15 @@ export class StorageManager {
     });
 
     deck.words = [...createdList, ...deck.words];
+
+    // 번호(number) 기준 정렬
+    deck.words.sort((a, b) => {
+      if (a.number && b.number) return a.number - b.number;
+      if (a.number) return -1;
+      if (b.number) return 1;
+      return 0;
+    });
+
     this.saveDecks(decks);
     return createdList;
   }

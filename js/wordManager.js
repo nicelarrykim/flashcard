@@ -182,7 +182,7 @@ export class WordManager {
               <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 dark:bg-slate-750 text-slate-500 dark:text-slate-400 uppercase text-[11px] font-bold border-b border-slate-200 dark:border-slate-700">
                   <tr>
-                    <th class="py-3.5 px-4 w-12 text-center">#</th>
+                    <th class="py-3.5 px-4 w-16 text-center">번호 (No.)</th>
                     <th class="py-3.5 px-4">단어 / 표현</th>
                     <th class="py-3.5 px-4">한국어 뜻</th>
                     <th class="py-3.5 px-4 text-center">원어민 발음</th>
@@ -193,7 +193,11 @@ export class WordManager {
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
                   ${filtered.map((w, idx) => `
                     <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-750/50 transition">
-                      <td class="py-3.5 px-4 text-center text-xs text-slate-400 font-mono">${idx + 1}</td>
+                      <td class="py-3.5 px-4 text-center">
+                        <span class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold">
+                          ${w.number ? `#${w.number}` : idx + 1}
+                        </span>
+                      </td>
                       <td class="py-3.5 px-4">
                         <div class="flex items-center gap-2">
                           <button class="mgr-tts-btn text-slate-400 hover:text-indigo-600 transition" data-word="${w.word}" data-audio="${w.audioUrl || ''}" title="원어민 발음 듣기">
@@ -591,11 +595,11 @@ export class WordManager {
                 </div>
 
                 <!-- 검수 테이블 -->
-                <div class="max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+                <div class="max-h-64 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
                   <table class="w-full text-left text-xs">
                     <thead class="bg-slate-50 dark:bg-slate-750 text-slate-500 font-bold sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
                       <tr>
-                        <th class="py-2.5 px-3 w-12 text-center">#</th>
+                        <th class="py-2.5 px-2 w-20 text-center">번호(인덱스)</th>
                         <th class="py-2.5 px-3 w-48">영어 단어/표현 (수정가능)</th>
                         <th class="py-2.5 px-3">한국어 뜻 (수정가능)</th>
                         <th class="py-2.5 px-2 w-16 text-center">발음</th>
@@ -605,7 +609,10 @@ export class WordManager {
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-750 bg-white dark:bg-slate-800" id="extracted-words-tbody">
                       ${this.extractedWords.map((w, idx) => `
                         <tr class="hover:bg-indigo-50/40 dark:hover:bg-slate-750/50 transition">
-                          <td class="py-2 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
+                          <td class="py-2 px-2 text-center">
+                            <input type="number" value="${w.number || ''}" placeholder="번호" data-idx="${idx}" data-field="number"
+                              class="w-16 px-1.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-600 font-mono text-center font-bold text-indigo-600 dark:text-indigo-400 focus:outline-none focus:border-indigo-500">
+                          </td>
                           <td class="py-2 px-3">
                             <input type="text" value="${w.word}" data-idx="${idx}" data-field="word"
                               class="w-full px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-600 font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
@@ -753,9 +760,13 @@ export class WordManager {
         const idx = parseInt(e.target.dataset.idx, 10);
         const field = e.target.dataset.field;
         if (this.extractedWords[idx]) {
-          this.extractedWords[idx][field] = e.target.value.trim();
-          if (field === 'word') {
-            this.extractedWords[idx].audioUrl = OCRParser.generateAudioUrl(e.target.value.trim());
+          if (field === 'number') {
+            this.extractedWords[idx].number = e.target.value ? parseInt(e.target.value, 10) : null;
+          } else {
+            this.extractedWords[idx][field] = e.target.value.trim();
+            if (field === 'word') {
+              this.extractedWords[idx].audioUrl = OCRParser.generateAudioUrl(e.target.value.trim());
+            }
           }
         }
       };
