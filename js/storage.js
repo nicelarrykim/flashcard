@@ -1,8 +1,8 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261121_13';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261121_13';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -39,26 +39,30 @@ export class StorageManager {
 
       const decks = JSON.parse(data);
       if (Array.isArray(decks) && decks.length > 0) {
-        // 기존 더미 Unsplash 이미지가 저장되어 있다면 최신 영영사전/일러스트 이미지로 자동 갱신
+        // 단어장 객체 검증 및 보정 (words 배열 보장)
         let upgraded = false;
         decks.forEach(deck => {
-          if (deck && Array.isArray(deck.words)) {
-            deck.words.forEach(word => {
-              if (word) {
-                const img = word.imageUrl || '';
-                if (!img || img.includes('photo-1456513080510-7bf3a84b82f8') || img.includes('pollinations.ai')) {
-                  const match = TEXTBOOK_WORDS.find(t => 
-                    (t.number && word.number && t.number === word.number) ||
-                    (t.word && word.word && String(t.word).toLowerCase().trim() === String(word.word).toLowerCase().trim())
-                  );
-                  if (match && match.imageUrl) {
-                    word.imageUrl = match.imageUrl;
-                    upgraded = true;
-                  }
+          if (!deck) return;
+          if (!Array.isArray(deck.words)) {
+            deck.words = [];
+            upgraded = true;
+          }
+          deck.words = deck.words.filter(Boolean);
+          deck.words.forEach(word => {
+            if (word) {
+              const img = word.imageUrl || '';
+              if (!img || img.includes('photo-1456513080510-7bf3a84b82f8') || img.includes('pollinations.ai')) {
+                const match = TEXTBOOK_WORDS.find(t => 
+                  (t.number && word.number && t.number === word.number) ||
+                  (t.word && word.word && String(t.word).toLowerCase().trim() === String(word.word).toLowerCase().trim())
+                );
+                if (match && match.imageUrl) {
+                  word.imageUrl = match.imageUrl;
+                  upgraded = true;
                 }
               }
-            });
-          }
+            }
+          });
         });
         if (upgraded) {
           localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
@@ -114,9 +118,9 @@ export class StorageManager {
    */
   static getActiveDeck() {
     const activeId = this.getActiveDeckId();
+    const decks = this.getDecks();
     if (activeId === 'all') {
-      const decks = this.getDecks();
-      const allWords = decks.flatMap(d => d.words);
+      const allWords = decks.flatMap(d => (d && Array.isArray(d.words)) ? d.words : []);
       return {
         id: 'all',
         name: '전체 단어장 (통합)',
@@ -124,8 +128,7 @@ export class StorageManager {
         words: allWords
       };
     }
-    const decks = this.getDecks();
-    return decks.find(d => d.id === activeId) || decks[0];
+    return decks.find(d => d.id === activeId) || decks[0] || { id: 'deck_default', name: '기본 단어장', words: [] };
   }
 
   /**
@@ -133,13 +136,12 @@ export class StorageManager {
    */
   static getActiveWords() {
     const deck = this.getActiveDeck();
-    if (!deck) return [];
-    const list = [...deck.words];
+    if (!deck || !Array.isArray(deck.words)) return [];
+    const list = [...deck.words].filter(Boolean);
     list.sort((a, b) => {
-      if (a.number && b.number) return a.number - b.number;
-      if (a.number) return -1;
-      if (b.number) return 1;
-      return 0;
+      const numA = (a && typeof a.number === 'number') ? a.number : 999999;
+      const numB = (b && typeof b.number === 'number') ? b.number : 999999;
+      return numA - numB;
     });
     return list;
   }
@@ -238,16 +240,19 @@ export class StorageManager {
     const decks = this.getDecks();
     const deckId = targetDeckId || (this.getActiveDeckId() === 'all' ? decks[0].id : this.getActiveDeckId());
     const deck = decks.find(d => d.id === deckId) || decks[0];
+    if (!deck) return [];
+    if (!Array.isArray(deck.words)) deck.words = [];
 
-    const createdList = wordsArray.map((w, index) => {
-      const cleanWord = w.word.trim();
+    const createdList = (wordsArray || []).filter(Boolean).map((w, index) => {
+      const cleanWord = (w && w.word) ? String(w.word).trim() : 'word';
+      const cleanMeaning = (w && w.meaning) ? String(w.meaning).trim() : '';
       return {
         id: 'w_' + (w.number || (Date.now() + index)) + '_' + Math.random().toString(36).substr(2, 5),
         number: w.number ? parseInt(w.number, 10) : null,
         word: cleanWord,
         phonetic: w.phonetic?.trim() || '',
         partOfSpeech: w.partOfSpeech?.trim() || 'word',
-        meaning: w.meaning.trim(),
+        meaning: cleanMeaning,
         example: w.example?.trim() || '',
         exampleMeaning: w.exampleMeaning?.trim() || '',
         imageUrl: w.imageUrl?.trim() || '',

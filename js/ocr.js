@@ -1,8 +1,8 @@
 // js/ocr.js
 // 최첨단 듀얼 엔진: Gemini Vision AI (정확도 100%) + Tesseract PSM 6 정밀 전처리 & 교재 스마트 복원 모듈
 
-import { TEXTBOOK_WORDS } from './data/textbookWords.js';
-import { ImageFinder } from './imageFinder.js';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261121_13';
+import { ImageFinder } from './imageFinder.js?v=20261121_13';
 
 const GEMINI_API_KEY_STORAGE = 'vocaquest_gemini_api_key';
 
@@ -453,5 +453,57 @@ export class OCRParser {
     });
 
     return list;
+  }
+
+  static parseTextToWordList(rawText) {
+    if (!rawText) return [];
+    const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    const results = [];
+    for (let rawLine of lines) {
+      let line = rawLine.trim();
+      if (!line || line.length < 2) continue;
+      let number = null;
+      let word = '';
+      let meaning = '';
+
+      const numMatch = line.match(/^\s*(\d{1,4})[\.\)\s\t\:\-]+/);
+      if (numMatch) {
+        number = parseInt(numMatch[1], 10);
+        line = line.replace(/^\s*\d{1,4}[\.\)\s\t\:\-]+/, '').trim();
+      }
+
+      const hangulIdx = line.search(/[가-힣]/);
+      if (hangulIdx > 0) {
+        let enPart = line.substring(0, hangulIdx).trim().replace(/^[:\|\-\s]+|[:\|\-\s]+$/g, '');
+        let koPart = line.substring(hangulIdx).trim().replace(/^[:\|\-\s]+|[:\|\-\s]+$/g, '');
+        if (/[a-zA-Z]/.test(enPart) && koPart.length >= 1) {
+          word = enPart;
+          meaning = koPart;
+        }
+      } else {
+        const parts = line.split(/[\t\:\,\-]/);
+        if (parts.length >= 2) {
+          word = parts[0].trim();
+          meaning = parts.slice(1).join(' ').trim();
+        }
+      }
+
+      if (word && meaning) {
+        results.push({
+          id: 'w_' + (number || Date.now()) + '_' + Math.random().toString(36).substr(2, 4),
+          number: number || null,
+          word: word.trim(),
+          meaning: meaning.trim(),
+          partOfSpeech: this.detectPartOfSpeech(meaning.trim()),
+          phonetic: '',
+          imageUrl: this.generateAutoImageUrl(word.trim(), meaning.trim(), number),
+          audioUrl: this.generateAudioUrl(word.trim()),
+          tags: ['batch-import'],
+          memorized: false,
+          wrongCount: 0
+        });
+      }
+    }
+    return this.deduplicateAndSort(results);
   }
 }

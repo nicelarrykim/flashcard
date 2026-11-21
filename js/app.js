@@ -1,14 +1,14 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js';
-import { SoundManager } from './tts.js';
-import { FlashcardGame } from './games/flashcard.js';
-import { QuizGame } from './games/quiz.js';
-import { MatchGame } from './games/match.js';
-import { ScrambleGame } from './games/scramble.js';
-import { SpeedDropGame } from './games/speed-drop.js';
-import { WordManager } from './wordManager.js';
+import { StorageManager } from './storage.js?v=20261121_13';
+import { SoundManager } from './tts.js?v=20261121_13';
+import { FlashcardGame } from './games/flashcard.js?v=20261121_13';
+import { QuizGame } from './games/quiz.js?v=20261121_13';
+import { MatchGame } from './games/match.js?v=20261121_13';
+import { ScrambleGame } from './games/scramble.js?v=20261121_13';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261121_13';
+import { WordManager } from './wordManager.js?v=20261121_13';
 
 class App {
   constructor() {
@@ -117,16 +117,16 @@ class App {
     selectEl.innerHTML = `
       ${decks.map(d => `
         <option value="${d.id}" ${d.id === activeId ? 'selected' : ''}>
-          📁 ${d.name} (${d.words.length}단어)
+          📁 ${d.name || '단어장'} (${(d.words || []).length}단어)
         </option>
       `).join('')}
       <option value="all" ${activeId === 'all' ? 'selected' : ''}>
-        🌐 전체 단어장 통합 (${decks.reduce((sum, d) => sum + d.words.length, 0)}단어)
+        🌐 전체 단어장 통합 (${decks.reduce((sum, d) => sum + ((d && d.words) ? d.words.length : 0), 0)}단어)
       </option>
     `;
 
     if (descEl && activeDeck) {
-      descEl.innerHTML = `<span>ℹ️</span> <span>${activeDeck.description || activeDeck.name}</span>`;
+      descEl.innerHTML = `<span>ℹ️</span> <span>${activeDeck.description || activeDeck.name || '단어장'}</span>`;
     }
   }
 
@@ -197,9 +197,9 @@ class App {
   }
 
   updateStats() {
-    const activeWords = StorageManager.getActiveWords();
-    const memorized = activeWords.filter(w => w.memorized).length;
-    const wrong = activeWords.filter(w => (w.wrongCount || 0) > 0).length;
+    const activeWords = (StorageManager.getActiveWords() || []).filter(Boolean);
+    const memorized = activeWords.filter(w => w && w.memorized).length;
+    const wrong = activeWords.filter(w => w && (w.wrongCount || 0) > 0).length;
 
     const totalEl = document.getElementById('stat-total-words');
     const memorizedEl = document.getElementById('stat-memorized-words');

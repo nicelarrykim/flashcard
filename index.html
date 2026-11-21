@@ -23,7 +23,7 @@
   </script>
 
   <!-- 커스텀 스타일 (3D 플립 등) -->
-  <link rel="stylesheet" href="css/style.css?v=20261121_11">
+  <link rel="stylesheet" href="css/style.css?v=20261121_13">
 
   <!-- Tesseract.js OCR 라이브러리 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -32,6 +32,43 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
 <body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200 bg-grid-pattern">
+
+  <!-- 전역 비상 오류 알림 및 데이터 복구 배너 -->
+  <div id="vq-error-box" class="hidden fixed top-4 inset-x-4 max-w-xl mx-auto z-50 p-4 rounded-2xl bg-rose-50 border-2 border-rose-400 text-rose-800 text-sm shadow-2xl">
+    <div class="flex items-start gap-3">
+      <span class="text-2xl">⚠️</span>
+      <div class="flex-1">
+        <h3 class="font-black text-rose-900 mb-1">앱 실행 중 오류가 발생했습니다</h3>
+        <p id="vq-error-text" class="text-xs font-mono text-rose-700 break-all mb-3"></p>
+        <div class="flex items-center gap-2">
+          <button onclick="localStorage.clear(); location.reload();" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow transition">
+            🔄 브라우저 데이터 초기화 및 복구
+          </button>
+          <button onclick="location.reload();" class="px-3 py-1.5 bg-white border border-rose-300 text-rose-700 hover:bg-rose-50 rounded-xl text-xs font-bold transition">
+            새로고침
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.addEventListener('error', function(e) {
+      var box = document.getElementById('vq-error-box');
+      var txt = document.getElementById('vq-error-text');
+      if (box && txt) {
+        box.classList.remove('hidden');
+        txt.innerText = (e.message || 'Error') + (e.filename ? ' in ' + e.filename.split('/').pop() + ':' + e.lineno : '');
+      }
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      var box = document.getElementById('vq-error-box');
+      var txt = document.getElementById('vq-error-text');
+      if (box && txt) {
+        box.classList.remove('hidden');
+        txt.innerText = 'Promise Rejection: ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
+      }
+    });
+  </script>
 
   <!-- 상단 네비게이션 헤더 -->
   <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
@@ -163,6 +200,6 @@
   </footer>
 
   <!-- 앱 메인 스크립트 (ES Module - 캐시 방지 버전 파라미터 적용) -->
-  <script type="module" src="js/app.js?v=20261121_11"></script>
+  <script type="module" src="js/app.js?v=20261121_13"></script>
 </body>
 </html>

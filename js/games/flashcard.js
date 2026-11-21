@@ -39,7 +39,10 @@ export class FlashcardGame {
   }
 
   render() {
+    this.container = this.container || document.getElementById(this.containerId);
     if (!this.container) return;
+
+    this.words = (this.words || []).filter(Boolean);
 
     if (this.words.length === 0) {
       this.container.innerHTML = `
@@ -72,7 +75,12 @@ export class FlashcardGame {
       return;
     }
 
-    const word = this.words[this.currentIndex];
+    if (this.currentIndex < 0 || this.currentIndex >= this.words.length) {
+      this.currentIndex = 0;
+    }
+
+    const word = this.words[this.currentIndex] || this.words[0];
+    if (!word) return;
     const total = this.words.length;
     const progressPercent = Math.round(((this.currentIndex + 1) / total) * 100);
     const activeDeck = StorageManager.getActiveDeck();

@@ -65,7 +65,7 @@ export class ImageFinder {
     233: 'https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?auto=format&fit=crop&w=600&q=80', // bomb (폭탄 폭발 불꽃)
     234: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80', // arrive (비행기 착륙 도착)
     235: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=600&q=80', // feed (먹이 주기)
-    236: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80'  # fetch (공을 물어오는 강아지)
+    236: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80'  // fetch (공을 물어오는 강아지)
   };
 
   /**
