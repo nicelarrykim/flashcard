@@ -24,11 +24,15 @@ export class MatchGame {
   renderStartScreen() {
     if (!this.container) return;
     const allWords = StorageManager.getWords();
+    const activeDeck = StorageManager.getActiveDeck();
     const canPlay = allWords.length >= this.pairCount;
 
     this.container.innerHTML = `
       <div class="max-w-md mx-auto text-center py-10 px-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
         <div class="text-6xl mb-4">🧩</div>
+        <div class="inline-block px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 text-xs font-black mb-3">
+          📖 단어장: ${activeDeck?.name || '기본 단어장'} (${allWords.length}단어)
+        </div>
         <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">카드 짝맞추기</h2>
         <p class="text-slate-500 dark:text-slate-400 mb-6 text-sm">
           뒤집힌 카드를 클릭하여 <strong>[영어 단어]</strong>와 <strong>[한국어 뜻]</strong> 짝을 찾아보세요!

@@ -28,11 +28,15 @@ export class QuizGame {
   renderStartScreen() {
     if (!this.container) return;
     const allWords = StorageManager.getWords();
+    const activeDeck = StorageManager.getActiveDeck();
     const canPlay = allWords.length >= 4;
 
     this.container.innerHTML = `
       <div class="max-w-md mx-auto text-center py-10 px-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
         <div class="text-6xl mb-4">⚡</div>
+        <div class="inline-block px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-black mb-3">
+          📖 단어장: ${activeDeck?.name || '기본 단어장'} (${allWords.length}단어)
+        </div>
         <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">사지선다 스피드 퀴즈</h2>
         <p class="text-slate-500 dark:text-slate-400 mb-6 text-sm">
           제한시간 안에 올바른 보기를 골라보세요!<br>

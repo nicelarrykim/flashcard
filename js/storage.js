@@ -1,95 +1,218 @@
 // js/storage.js
-// LocalStorage 기반 단어 데이터 관리 및 영구 저장소 모듈
+// 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
 import { DEFAULT_WORDS } from './data/defaultWords.js';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js';
 
-const STORAGE_KEY = 'vocaquest_words_v2';
-const OLD_STORAGE_KEY = 'vocaquest_words_v1';
+const DECKS_KEY = 'vocaquest_decks_v2';
+const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
 const SETTINGS_KEY = 'vocaquest_settings_v1';
 
 export class StorageManager {
-  static getWords() {
+  /**
+   * 모든 단어장 목록 조회
+   */
+  static getDecks() {
     try {
-      let data = localStorage.getItem(STORAGE_KEY);
-      
-      // v1 데이터가 있다면 마이그레이션 (audioUrl 보강)
+      const data = localStorage.getItem(DECKS_KEY);
       if (!data) {
-        const oldData = localStorage.getItem(OLD_STORAGE_KEY);
-        if (oldData) {
-          const oldWords = JSON.parse(oldData);
-          if (Array.isArray(oldWords) && oldWords.length > 0) {
-            // 기본 단어들의 audioUrl 매핑
-            const migrated = oldWords.map(w => {
-              const def = DEFAULT_WORDS.find(d => d.word.toLowerCase() === w.word.toLowerCase());
-              return {
-                ...w,
-                audioUrl: w.audioUrl || def?.audioUrl || `https://ssl.gstatic.com/dictionary/static/sounds/20200429/${w.word.toLowerCase()}--_us_1.mp3`
-              };
-            });
-            this.saveWords(migrated);
-            return migrated;
+        // 초기 기본 단어장 2개 생성
+        const initialDecks = [
+          {
+            id: 'deck_default',
+            name: '기본 추천 단어장',
+            description: '필수 기초 및 중급 영단어 15개',
+            createdAt: Date.now() - 10000,
+            words: DEFAULT_WORDS
+          },
+          {
+            id: 'deck_textbook',
+            name: '교재 사진 단어장 (177~236)',
+            description: '첨부된 책 사진에서 추출한 60개 단어 및 숙어',
+            createdAt: Date.now(),
+            words: TEXTBOOK_WORDS
           }
-        }
-
-        this.saveWords(DEFAULT_WORDS);
-        return DEFAULT_WORDS;
+        ];
+        this.saveDecks(initialDecks);
+        return initialDecks;
       }
 
-      const words = JSON.parse(data);
-      return Array.isArray(words) && words.length > 0 ? words : DEFAULT_WORDS;
+      const decks = JSON.parse(data);
+      if (Array.isArray(decks) && decks.length > 0) {
+        return decks;
+      }
+      return this.resetToDefaultDecks();
     } catch (e) {
-      console.error('Failed to load words from localStorage:', e);
-      return DEFAULT_WORDS;
+      console.error('Failed to load decks:', e);
+      return this.resetToDefaultDecks();
     }
   }
 
-  static saveWords(words) {
+  static saveDecks(decks) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
-      window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: words }));
+      localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
+      window.dispatchEvent(new CustomEvent('vocaquest_decks_updated', { detail: decks }));
+      window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
     } catch (e) {
-      console.error('Failed to save words to localStorage:', e);
+      console.error('Failed to save decks:', e);
     }
   }
 
-  static addWord(wordData) {
-    const words = this.getWords();
-    const cleanWord = wordData.word.trim().toLowerCase();
+  /**
+   * 현재 선택된 활성 단어장 ID (전체 단어장 보기: 'all')
+   */
+  static getActiveDeckId() {
+    try {
+      const activeId = localStorage.getItem(ACTIVE_DECK_KEY);
+      const decks = this.getDecks();
+      if (activeId === 'all') return 'all';
+      if (activeId && decks.some(d => d.id === activeId)) {
+        return activeId;
+      }
+      return decks[0]?.id || 'deck_default';
+    } catch {
+      return 'deck_default';
+    }
+  }
+
+  static setActiveDeckId(deckId) {
+    try {
+      localStorage.setItem(ACTIVE_DECK_KEY, deckId);
+      window.dispatchEvent(new CustomEvent('vocaquest_deck_changed', { detail: { deckId } }));
+      window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * 현재 활성 단어장 객체
+   */
+  static getActiveDeck() {
+    const activeId = this.getActiveDeckId();
+    if (activeId === 'all') {
+      const decks = this.getDecks();
+      const allWords = decks.flatMap(d => d.words);
+      return {
+        id: 'all',
+        name: '전체 단어장 (통합)',
+        description: `총 ${decks.length}개 단어장의 모든 단어`,
+        words: allWords
+      };
+    }
+    const decks = this.getDecks();
+    return decks.find(d => d.id === activeId) || decks[0];
+  }
+
+  /**
+   * 현재 활성 단어장의 단어 목록 (플래시카드 및 게임에서 사용)
+   */
+  static getActiveWords() {
+    const deck = this.getActiveDeck();
+    return deck ? [...deck.words] : [];
+  }
+
+  /**
+   * 새 단어장 생성
+   */
+  static createDeck(name, description = '', initialWords = []) {
+    const decks = this.getDecks();
+    const newDeck = {
+      id: 'deck_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      name: name.trim() || '새 단어장',
+      description: description.trim() || '',
+      createdAt: Date.now(),
+      words: initialWords
+    };
+    decks.push(newDeck);
+    this.saveDecks(decks);
+    this.setActiveDeckId(newDeck.id);
+    return newDeck;
+  }
+
+  /**
+   * 단어장 이름 및 설명 수정
+   */
+  static updateDeck(deckId, { name, description }) {
+    const decks = this.getDecks();
+    const deck = decks.find(d => d.id === deckId);
+    if (deck) {
+      if (name !== undefined) deck.name = name.trim();
+      if (description !== undefined) deck.description = description.trim();
+      this.saveDecks(decks);
+      return deck;
+    }
+    return null;
+  }
+
+  /**
+   * 단어장 삭제
+   */
+  static deleteDeck(deckId) {
+    let decks = this.getDecks();
+    if (decks.length <= 1) {
+      throw new Error('최소 한 개 이상의 단어장이 유지되어야 합니다.');
+    }
+    decks = decks.filter(d => d.id !== deckId);
+    this.saveDecks(decks);
+
+    if (this.getActiveDeckId() === deckId) {
+      this.setActiveDeckId(decks[0].id);
+    }
+    return decks;
+  }
+
+  /**
+   * 단어 추가 (deckId 생략 시 현재 활성 단어장에 추가)
+   */
+  static addWord(wordData, targetDeckId = null) {
+    const decks = this.getDecks();
+    const deckId = targetDeckId || (this.getActiveDeckId() === 'all' ? decks[0].id : this.getActiveDeckId());
+    const deck = decks.find(d => d.id === deckId) || decks[0];
+
+    const cleanWord = wordData.word.trim();
     const newWord = {
       id: 'w_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-      word: wordData.word.trim(),
+      word: cleanWord,
       phonetic: wordData.phonetic?.trim() || '',
-      partOfSpeech: wordData.partOfSpeech?.trim() || 'noun',
+      partOfSpeech: wordData.partOfSpeech?.trim() || 'word',
       meaning: wordData.meaning.trim(),
       example: wordData.example?.trim() || '',
       exampleMeaning: wordData.exampleMeaning?.trim() || '',
       imageUrl: wordData.imageUrl?.trim() || '',
-      audioUrl: wordData.audioUrl?.trim() || `https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanWord}--_us_1.mp3`,
+      audioUrl: wordData.audioUrl?.trim() || `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`,
       tags: wordData.tags || ['custom'],
-      level: wordData.level || 'beginner',
+      level: wordData.level || 'intermediate',
       memorized: false,
       wrongCount: 0,
       createdAt: Date.now()
     };
-    words.unshift(newWord);
-    this.saveWords(words);
+
+    deck.words.unshift(newWord);
+    this.saveDecks(decks);
     return newWord;
   }
 
-  static addWordsBatch(wordsArray) {
-    const currentWords = this.getWords();
+  /**
+   * 단어 대량 추가
+   */
+  static addWordsBatch(wordsArray, targetDeckId = null) {
+    const decks = this.getDecks();
+    const deckId = targetDeckId || (this.getActiveDeckId() === 'all' ? decks[0].id : this.getActiveDeckId());
+    const deck = decks.find(d => d.id === deckId) || decks[0];
+
     const createdList = wordsArray.map((w, index) => {
-      const cleanWord = w.word.trim().toLowerCase();
+      const cleanWord = w.word.trim();
       return {
         id: 'w_' + (Date.now() + index) + '_' + Math.random().toString(36).substr(2, 5),
-        word: w.word.trim(),
+        word: cleanWord,
         phonetic: w.phonetic?.trim() || '',
-        partOfSpeech: w.partOfSpeech?.trim() || 'noun',
+        partOfSpeech: w.partOfSpeech?.trim() || 'word',
         meaning: w.meaning.trim(),
         example: w.example?.trim() || '',
         exampleMeaning: w.exampleMeaning?.trim() || '',
         imageUrl: w.imageUrl?.trim() || '',
-        audioUrl: w.audioUrl?.trim() || `https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanWord}--_us_1.mp3`,
+        audioUrl: w.audioUrl?.trim() || `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`,
         tags: w.tags || ['imported'],
         level: w.level || 'intermediate',
         memorized: false,
@@ -97,94 +220,87 @@ export class StorageManager {
         createdAt: Date.now()
       };
     });
-    const updated = [...createdList, ...currentWords];
-    this.saveWords(updated);
+
+    deck.words = [...createdList, ...deck.words];
+    this.saveDecks(decks);
     return createdList;
   }
 
-  static updateWord(id, updatedFields) {
-    const words = this.getWords();
-    const index = words.findIndex(w => w.id === id);
-    if (index !== -1) {
-      words[index] = { ...words[index], ...updatedFields };
-      this.saveWords(words);
-      return words[index];
+  /**
+   * 단어 수정
+   */
+  static updateWord(wordId, updatedFields) {
+    const decks = this.getDecks();
+    for (const deck of decks) {
+      const w = deck.words.find(item => item.id === wordId);
+      if (w) {
+        Object.assign(w, updatedFields);
+        this.saveDecks(decks);
+        return w;
+      }
     }
     return null;
   }
 
-  static deleteWord(id) {
-    const words = this.getWords();
-    const filtered = words.filter(w => w.id !== id);
-    this.saveWords(filtered);
-    return filtered;
-  }
-
-  static markMemorized(id, memorized = true) {
-    const words = this.getWords();
-    const word = words.find(w => w.id === id);
-    if (word) {
-      word.memorized = memorized;
-      if (memorized && word.wrongCount > 0) {
-        word.wrongCount = Math.max(0, word.wrongCount - 1);
+  /**
+   * 단어 삭제
+   */
+  static deleteWord(wordId) {
+    const decks = this.getDecks();
+    for (const deck of decks) {
+      const idx = deck.words.findIndex(item => item.id === wordId);
+      if (idx !== -1) {
+        deck.words.splice(idx, 1);
+        this.saveDecks(decks);
+        return true;
       }
-      this.saveWords(words);
     }
+    return false;
   }
 
-  static recordMistake(id) {
-    const words = this.getWords();
-    const word = words.find(w => w.id === id);
-    if (word) {
-      word.wrongCount = (word.wrongCount || 0) + 1;
-      word.memorized = false;
-      this.saveWords(words);
-    }
-  }
-
-  static getWrongWords() {
-    return this.getWords().filter(w => (w.wrongCount || 0) > 0);
-  }
-
-  static resetToDefault() {
-    this.saveWords(DEFAULT_WORDS);
-    return DEFAULT_WORDS;
-  }
-
-  static clearAll() {
-    this.saveWords([]);
-  }
-
-  static exportJSON() {
-    const words = this.getWords();
-    const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(words, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", jsonString);
-    downloadAnchor.setAttribute("download", `vocaquest_words_${new Date().toISOString().slice(0, 10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  }
-
-  static importJSON(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          if (Array.isArray(parsed)) {
-            this.saveWords(parsed);
-            resolve(parsed);
-          } else {
-            reject(new Error('올바른 단어 배열(JSON) 형식이 아닙니다.'));
-          }
-        } catch (err) {
-          reject(err);
+  /**
+   * 암기 완료 상태 표시
+   */
+  static markMemorized(wordId, memorized = true) {
+    const decks = this.getDecks();
+    for (const deck of decks) {
+      const w = deck.words.find(item => item.id === wordId);
+      if (w) {
+        w.memorized = memorized;
+        if (memorized && w.wrongCount > 0) {
+          w.wrongCount = Math.max(0, w.wrongCount - 1);
         }
-      };
-      reader.onerror = () => reject(new Error('파일 읽기 실패'));
-      reader.readAsText(file);
-    });
+        this.saveDecks(decks);
+        return;
+      }
+    }
+  }
+
+  /**
+   * 오답 기록
+   */
+  static recordMistake(wordId) {
+    const decks = this.getDecks();
+    for (const deck of decks) {
+      const w = deck.words.find(item => item.id === wordId);
+      if (w) {
+        w.wrongCount = (w.wrongCount || 0) + 1;
+        w.memorized = false;
+        this.saveDecks(decks);
+        return;
+      }
+    }
+  }
+
+  // 호환성을 위한 getWords alias
+  static getWords() {
+    return this.getActiveWords();
+  }
+
+  static resetToDefaultDecks() {
+    localStorage.removeItem(DECKS_KEY);
+    localStorage.removeItem(ACTIVE_DECK_KEY);
+    return this.getDecks();
   }
 
   static getSettings() {
@@ -202,5 +318,42 @@ export class StorageManager {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  static exportJSON() {
+    const activeDeck = this.getActiveDeck();
+    const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(activeDeck, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", jsonString);
+    downloadAnchor.setAttribute("download", `${activeDeck.name}_${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  }
+
+  static importJSON(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed)) {
+            // 단어 배열인 경우 새 단어장으로 임포트
+            this.createDeck(file.name.replace('.json', ''), '가져온 단어장', parsed);
+            resolve();
+          } else if (parsed && Array.isArray(parsed.words)) {
+            // 단어장 객체인 경우
+            this.createDeck(parsed.name || file.name.replace('.json', ''), parsed.description || '', parsed.words);
+            resolve();
+          } else {
+            reject(new Error('올바른 단어장 JSON 형식이 아닙니다.'));
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => reject(new Error('파일 읽기 실패'));
+      reader.readAsText(file);
+    });
   }
 }

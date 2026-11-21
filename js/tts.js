@@ -12,8 +12,8 @@ export class SoundManager {
    */
   static speak(text, directAudioUrl = '') {
     if (!this.soundEnabled || !text) return;
-    const cleanWord = text.trim().toLowerCase().replace(/[^a-z\-]/g, '');
-    if (!cleanWord) return;
+    const rawText = text.trim();
+    if (!rawText) return;
 
     // 현재 재생 중인 오디오 정지
     if (this.currentAudio) {
@@ -31,15 +31,20 @@ export class SoundManager {
       audioCandidates.push(directAudioUrl);
     }
 
-    // 2. Google 공식 사전 미국식 원어민 녹음 MP3 (Google Dictionary US)
-    audioCandidates.push(`https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanWord}--_us_1.mp3`);
-    audioCandidates.push(`https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanWord}--_us_2.mp3`);
+    const cleanSingle = rawText.toLowerCase().replace(/[^a-z\-]/g, '');
+    const cleanPhrase = rawText.toLowerCase().replace(/[^a-z\-\s]/g, ' ').replace(/\s+/g, ' ').trim();
 
-    // 3. 글로벌 사전 표준 미국식 원어민 음성 스트림 (Youdao US Pronunciation)
-    audioCandidates.push(`https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`);
+    // 2. 단일 단어인 경우 Google 공식 사전 미국식 원어민 녹음 MP3
+    if (!cleanPhrase.includes(' ') && cleanSingle.length >= 2) {
+      audioCandidates.push(`https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanSingle}--_us_1.mp3`);
+      audioCandidates.push(`https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanSingle}--_us_2.mp3`);
+      audioCandidates.push(`https://api.dictionaryapi.dev/media/pronunciations/en/${cleanSingle}-us.mp3`);
+    }
 
-    // 4. Free Dictionary API US 녹음
-    audioCandidates.push(`https://api.dictionaryapi.dev/media/pronunciations/en/${cleanWord}-us.mp3`);
+    // 3. 글로벌 사전 표준 미국식 원어민 음성 스트림 (단어 및 'Lost and Found', 'get a move on' 같은 숙어/구동사 100% 지원)
+    if (cleanPhrase) {
+      audioCandidates.push(`https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanPhrase)}&type=2`);
+    }
 
     // 순차 재생 시도 (첫 번째로 성공하는 고음질 원어민 음원 재생)
     this.playCandidatesSequentially(audioCandidates, 0);

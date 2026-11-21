@@ -24,11 +24,15 @@ export class ScrambleGame {
   renderStartScreen() {
     if (!this.container) return;
     const allWords = StorageManager.getWords();
+    const activeDeck = StorageManager.getActiveDeck();
     const canPlay = allWords.length >= 1;
 
     this.container.innerHTML = `
       <div class="max-w-md mx-auto text-center py-10 px-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
         <div class="text-6xl mb-4">🔤</div>
+        <div class="inline-block px-3 py-1 rounded-full bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 text-xs font-black mb-3">
+          📖 단어장: ${activeDeck?.name || '기본 단어장'} (${allWords.length}단어)
+        </div>
         <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">스펠링 맞추기 (Scramble)</h2>
         <p class="text-slate-500 dark:text-slate-400 mb-6 text-sm">
           한국어 뜻과 힌트 이미지를 보고 뒤섞인 알파벳 글자 블록을 순서대로 조합하여 단어를 완성하세요!

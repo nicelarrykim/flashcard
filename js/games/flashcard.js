@@ -73,12 +73,16 @@ export class FlashcardGame {
     const word = this.words[this.currentIndex];
     const total = this.words.length;
     const progressPercent = Math.round(((this.currentIndex + 1) / total) * 100);
+    const activeDeck = StorageManager.getActiveDeck();
 
     this.container.innerHTML = `
       <div class="max-w-xl mx-auto flex flex-col items-center">
         <!-- 상단 컨트롤 & 상태 바 -->
         <div class="w-full flex items-center justify-between mb-4 px-2">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="px-2.5 py-0.5 text-xs font-black bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 rounded-full">
+              📖 ${activeDeck?.name || '단어장'}
+            </span>
             <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">
               ${this.currentIndex + 1} / ${total}
             </span>

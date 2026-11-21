@@ -1,5 +1,5 @@
 // js/app.js
-// VocaQuest 메인 앱 컨트롤러 및 라우터
+// VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
 import { StorageManager } from './storage.js';
 import { SoundManager } from './tts.js';
@@ -23,18 +23,32 @@ class App {
 
   init() {
     this.bindHeader();
+    this.bindGlobalDeckSelector();
     this.bindTabs();
     this.updateStats();
 
     // 초기 탭 렌더링
     this.switchTab('flashcard');
 
-    // 단어 데이터 변경 감지
+    // 단어 또는 단어장 데이터 변경 감지
     window.addEventListener('vocaquest_words_updated', () => {
       this.updateStats();
+      this.renderDeckSelector();
     });
 
-    // 전역 함수로 탭 전환 등록 (HTML 인라인 버튼에서 호출 가능하도록)
+    window.addEventListener('vocaquest_decks_updated', () => {
+      this.updateStats();
+      this.renderDeckSelector();
+    });
+
+    window.addEventListener('vocaquest_deck_changed', () => {
+      this.updateStats();
+      this.renderDeckSelector();
+      // 단어장이 바뀌면 현재 열려있는 게임/화면 즉시 재초기화
+      this.reloadCurrentTab();
+    });
+
+    // 전역 함수로 탭 전환 등록
     window.switchTab = (tabName) => this.switchTab(tabName);
   }
 
@@ -70,6 +84,62 @@ class App {
     }
   }
 
+  /**
+   * 전역 단어장(Deck) 선택 드롭다운 및 새 단어장 생성
+   */
+  bindGlobalDeckSelector() {
+    this.renderDeckSelector();
+
+    const selectEl = document.getElementById('global-deck-select');
+    if (selectEl) {
+      selectEl.addEventListener('change', (e) => {
+        StorageManager.setActiveDeckId(e.target.value);
+      });
+    }
+
+    const createBtn = document.getElementById('global-create-deck-btn');
+    if (createBtn) {
+      createBtn.addEventListener('click', () => {
+        this.openCreateDeckPrompt();
+      });
+    }
+  }
+
+  renderDeckSelector() {
+    const selectEl = document.getElementById('global-deck-select');
+    const descEl = document.getElementById('global-deck-desc');
+    if (!selectEl) return;
+
+    const decks = StorageManager.getDecks();
+    const activeId = StorageManager.getActiveDeckId();
+    const activeDeck = StorageManager.getActiveDeck();
+
+    selectEl.innerHTML = `
+      ${decks.map(d => `
+        <option value="${d.id}" ${d.id === activeId ? 'selected' : ''}>
+          📁 ${d.name} (${d.words.length}단어)
+        </option>
+      `).join('')}
+      <option value="all" ${activeId === 'all' ? 'selected' : ''}>
+        🌐 전체 단어장 통합 (${decks.reduce((sum, d) => sum + d.words.length, 0)}단어)
+      </option>
+    `;
+
+    if (descEl && activeDeck) {
+      descEl.innerHTML = `<span>ℹ️</span> <span>${activeDeck.description || activeDeck.name}</span>`;
+    }
+  }
+
+  openCreateDeckPrompt() {
+    const name = prompt('새로 만들 단어장 이름을 입력해주세요 (예: Day 2 필수 단어장):');
+    if (name && name.trim()) {
+      const desc = prompt('단어장 간단 설명을 입력해주세요 (선택):') || '';
+      const newDeck = StorageManager.createDeck(name.trim(), desc.trim());
+      alert(`'${newDeck.name}' 단어장이 생성되었습니다! 이제 이 단어장에 단어를 추가하거나 사진을 스캔해보세요.`);
+      this.switchTab('manager');
+    }
+  }
+
   bindTabs() {
     const tabButtons = document.querySelectorAll('.nav-tab');
     tabButtons.forEach(btn => {
@@ -81,14 +151,12 @@ class App {
   }
 
   switchTab(tabName) {
-    // 이전 게임이 구동 중이면 정리 (특히 애니메이션 루프가 있는 SpeedDrop)
     if (this.currentTab === 'speed-drop' && tabName !== 'speed-drop') {
       this.speedDropGame.stop();
     }
 
     this.currentTab = tabName;
 
-    // 탭 버튼 스타일 갱신
     document.querySelectorAll('.nav-tab').forEach(btn => {
       if (btn.dataset.tab === tabName) {
         btn.classList.add('active', 'bg-indigo-600', 'text-white', 'shadow-md', 'shadow-indigo-500/20');
@@ -99,7 +167,6 @@ class App {
       }
     });
 
-    // 탭 콘텐츠 영역 표시/숨김
     document.querySelectorAll('.tab-content').forEach(section => {
       section.classList.add('hidden');
     });
@@ -109,7 +176,11 @@ class App {
       activeSection.classList.remove('hidden');
     }
 
-    // 각 게임/화면 초기화 실행
+    this.reloadCurrentTab();
+  }
+
+  reloadCurrentTab() {
+    const tabName = this.currentTab;
     if (tabName === 'flashcard') {
       this.flashcardGame.init();
     } else if (tabName === 'quiz') {
@@ -126,21 +197,20 @@ class App {
   }
 
   updateStats() {
-    const allWords = StorageManager.getWords();
-    const memorized = allWords.filter(w => w.memorized).length;
-    const wrong = allWords.filter(w => (w.wrongCount || 0) > 0).length;
+    const activeWords = StorageManager.getActiveWords();
+    const memorized = activeWords.filter(w => w.memorized).length;
+    const wrong = activeWords.filter(w => (w.wrongCount || 0) > 0).length;
 
     const totalEl = document.getElementById('stat-total-words');
     const memorizedEl = document.getElementById('stat-memorized-words');
     const wrongEl = document.getElementById('stat-wrong-words');
 
-    if (totalEl) totalEl.innerText = allWords.length;
+    if (totalEl) totalEl.innerText = activeWords.length;
     if (memorizedEl) memorizedEl.innerText = memorized;
     if (wrongEl) wrongEl.innerText = wrong;
   }
 }
 
-// DOM 로드 시 앱 기동
 document.addEventListener('DOMContentLoaded', () => {
   const app = new App();
   app.init();

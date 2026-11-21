@@ -24,11 +24,15 @@ export class SpeedDropGame {
   renderStartScreen() {
     if (!this.container) return;
     const allWords = StorageManager.getWords();
+    const activeDeck = StorageManager.getActiveDeck();
     const canPlay = allWords.length >= 3;
 
     this.container.innerHTML = `
       <div class="max-w-md mx-auto text-center py-10 px-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
         <div class="text-6xl mb-4">☄️</div>
+        <div class="inline-block px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-xs font-black mb-3">
+          📖 단어장: ${activeDeck?.name || '기본 단어장'} (${allWords.length}단어)
+        </div>
         <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">단어 낙하 디펜스</h2>
         <p class="text-slate-500 dark:text-slate-400 mb-6 text-sm">
           하늘에서 떨어지는 단어가 바닥에 닿기 전에 영단어를 정확하게 타이핑하여 격추하세요!
