@@ -39,6 +39,22 @@ export class StorageManager {
 
       const decks = JSON.parse(data);
       if (Array.isArray(decks) && decks.length > 0) {
+        // 기존 더미 Unsplash 이미지가 저장되어 있다면 최신 영영사전/일러스트 이미지로 자동 갱신
+        let upgraded = false;
+        decks.forEach(deck => {
+          deck.words.forEach(word => {
+            if (!word.imageUrl || word.imageUrl.includes('photo-1456513080510-7bf3a84b82f8')) {
+              const match = TEXTBOOK_WORDS.find(t => (t.number && t.number === word.number) || t.word.toLowerCase() === word.word.toLowerCase());
+              if (match && match.imageUrl) {
+                word.imageUrl = match.imageUrl;
+                upgraded = true;
+              }
+            }
+          });
+        });
+        if (upgraded) {
+          localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
+        }
         return decks;
       }
       return this.resetToDefaultDecks();

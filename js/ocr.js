@@ -2,6 +2,7 @@
 // 최첨단 듀얼 엔진: Gemini Vision AI (정확도 100%) + Tesseract PSM 6 정밀 전처리 & 교재 스마트 복원 모듈
 
 import { TEXTBOOK_WORDS } from './data/textbookWords.js';
+import { ImageFinder } from './imageFinder.js';
 
 const GEMINI_API_KEY_STORAGE = 'vocaquest_gemini_api_key';
 
@@ -145,17 +146,26 @@ export class OCRParser {
       if (jsonMatch) parsedJson = JSON.parse(jsonMatch[0]);
     }
 
-    return parsedJson.map(item => ({
-      id: 'w_' + (item.number || Date.now()) + '_' + Math.random().toString(36).substr(2, 4),
-      number: item.number ? parseInt(item.number, 10) : null,
-      word: item.word.trim(),
-      meaning: item.meaning.trim(),
-      partOfSpeech: this.detectPartOfSpeech(item.meaning.trim()),
-      phonetic: '',
-      imageUrl: this.generateAutoImageUrl(item.word.trim()),
-      audioUrl: this.generateAudioUrl(item.word.trim()),
-      tags: ['gemini-vision']
-    }));
+    const items = [];
+    for (const item of parsedJson) {
+      const word = item.word ? item.word.trim() : '';
+      const meaning = item.meaning ? item.meaning.trim() : '';
+      const number = item.number ? parseInt(item.number, 10) : null;
+      if (!word) continue;
+      const imageUrl = await ImageFinder.getBestImageUrl(word, meaning, number);
+      items.push({
+        id: 'w_' + (number || Date.now()) + '_' + Math.random().toString(36).substr(2, 4),
+        number,
+        word,
+        meaning,
+        partOfSpeech: this.detectPartOfSpeech(meaning),
+        phonetic: '',
+        imageUrl,
+        audioUrl: this.generateAudioUrl(word),
+        tags: ['gemini-vision']
+      });
+    }
+    return items;
   }
 
   /**
@@ -198,7 +208,7 @@ export class OCRParser {
     }
 
     onProgress(88, '번호-단어-뜻 3열 구조화 및 교재 스마트 복원 중...');
-    const rawParsed = this.parseStructuredLines(allExtractedLines);
+    const rawParsed = await this.parseStructuredLines(allExtractedLines);
 
     // ★ 교재 스마트 복원: 첨부된 사진 속 단어들이 감지되면(예: 207, crook, death 등)
     // 누락된 단어들을 177번부터 236번까지 60개 전체로 완벽히 복원!
@@ -342,7 +352,7 @@ export class OCRParser {
     return canvas;
   }
 
-  static parseStructuredLines(lines) {
+  static async parseStructuredLines(lines) {
     const results = [];
 
     for (let rawLine of lines) {
@@ -379,6 +389,7 @@ export class OCRParser {
       }
 
       if (word && meaning) {
+        const imageUrl = await ImageFinder.getBestImageUrl(word.trim(), meaning.trim(), number);
         results.push({
           id: 'w_' + (number || Date.now()) + '_' + Math.random().toString(36).substr(2, 4),
           number: number || null,
@@ -386,7 +397,7 @@ export class OCRParser {
           meaning: meaning.trim(),
           partOfSpeech: this.detectPartOfSpeech(meaning.trim()),
           phonetic: '',
-          imageUrl: this.generateAutoImageUrl(word.trim()),
+          imageUrl,
           audioUrl: this.generateAudioUrl(word.trim()),
           tags: ['photo-scan'],
           memorized: false,
@@ -419,10 +430,9 @@ export class OCRParser {
     return `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(clean)}&type=2`;
   }
 
-  static generateAutoImageUrl(word) {
+  static generateAutoImageUrl(word, meaning = '') {
     if (!word) return '';
-    const cleanWord = encodeURIComponent(word.toLowerCase().trim());
-    return `https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80&sig=${cleanWord}`;
+    return ImageFinder.generateIllustrationUrl(word, meaning);
   }
 
   static deduplicateAndSort(words) {
