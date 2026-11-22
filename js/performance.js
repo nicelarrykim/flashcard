@@ -1,10 +1,10 @@
 // js/performance.js
 // 단어별 학습 성과 대시보드 및 나의 왕국(영지 발전 & 기사단 승급) 모듈
 
-import { StorageManager } from './storage.js?v=20261122_32';
-import { SoundManager } from './tts.js?v=20261122_32';
-import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261122_32';
-import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261122_32';
+import { StorageManager } from './storage.js?v=20261122_33';
+import { SoundManager } from './tts.js?v=20261122_33';
+import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261122_33';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261122_33';
 
 export class PerformanceView {
   constructor(containerId) {

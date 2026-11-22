@@ -1,10 +1,10 @@
 // js/admin.js
 // 관리자 인증(암호 2217) 및 다중 학습자 프로필 관리 모듈
 
-import { StorageManager } from './storage.js?v=20261122_32';
-import { KingdomManager } from './kingdom.js?v=20261122_32';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_32';
-import { ServerSyncManager } from './serverSync.js?v=20261122_32';
+import { StorageManager } from './storage.js?v=20261122_33';
+import { KingdomManager } from './kingdom.js?v=20261122_33';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_33';
+import { ServerSyncManager } from './serverSync.js?v=20261122_33';
 
 export const ADMIN_PASSWORD = '2217';
 
@@ -298,7 +298,7 @@ export class AdminManager {
           alert(`🎉 [${res.profile.name}] 학습자의 성과(단어 ${res.wordCount}개)가 서버에 성공적으로 저장되었습니다!\n\n이제 다른 기기에서 [프로필 선택하여 받기]로 가져갈 수 있습니다.`);
           this.openAdminPanel();
         } else {
-          alert(`❌ 서버 업로드 실패: ${res.error}\n\n서버 설정에서 서버 주소가 http://192.168.0.110:8000 등으로 올바르게 지정되었는지 확인하세요.`);
+          alert(`❌ 서버 업로드 실패: ${res.error}\n\n서버 설정에서 동기화 서버 주소가 http://192.168.0.110:8080 등으로 올바르게 지정되었는지 확인하세요.`);
         }
       };
     }
@@ -428,7 +428,7 @@ export class AdminManager {
                 동기화 서버 주소 (API URL):
               </label>
               <div class="flex items-center gap-2">
-                <input type="text" id="server-cfg-url-input" value="${currentUrl}" placeholder="http://localhost:8000 또는 http://192.168.0.x:8000"
+                <input type="text" id="server-cfg-url-input" value="${currentUrl}" placeholder="http://localhost:8080 또는 http://192.168.0.110:8080"
                   class="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 font-mono text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                 <button type="button" id="server-cfg-test-btn" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-sm shrink-0">
                   연결 확인
@@ -464,7 +464,7 @@ export class AdminManager {
               <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
                 <li>컴퓨터 터미널에서 <code>python3 server.py</code>를 실행합니다.</li>
                 <li>기존에 공부하던 기기에서 <strong>[📤 내 로컬 성과 ➔ 서버로 올리기]</strong>를 누릅니다.</li>
-                <li>새 기기(스마트폰 등)에서 <code>http://192.168.0.110:8000</code>으로 접속하면 이전 성과가 그대로 연동됩니다!</li>
+                <li>동기화 서버 주소: <code>http://192.168.0.110:8080</code> (로컬 게임과 분리된 전용 포트)</li>
               </ol>
             </div>
           </div>

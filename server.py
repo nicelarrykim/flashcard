@@ -19,7 +19,7 @@ import time
 import mimetypes
 from urllib.parse import urlparse, parse_qs
 
-PORT = int(os.environ.get('PORT', 8000))
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get('PORT', 8080))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'vocaquest_server.db')
 

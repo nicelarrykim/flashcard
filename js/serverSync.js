@@ -23,13 +23,20 @@ export class ServerSyncManager {
       }
     } catch (e) {}
 
-    // 2. 현재 웹페이지가 http:// 또는 https:// 로 제공 중인 경우 현재 origin 사용
+    // 2. 현재 웹페이지가 http:// 또는 https:// 로 제공 중인 경우
     if (window.location.protocol.startsWith('http')) {
-      return window.location.origin;
+      if (window.location.port === '8080') {
+        return window.location.origin;
+      }
+      // 로컬 웹 게임 포트(8000 등)와 동기화 전용 포트(8080) 분리 자동 감지
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.')) {
+        return `http://${window.location.hostname}:8080`;
+      }
+      return 'http://192.168.0.110:8080';
     }
 
-    // 3. 로컬 파일(file:///) 등으로 열었을 경우 기본 localhost:8000 사용
-    return 'http://localhost:8000';
+    // 3. 로컬 파일(file:///) 등으로 열었을 경우 기본 localhost:8080 사용
+    return 'http://localhost:8080';
   }
 
   static setCustomServerUrl(url) {

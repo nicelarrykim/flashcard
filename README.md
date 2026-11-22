@@ -63,10 +63,10 @@ git push -u origin main
 ### 백엔드 서버 실행
 추가 패키지 설치 없이 Python 3 표준 라이브러리만으로 즉시 구동됩니다:
 ```bash
-python3 server.py
+python3 server.py 8080
 ```
-- **PC 브라우저**: `http://localhost:8000`
-- **스마트폰/태블릿/다른 기기**: 같은 Wi-Fi에 연결된 후 서버 실행 화면에 안내되는 로컬 IP (예: `http://192.168.0.x:8000`)로 접속하면 동일한 프로필과 성취도가 실시간으로 동기화됩니다.
+- **PC 브라우저 동기화**: `http://localhost:8080`
+- **스마트폰/태블릿 동기화**: 같은 Wi-Fi에 연결된 후 로컬 IP `http://192.168.0.110:8080`로 동기화 서버 연결.
 - **SQLite DB 영구 보존**: `vocaquest_server.db` 파일에 모든 학습 데이터가 자동 보존됩니다.
 
 ---
