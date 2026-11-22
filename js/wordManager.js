@@ -1,10 +1,10 @@
 // js/wordManager.js
 // 다중 단어장(Deck) CRUD 관리 및 다중 사진 일괄 OCR 스캐너 모듈
 
-import { StorageManager } from './storage.js?v=20261123_04';
-import { SoundManager } from './tts.js?v=20261123_04';
-import { OCRParser } from './ocr.js?v=20261123_04';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_04';
+import { StorageManager } from './storage.js?v=20261123_05';
+import { SoundManager } from './tts.js?v=20261123_05';
+import { OCRParser } from './ocr.js?v=20261123_05';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_05';
 
 export class WordManager {
   constructor(containerId) {

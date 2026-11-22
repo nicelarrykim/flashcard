@@ -1,12 +1,12 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261123_04';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_04';
-import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261123_04';
-import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261123_04';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_04';
-import { ServerSyncManager } from './serverSync.js?v=20261123_04';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261123_05';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_05';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261123_05';
+import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261123_05';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_05';
+import { ServerSyncManager } from './serverSync.js?v=20261123_05';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -266,6 +266,23 @@ export class StorageManager {
             decks.unshift(JSON.parse(JSON.stringify(ELEMENTARY_WORDS_50_DECK)));
           }
           this.saveDecks(decks);
+        } else if (Array.isArray(decks)) {
+          // 이미 존재하는 초급단어50 덱에 신규 확장 단어(200개) 자동 동기화
+          const elemDeck = decks.find(d => d.id === ELEMENTARY_WORDS_50_DECK.id || d.name === ELEMENTARY_WORDS_50_DECK.name);
+          if (elemDeck && Array.isArray(elemDeck.words) && elemDeck.words.length < ELEMENTARY_WORDS_50_DECK.words.length) {
+            const existingIds = new Set(elemDeck.words.map(w => w.id || w.word));
+            let added = false;
+            ELEMENTARY_WORDS_50_DECK.words.forEach(w => {
+              if (!existingIds.has(w.id) && !existingIds.has(w.word)) {
+                elemDeck.words.push(JSON.parse(JSON.stringify(w)));
+                existingIds.add(w.id);
+                added = true;
+              }
+            });
+            if (added) {
+              this.saveDecks(decks);
+            }
+          }
         }
       }
 
