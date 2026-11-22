@@ -1,10 +1,10 @@
 // js/performance.js
 // 단어별 학습 성과 대시보드 및 나의 왕국(영지 발전 & 기사단 승급) 모듈
 
-import { StorageManager } from './storage.js?v=20261122_12';
-import { SoundManager } from './tts.js?v=20261122_12';
-import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261122_12';
-import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261122_12';
+import { StorageManager } from './storage.js?v=20261122_15';
+import { SoundManager } from './tts.js?v=20261122_15';
+import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261122_15';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261122_15';
 
 export class PerformanceView {
   constructor(containerId) {
@@ -109,11 +109,11 @@ export class PerformanceView {
             <!-- 좌측: 왕국 성채 SVG 일러스트 -->
             <div class="w-full md:w-64 shrink-0 flex flex-col items-center">
               <div class="w-48 h-36 rounded-2xl overflow-hidden shadow-md border border-indigo-100 dark:border-indigo-900 bg-slate-900/10 dark:bg-slate-900/60 flex items-center justify-center p-1">
-                ${KingdomManager.getKingdomIllustrationSVG(kingdomPower.tier.level)}
+                ${KingdomManager.getKingdomIllustrationSVG(kingdomPower.tier?.level || 1)}
               </div>
               <div class="mt-2 text-center">
-                <span class="inline-block px-3 py-1 rounded-full text-xs font-black ${kingdomPower.tier.badgeColor}">
-                  ${kingdomPower.tier.badge}
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-black ${kingdomPower.tier?.badgeColor || 'bg-slate-100 text-slate-700'}">
+                  ${kingdomPower.tier?.badge || `Tier ${kingdomPower.tier?.level || 1}`}
                 </span>
               </div>
             </div>
@@ -126,44 +126,44 @@ export class PerformanceView {
                     영지: ${currentDeckName}
                   </div>
                   <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>${kingdomPower.tier.name}</span>
-                    <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">(Tier ${kingdomPower.tier.level})</span>
+                    <span>${kingdomPower.tier?.name || '영지'}</span>
+                    <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">(Tier ${kingdomPower.tier?.level || 1})</span>
                   </h3>
                 </div>
                 <div class="text-right">
                   <div class="text-xs text-slate-400">기사단 총 전투력</div>
                   <div class="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono">
-                    ${kingdomPower.totalPoints.toLocaleString()} <span class="text-xs font-normal">pts</span>
+                    ${(kingdomPower.totalPoints ?? kingdomPower.totalPower ?? 0).toLocaleString()} <span class="text-xs font-normal">pts</span>
                   </div>
                 </div>
               </div>
 
               <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                ${kingdomPower.tier.description}
+                ${kingdomPower.tier?.description || ''}
               </p>
 
               <!-- 발전도 프로그레스 바 -->
               <div class="space-y-1.5 pt-1">
                 <div class="flex items-center justify-between text-xs font-bold">
                   <span class="text-slate-700 dark:text-slate-300">다음 영지 승급 진행도</span>
-                  <span class="text-indigo-600 dark:text-indigo-400 font-mono">${kingdomPower.progressPercent}%</span>
+                  <span class="text-indigo-600 dark:text-indigo-400 font-mono">${kingdomPower.progressPercent ?? kingdomPower.progressPct ?? 0}%</span>
                 </div>
                 <div class="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shadow-inner">
-                  <div class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-400 rounded-full transition-all duration-500" style="width: ${kingdomPower.progressPercent}%"></div>
+                  <div class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-400 rounded-full transition-all duration-500" style="width: ${kingdomPower.progressPercent ?? kingdomPower.progressPct ?? 0}%"></div>
                 </div>
                 <div class="flex justify-between text-[11px] text-slate-400">
-                  <span>현 등급: ${kingdomPower.tier.name}</span>
+                  <span>현 등급: ${kingdomPower.tier?.name || '영지'}</span>
                   <span>다음 등급: ${kingdomPower.nextTier ? kingdomPower.nextTier.name : '최고 등급 도달!'}</span>
                 </div>
               </div>
 
               <!-- 요약 기사단 수 -->
               <div class="flex flex-wrap items-center gap-3 pt-2 text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-700/60">
-                <span>⚔️ 총 기사 단원: <strong class="text-slate-800 dark:text-slate-200">${kingdomPower.totalWords}명</strong></span>
+                <span>⚔️ 총 기사 단원: <strong class="text-slate-800 dark:text-slate-200">${kingdomPower.totalWords || 0}명</strong></span>
                 <span>•</span>
-                <span>🛡️ 고위 기사(중급 이상): <strong class="text-indigo-600 dark:text-indigo-400">${kingdomPower.advancedKnightCount}명</strong></span>
+                <span>🛡️ 고위 기사(중급 이상): <strong class="text-indigo-600 dark:text-indigo-400">${kingdomPower.advancedKnightCount || 0}명</strong></span>
                 <span>•</span>
-                <span>👑 수호 기사(근위대/마스터): <strong class="text-amber-500 dark:text-amber-400">${kingdomPower.royalGuardCount + kingdomPower.masterCount}명</strong></span>
+                <span>👑 수호 기사(근위대/마스터): <strong class="text-amber-500 dark:text-amber-400">${(kingdomPower.royalGuardCount || 0) + (kingdomPower.masterCount || 0)}명</strong></span>
               </div>
             </div>
 
@@ -190,15 +190,15 @@ export class PerformanceView {
                 <div data-deck-id="${deck.id}" class="deck-filter-btn cursor-pointer p-4 rounded-2xl border-2 transition-all transform hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between ${isSelected ? 'border-indigo-600 ring-2 ring-indigo-500/30 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-md' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300'}">
                   <div class="flex items-center gap-3 mb-2.5">
                     <div class="w-16 h-12 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 bg-slate-900/10 dark:bg-slate-900/60 flex items-center justify-center">
-                      ${KingdomManager.getKingdomIllustrationSVG(dPower.tier.level)}
+                      ${KingdomManager.getKingdomIllustrationSVG(dPower.tier?.level || 1)}
                     </div>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between gap-1 mb-0.5">
                         <span class="text-xs font-black text-slate-900 dark:text-white truncate">${deck.name}</span>
-                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${dPower.tier.badgeColor}">T${dPower.tier.level}</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${dPower.tier?.badgeColor || 'bg-slate-100 text-slate-600'}">T${dPower.tier?.level || 1}</span>
                       </div>
                       <div class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold truncate">
-                        ${dPower.tier.name}
+                        ${dPower.tier?.name || '영지'}
                       </div>
                     </div>
                   </div>
@@ -206,11 +206,11 @@ export class PerformanceView {
                   <!-- 단어수 및 기사단 포인트 -->
                   <div class="space-y-1 mt-auto">
                     <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                      <span>단어 ${dPower.totalWords}개 / 기사단</span>
-                      <span class="font-bold text-slate-700 dark:text-slate-300 font-mono">${dPower.totalPoints} pts</span>
+                      <span>단어 ${dPower.totalWords || 0}개 / 기사단</span>
+                      <span class="font-bold text-slate-700 dark:text-slate-300 font-mono">${(dPower.totalPoints ?? dPower.totalPower ?? 0)} pts</span>
                     </div>
                     <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                      <div class="h-full bg-indigo-500 rounded-full" style="width: ${dPower.progressPercent}%"></div>
+                      <div class="h-full bg-indigo-500 rounded-full" style="width: ${dPower.progressPercent ?? dPower.progressPct ?? 0}%"></div>
                     </div>
                   </div>
                 </div>

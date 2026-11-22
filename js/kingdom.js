@@ -8,6 +8,8 @@ export const KINGDOM_TIERS = {
     level: 1,
     name: '개척 야영지',
     title: 'Frontier Camp',
+    badge: 'Tier 1 야영지',
+    badgeColor: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300',
     minProgress: 0,
     maxProgress: 19,
     description: '황무지에 세워진 기사단의 첫 주둔지입니다. 텐트와 모닥불 주위로 신병들이 모여들고 있습니다.',
@@ -17,6 +19,8 @@ export const KINGDOM_TIERS = {
     level: 2,
     name: '목조 요새 마을',
     title: 'Wooden Fortress',
+    badge: 'Tier 2 목조요새',
+    badgeColor: 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300',
     minProgress: 20,
     maxProgress: 39,
     description: '통나무 망루와 목책 방벽을 갖춘 요새 마을입니다. 보병들이 방어선을 순찰하고 있습니다.',
@@ -26,6 +30,8 @@ export const KINGDOM_TIERS = {
     level: 3,
     name: '석조 기사단 성채',
     title: 'Stone Citadel',
+    badge: 'Tier 3 석조성채',
+    badgeColor: 'bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300',
     minProgress: 40,
     maxProgress: 59,
     description: '견고한 화강암 성벽과 감시탑이 솟아오른 기사단의 본부입니다. 정규 기사들이 훈련 중입니다.',
@@ -35,6 +41,8 @@ export const KINGDOM_TIERS = {
     level: 4,
     name: '왕립 대성채',
     title: 'Royal High Castle',
+    badge: 'Tier 4 왕립대성채',
+    badgeColor: 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300',
     minProgress: 60,
     maxProgress: 79,
     description: '웅장한 성탑과 붉은 삼각 지붕, 해자를 갖춘 왕국의 심장부입니다. 고급 기사와 근위대가 상주합니다.',
@@ -44,6 +52,8 @@ export const KINGDOM_TIERS = {
     level: 5,
     name: '찬란한 황금 제국',
     title: 'Imperial Golden Palace',
+    badge: 'Tier 5 황금제국',
+    badgeColor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',
     minProgress: 80,
     maxProgress: 100,
     description: '전설의 마스터 기사들이 수호하는 천공의 황금 제국입니다. 성스러운 빛이 영지를 가득 채웁니다.',
@@ -55,7 +65,7 @@ export class KingdomManager {
   /**
    * 단어 목록의 기사 수와 숙련도에 비례하여 왕국의 발전도와 티어 계산
    * @param {Array} words 단어 객체 배열
-   * @returns {Object} { totalPower, maxPower, progressPct, tier, knightCounts }
+   * @returns {Object} { totalPower, totalPoints, maxPower, progressPct, progressPercent, tier, nextTier, knightCounts, advancedKnightCount, royalGuardCount, masterCount }
    */
   static calculateKingdomPower(words) {
     const list = (words || []).filter(Boolean);
@@ -99,18 +109,42 @@ export class KingdomManager {
 
     // 발전도에 따른 티어 결정
     let tier = KINGDOM_TIERS.TIER_1;
-    if (progressPct >= 80) tier = KINGDOM_TIERS.TIER_5;
-    else if (progressPct >= 60) tier = KINGDOM_TIERS.TIER_4;
-    else if (progressPct >= 40) tier = KINGDOM_TIERS.TIER_3;
-    else if (progressPct >= 20) tier = KINGDOM_TIERS.TIER_2;
+    let nextTier = KINGDOM_TIERS.TIER_2;
+
+    if (progressPct >= 80) {
+      tier = KINGDOM_TIERS.TIER_5;
+      nextTier = null;
+    } else if (progressPct >= 60) {
+      tier = KINGDOM_TIERS.TIER_4;
+      nextTier = KINGDOM_TIERS.TIER_5;
+    } else if (progressPct >= 40) {
+      tier = KINGDOM_TIERS.TIER_3;
+      nextTier = KINGDOM_TIERS.TIER_4;
+    } else if (progressPct >= 20) {
+      tier = KINGDOM_TIERS.TIER_2;
+      nextTier = KINGDOM_TIERS.TIER_3;
+    }
+
+    const advancedKnightCount = (knightCounts[RANK_TYPES.SENIOR_KNIGHT] || 0) + 
+                                (knightCounts[RANK_TYPES.HIGH_KNIGHT] || 0) + 
+                                (knightCounts[RANK_TYPES.ROYAL_GUARD] || 0) + 
+                                (knightCounts[RANK_TYPES.MASTER] || 0);
+    const royalGuardCount = knightCounts[RANK_TYPES.ROYAL_GUARD] || 0;
+    const masterCount = knightCounts[RANK_TYPES.MASTER] || 0;
 
     return {
       totalWords,
       totalPower,
+      totalPoints: totalPower,
       maxPower,
       progressPct,
+      progressPercent: progressPct,
       tier,
-      knightCounts
+      nextTier,
+      knightCounts,
+      advancedKnightCount,
+      royalGuardCount,
+      masterCount
     };
   }
 
