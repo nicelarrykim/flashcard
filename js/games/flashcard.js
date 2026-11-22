@@ -103,15 +103,7 @@ export class FlashcardGame {
 
     // 사진 표시 옵션 판정:
     // 1. auto: 왕실근위대부터는 사진 숨김, always_on: 항상 켬, always_off: 항상 끔
-    const photoMode = StorageManager.getPhotoDisplayMode ? StorageManager.getPhotoDisplayMode() : 'auto';
-    let allowPhoto = false;
-    if (word.imageUrl && word.imageUrl.trim()) {
-      if (photoMode === 'always_on') {
-        allowPhoto = true;
-      } else if (photoMode === 'auto') {
-        allowPhoto = (wordRank !== RANK_TYPES.ROYAL_GUARD && wordRank !== RANK_TYPES.MASTER);
-      }
-    }
+    const allowPhoto = StorageManager.shouldShowPhoto ? StorageManager.shouldShowPhoto(word) : !!(word.imageUrl && word.imageUrl.trim());
 
     // 2. 단어장별 그림 위치 옵션 ('meaning' | 'word', 기본값: 'meaning')
     const imagePos = (activeDeck && activeDeck.imagePosition) ? activeDeck.imagePosition : 'meaning';

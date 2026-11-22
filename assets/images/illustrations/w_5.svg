@@ -1,28 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
   <defs>
     <linearGradient id="bg_5" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0284c7" />
-      <stop offset="100%" stop-color="#2563eb" />
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
     </linearGradient>
     <filter id="shadow_5" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.25"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.3"/>
     </filter>
   </defs>
 
-  <rect width="256" height="256" rx="32" fill="url(#bg_5)"/>
-  <circle cx="210" cy="46" r="64" fill="#ffffff" fill-opacity="0.08"/>
-  <circle cx="30" cy="226" r="48" fill="#ffffff" fill-opacity="0.06"/>
+  <!-- 카드 배경 (글자 일체 없음) -->
+  <rect width="256" height="256" rx="36" fill="url(#bg_5)"/>
 
-  <rect x="20" y="18" width="46" height="24" rx="12" fill="#ffffff" fill-opacity="0.2"/>
-  <text x="43" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">#5</text>
+  <!-- 배경 디자인 서클 -->
+  <circle cx="215" cy="40" r="75" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="35" cy="225" r="55" fill="#ffffff" fill-opacity="0.06"/>
 
-  <g transform="translate(128, 115)" filter="url(#shadow_5)">
-    <path d="M-44 -12 L-20 6 L-6 -6 L-18 -22 Z" fill="#ffffff"/><path d="M44 -12 L20 6 L6 -6 L18 -22 Z" fill="#fde047"/><rect x="-18" y="-4" width="36" height="24" rx="8" fill="#ffffff"/><line x1="-8" y1="2" x2="8" y2="2" stroke="#3b82f6" stroke-width="3"/><line x1="-8" y1="10" x2="8" y2="10" stroke="#3b82f6" stroke-width="3"/>
-  </g>
-
-  <g transform="translate(128, 206)">
-    <rect x="-104" y="-2" width="208" height="38" rx="12" fill="#000000" fill-opacity="0.25"/>
-    <text x="0" y="16" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">employ</text>
-    <text x="0" y="30" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#f1f5f9" fill-opacity="0.9" text-anchor="middle">고용하다</text>
+  <!-- 캔버스에 꽉 차게 확대된 중앙 구체 일러스트 -->
+  <g transform="translate(128, 128)" filter="url(#shadow_5)">
+    
+        <!-- 양쪽에서 뻗은 정장 소매와 단단히 맞잡은 악수 -->
+        <!-- 왼쪽 소매 (감색 정장) -->
+        <path d="M-80 -25 L-35 -5 L-45 25 L-80 15 Z" fill="#1e3a8a"/>
+        <rect x="-38" y="-7" width="10" height="30" fill="#ffffff" transform="rotate(-15 -38 -7)"/>
+        <!-- 오른쪽 소매 (차콜 정장) -->
+        <path d="M80 -25 L35 -5 L45 25 L80 15 Z" fill="#334155"/>
+        <rect x="28" y="-7" width="10" height="30" fill="#ffffff" transform="rotate(15 28 -7)"/>
+        <!-- 악수하는 두 손 -->
+        <path d="M-30 -2 L0 15 L25 0 L0 -15 Z" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+        <path d="M-5 12 L15 -2 M0 16 L20 2 M-10 8 L10 -6" stroke="#ea580c" stroke-width="3" stroke-linecap="round"/>
+        <!-- 아래 사원증 목걸이 카드 -->
+        <rect x="-24" y="28" width="48" height="36" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="3"/>
+        <circle cx="0" cy="42" r="6" fill="#3b82f6"/>
+        <line x1="-14" y1="54" x2="14" y2="54" stroke="#94a3b8" stroke-width="3"/>
+        
   </g>
 </svg>

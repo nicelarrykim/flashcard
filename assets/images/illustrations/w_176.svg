@@ -1,28 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
   <defs>
     <linearGradient id="bg_176" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f766e" />
-      <stop offset="100%" stop-color="#14b8a6" />
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
     </linearGradient>
     <filter id="shadow_176" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.25"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.3"/>
     </filter>
   </defs>
 
-  <rect width="256" height="256" rx="32" fill="url(#bg_176)"/>
-  <circle cx="210" cy="46" r="64" fill="#ffffff" fill-opacity="0.08"/>
-  <circle cx="30" cy="226" r="48" fill="#ffffff" fill-opacity="0.06"/>
+  <!-- 카드 배경 (글자 일체 없음) -->
+  <rect width="256" height="256" rx="36" fill="url(#bg_176)"/>
 
-  <rect x="20" y="18" width="46" height="24" rx="12" fill="#ffffff" fill-opacity="0.2"/>
-  <text x="43" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">#176</text>
+  <!-- 배경 디자인 서클 -->
+  <circle cx="215" cy="40" r="75" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="35" cy="225" r="55" fill="#ffffff" fill-opacity="0.06"/>
 
-  <g transform="translate(128, 115)" filter="url(#shadow_176)">
-    <rect x="-24" y="-24" width="48" height="48" rx="12" fill="#ffffff" fill-opacity="0.9"/><circle cx="0" cy="0" r="14" fill="#3b82f6"/><circle cx="0" cy="0" r="6" fill="#ffffff"/>
-  </g>
-
-  <g transform="translate(128, 206)">
-    <rect x="-104" y="-2" width="208" height="38" rx="12" fill="#000000" fill-opacity="0.25"/>
-    <text x="0" y="16" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">stool</text>
-    <text x="0" y="30" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#f1f5f9" fill-opacity="0.9" text-anchor="middle">의자</text>
+  <!-- 캔버스에 꽉 차게 확대된 중앙 구체 일러스트 -->
+  <g transform="translate(128, 128)" filter="url(#shadow_176)">
+    
+        <rect x="-55" y="-55" width="110" height="110" rx="24" fill="#ffffff" stroke="#fde047" stroke-width="6"/>
+        <circle cx="0" cy="0" r="32" fill="#3b82f6"/>
+        <polygon points="0,-20 6,-6 20,-6 9,3 13,17 0,8 -13,17 -9,3 -20,-6 -6,-6" fill="#ffffff"/>
+        
   </g>
 </svg>

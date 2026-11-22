@@ -250,11 +250,22 @@ export class MatchGame {
                       <span class="text-[9px] sm:text-[10px] font-semibold text-slate-400">의미</span>
                     </div>
 
-                    <div class="my-auto w-full">
-                      <div class="font-extrabold text-[11px] sm:text-sm text-slate-800 dark:text-slate-100 line-clamp-2 break-keep leading-tight sm:leading-snug">
-                        ${card.text}
+                    ${StorageManager.shouldShowPhoto(card.wordObj) ? `
+                      <div class="flex items-center gap-1.5 sm:gap-2 my-auto w-full">
+                        <div class="w-7 h-7 sm:w-9 sm:h-9 shrink-0 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-0.5">
+                          <img src="${card.wordObj.imageUrl}" alt="${card.text}" onerror="this.parentElement.style.display='none'" class="w-full h-full object-contain">
+                        </div>
+                        <div class="font-extrabold text-[10px] sm:text-xs text-slate-800 dark:text-slate-100 line-clamp-2 break-keep leading-tight flex-1">
+                          ${card.text}
+                        </div>
                       </div>
-                    </div>
+                    ` : `
+                      <div class="my-auto w-full">
+                        <div class="font-extrabold text-[11px] sm:text-sm text-slate-800 dark:text-slate-100 line-clamp-2 break-keep leading-tight sm:leading-snug">
+                          ${card.text}
+                        </div>
+                      </div>
+                    `}
 
                     <!-- 밑줄 포인트 -->
                     <div class="w-full h-0.5 sm:h-1 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full opacity-60"></div>

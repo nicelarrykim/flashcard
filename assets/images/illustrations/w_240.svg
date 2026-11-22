@@ -1,28 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
   <defs>
     <linearGradient id="bg_240" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f766e" />
-      <stop offset="100%" stop-color="#14b8a6" />
+      <stop offset="0%" stop-color="#f97316" />
+      <stop offset="100%" stop-color="#c2410c" />
     </linearGradient>
     <filter id="shadow_240" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.25"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.3"/>
     </filter>
   </defs>
 
-  <rect width="256" height="256" rx="32" fill="url(#bg_240)"/>
-  <circle cx="210" cy="46" r="64" fill="#ffffff" fill-opacity="0.08"/>
-  <circle cx="30" cy="226" r="48" fill="#ffffff" fill-opacity="0.06"/>
+  <!-- 카드 배경 (글자 일체 없음) -->
+  <rect width="256" height="256" rx="36" fill="url(#bg_240)"/>
 
-  <rect x="20" y="18" width="46" height="24" rx="12" fill="#ffffff" fill-opacity="0.2"/>
-  <text x="43" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">#240</text>
+  <!-- 배경 디자인 서클 -->
+  <circle cx="215" cy="40" r="75" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="35" cy="225" r="55" fill="#ffffff" fill-opacity="0.06"/>
 
-  <g transform="translate(128, 115)" filter="url(#shadow_240)">
-    <path d="M-30 0 L-10 0 M-10 -8 L-10 8" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/><line x1="-4" y1="-4" x2="4" y2="-4" stroke="#fde047" stroke-width="4"/><line x1="-4" y1="4" x2="4" y2="4" stroke="#fde047" stroke-width="4"/><path d="M30 0 L10 0 M10 -8 L10 8" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
-  </g>
-
-  <g transform="translate(128, 206)">
-    <rect x="-104" y="-2" width="208" height="38" rx="12" fill="#000000" fill-opacity="0.25"/>
-    <text x="0" y="16" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">connect</text>
-    <text x="0" y="30" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#f1f5f9" fill-opacity="0.9" text-anchor="middle">연결하다</text>
+  <!-- 캔버스에 꽉 차게 확대된 중앙 구체 일러스트 -->
+  <g transform="translate(128, 128)" filter="url(#shadow_240)">
+    
+        <!-- 좌측 수 플러그 -->
+        <rect x="-75" y="-16" width="35" height="32" rx="4" fill="#64748b" stroke="#ffffff" stroke-width="3"/>
+        <rect x="-40" y="-12" width="18" height="8" rx="2" fill="#fde047"/>
+        <rect x="-40" y="4" width="18" height="8" rx="2" fill="#fde047"/>
+        <line x1="-95" y1="0" x2="-75" y2="0" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+        <!-- 우측 암 콘센트 -->
+        <rect x="2" y="-22" width="40" height="44" rx="6" fill="#3b82f6" stroke="#ffffff" stroke-width="4"/>
+        <line x1="42" y1="0" x2="75" y2="0" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+        <!-- 결합부 스파크 에너지 -->
+        <polygon points="-10,-30 -5,-15 -20,-10 0,0 -8,15 10,-5" fill="#fde047"/>
+        
   </g>
 </svg>

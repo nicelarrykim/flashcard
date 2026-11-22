@@ -1,28 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
   <defs>
     <linearGradient id="bg_29" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#059669" />
-      <stop offset="100%" stop-color="#10b981" />
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="100%" stop-color="#be185d" />
     </linearGradient>
     <filter id="shadow_29" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.25"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.3"/>
     </filter>
   </defs>
 
-  <rect width="256" height="256" rx="32" fill="url(#bg_29)"/>
-  <circle cx="210" cy="46" r="64" fill="#ffffff" fill-opacity="0.08"/>
-  <circle cx="30" cy="226" r="48" fill="#ffffff" fill-opacity="0.06"/>
+  <!-- 카드 배경 (글자 일체 없음) -->
+  <rect width="256" height="256" rx="36" fill="url(#bg_29)"/>
 
-  <rect x="20" y="18" width="46" height="24" rx="12" fill="#ffffff" fill-opacity="0.2"/>
-  <text x="43" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">#29</text>
+  <!-- 배경 디자인 서클 -->
+  <circle cx="215" cy="40" r="75" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="35" cy="225" r="55" fill="#ffffff" fill-opacity="0.06"/>
 
-  <g transform="translate(128, 115)" filter="url(#shadow_29)">
-    <path d="M-36 0 C-36 -34 36 -34 36 0 Z" fill="#fde047" stroke="#ffffff" stroke-width="4"/><path d="M-12 -2 C-12 -24 12 -24 12 -2 Z" fill="#ef4444"/><line x1="-34" y1="0" x2="0" y2="30" stroke="#ffffff" stroke-width="2.5"/><line x1="34" y1="0" x2="0" y2="30" stroke="#ffffff" stroke-width="2.5"/><rect x="-6" y="28" width="12" height="12" rx="2" fill="#ffffff"/>
-  </g>
-
-  <g transform="translate(128, 206)">
-    <rect x="-104" y="-2" width="208" height="38" rx="12" fill="#000000" fill-opacity="0.25"/>
-    <text x="0" y="16" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">parachute</text>
-    <text x="0" y="30" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#f1f5f9" fill-opacity="0.9" text-anchor="middle">낙하산</text>
+  <!-- 캔버스에 꽉 차게 확대된 중앙 구체 일러스트 -->
+  <g transform="translate(128, 128)" filter="url(#shadow_29)">
+    
+        <!-- 구름 배경 -->
+        <ellipse cx="-55" cy="-20" rx="25" ry="14" fill="#ffffff" fill-opacity="0.25"/>
+        <ellipse cx="60" cy="20" rx="30" ry="16" fill="#ffffff" fill-opacity="0.25"/>
+        <!-- 낙하산 캐노피 (화려한 3색 줄무늬) -->
+        <path d="M-68 -30 C-68 -85 68 -85 68 -30 Q0 -40 -68 -30 Z" fill="#ef4444" stroke="#ffffff" stroke-width="4"/>
+        <path d="M-42 -33 C-42 -82 42 -82 42 -33 Q0 -40 -42 -33 Z" fill="#fde047"/>
+        <path d="M-18 -36 C-18 -78 18 -78 18 -36 Q0 -40 -18 -36 Z" fill="#3b82f6"/>
+        <!-- 낙하산 끈 -->
+        <line x1="-65" y1="-30" x2="0" y2="35" stroke="#ffffff" stroke-width="2.5"/>
+        <line x1="-25" y1="-36" x2="0" y2="35" stroke="#ffffff" stroke-width="2.5"/>
+        <line x1="25" y1="-36" x2="0" y2="35" stroke="#ffffff" stroke-width="2.5"/>
+        <line x1="65" y1="-30" x2="0" y2="35" stroke="#ffffff" stroke-width="2.5"/>
+        <!-- 매달려 내려오는 사람 -->
+        <circle cx="0" cy="38" r="8" fill="#fde047"/>
+        <path d="M-8 48 L8 48 L4 68 L-4 68 Z" fill="#ffffff"/>
+        <path d="M-14 52 L-4 46 M14 52 L4 46" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <path d="M-4 68 L-10 82 M4 68 L10 82" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+        
   </g>
 </svg>

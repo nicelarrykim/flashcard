@@ -2,7 +2,6 @@
 import os
 import json
 import sqlite3
-import html
 
 # 250 단어 데이터 정의 (index, word, meaning, partOfSpeech)
 WORDS = [
@@ -275,184 +274,482 @@ WORDS = [
     (250, "barrel", "통", "noun")
 ]
 
-# SVG 디자인 테마 색상 (gradient from, to, accent)
+# 아름답고 부드러운 배경 그라데이션 팔레트
 PALETTES = [
-    ("#4f46e5", "#7c3aed", "#e0e7ff"), # Indigo-Purple
-    ("#0284c7", "#2563eb", "#e0f2fe"), # Sky-Blue
-    ("#059669", "#10b981", "#d1fae5"), # Emerald
-    ("#d97706", "#f59e0b", "#fef3c7"), # Amber
-    ("#dc2626", "#ef4444", "#fee2e2"), # Red
-    ("#7c2d12", "#c2410c", "#ffedd5"), # Orange-Brown
-    ("#4c1d95", "#9333ea", "#f3e8ff"), # Violet
-    ("#0f766e", "#14b8a6", "#ccfbf1"), # Teal
-    ("#be185d", "#ec4899", "#fce7f3"), # Pink
-    ("#374151", "#4b5563", "#f3f4f6"), # Slate
+    ("#3b82f6", "#1d4ed8"), # Blue
+    ("#10b981", "#047857"), # Emerald
+    ("#8b5cf6", "#6d28d9"), # Purple
+    ("#f59e0b", "#d97706"), # Amber
+    ("#ef4444", "#b91c1c"), # Red
+    ("#06b6d4", "#0e7490"), # Cyan
+    ("#ec4899", "#be185d"), # Pink
+    ("#f97316", "#c2410c"), # Orange
+    ("#14b8a6", "#0f766e"), # Teal
+    ("#6366f1", "#4338ca"), # Indigo
 ]
 
-def generate_illustration_elements(num, word, meaning):
+def build_illustration(word, num):
     w = word.lower().strip()
-    
-    # 특정 단어별 상징 일러스트
-    if w == "involve":
-        return '<circle cx="-18" cy="0" r="32" fill="none" stroke="#ffffff" stroke-width="8"/><circle cx="18" cy="0" r="32" fill="none" stroke="#fde047" stroke-width="8"/>'
-    elif w == "maintain":
-        return '<path d="M0 -38 L32 -22 L32 10 Q32 38 0 46 Q-32 38 -32 10 L-32 -22 Z" fill="#ffffff" fill-opacity="0.25" stroke="#ffffff" stroke-width="5"/><path d="M-12 2 L-2 12 L16 -8" fill="none" stroke="#4ade80" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>'
-    elif w == "pronounce":
-        return '<rect x="-14" y="-28" width="28" height="42" rx="14" fill="#ffffff"/><path d="M-24 -6 C-24 16 24 16 24 -6" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><line x1="0" y1="16" x2="0" y2="34" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><line x1="-16" y1="34" x2="16" y2="34" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><path d="M34 -16 A 26 26 0 0 1 34 16" fill="none" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>'
-    elif w == "mankind":
-        return '<circle cx="0" cy="-22" r="14" fill="#fde047"/><path d="M-22 28 C-22 6 -6 4 0 4 C6 4 22 6 22 28" fill="#ffffff"/><circle cx="-34" cy="-12" r="10" fill="#ffffff" fill-opacity="0.8"/><path d="M-48 28 C-48 12 -36 10 -32 10 C-30 14 -30 20 -30 28" fill="#ffffff" fill-opacity="0.8"/><circle cx="34" cy="-12" r="10" fill="#ffffff" fill-opacity="0.8"/><path d="M48 28 C48 12 36 10 32 10 C30 14 30 20 30 28" fill="#ffffff" fill-opacity="0.8"/>'
-    elif w == "employ":
-        return '<path d="M-44 -12 L-20 6 L-6 -6 L-18 -22 Z" fill="#ffffff"/><path d="M44 -12 L20 6 L6 -6 L18 -22 Z" fill="#fde047"/><rect x="-18" y="-4" width="36" height="24" rx="8" fill="#ffffff"/><line x1="-8" y1="2" x2="8" y2="2" stroke="#3b82f6" stroke-width="3"/><line x1="-8" y1="10" x2="8" y2="10" stroke="#3b82f6" stroke-width="3"/>'
-    elif w == "expectation":
-        return '<rect x="-28" y="-10" width="56" height="44" rx="6" fill="#fde047"/><rect x="-32" y="-20" width="64" height="12" rx="4" fill="#fbbf24"/><line x1="0" y1="-20" x2="0" y2="34" stroke="#ffffff" stroke-width="6"/><path d="M0 -20 C-14 -36 -28 -20 0 -20 C28 -20 14 -36 0 -20" fill="#ef4444"/>'
-    elif w == "digest":
-        return '<path d="M-6 -36 C18 -36 34 -18 32 8 C30 34 2 40 -16 26 C-30 14 -28 -14 -6 -36 Z" fill="#fda4af" stroke="#ffffff" stroke-width="5"/><circle cx="2" cy="0" r="5" fill="#ffffff"/><circle cx="-8" cy="14" r="4" fill="#fde047"/><circle cx="12" cy="16" r="4" fill="#6ee7b7"/>'
-    elif w == "continent":
-        return '<circle cx="0" cy="0" r="38" fill="#0284c7" stroke="#ffffff" stroke-width="5"/><path d="M-24 -14 Q-12 -28 6 -20 Q22 -14 18 2 Q14 18 -4 24 Q-22 20 -24 -14 Z" fill="#22c55e"/><path d="M12 -8 Q26 2 20 18 Q6 10 12 -8 Z" fill="#22c55e"/>'
-    elif w == "belief":
-        return '<path d="M0 28 C-36 6 -36 -22 0 -22 C36 -22 36 6 0 28 Z" fill="#ef4444" stroke="#ffffff" stroke-width="4"/><line x1="0" y1="-14" x2="0" y2="4" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><line x1="-8" y1="-6" x2="8" y2="-6" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>'
-    elif w == "artistic":
-        return '<path d="M-30 10 C-36 -24 16 -38 34 -14 C44 0 28 32 6 32 C-4 32 -10 24 -18 24 C-24 24 -26 28 -30 10 Z" fill="#ffffff"/><circle cx="-14" cy="-14" r="5" fill="#ef4444"/><circle cx="8" cy="-18" r="5" fill="#3b82f6"/><circle cx="22" cy="-2" r="5" fill="#eab308"/><circle cx="12" cy="16" r="5" fill="#22c55e"/><line x1="-36" y1="36" x2="16" y2="-32" stroke="#78350f" stroke-width="5" stroke-linecap="round"/>'
-    elif w == "assess":
-        return '<rect x="-24" y="-32" width="48" height="60" rx="6" fill="#ffffff"/><line x1="-16" y1="-16" x2="4" y2="-16" stroke="#64748b" stroke-width="4" stroke-linecap="round"/><line x1="-16" y1="-4" x2="16" y2="-4" stroke="#64748b" stroke-width="4" stroke-linecap="round"/><line x1="-16" y1="8" x2="8" y2="8" stroke="#64748b" stroke-width="4" stroke-linecap="round"/><circle cx="16" cy="16" r="14" fill="#38bdf8" stroke="#ffffff" stroke-width="3"/><line x1="26" y1="26" x2="36" y2="36" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>'
-    elif w == "collaborate":
-        return '<rect x="-30" y="-30" width="28" height="28" rx="4" fill="#38bdf8"/><rect x="2" y="-30" width="28" height="28" rx="4" fill="#fde047"/><rect x="-30" y="2" width="28" height="28" rx="4" fill="#4ade80"/><rect x="2" y="2" width="28" height="28" rx="4" fill="#f43f5e"/><circle cx="0" cy="0" r="10" fill="#ffffff"/>'
-    elif w == "precise":
-        return '<circle cx="0" cy="0" r="36" fill="none" stroke="#ffffff" stroke-width="4"/><circle cx="0" cy="0" r="24" fill="none" stroke="#fde047" stroke-width="4"/><circle cx="0" cy="0" r="10" fill="#ef4444"/><line x1="-44" y1="0" x2="44" y2="0" stroke="#ffffff" stroke-width="3"/><line x1="0" y1="-44" x2="0" y2="44" stroke="#ffffff" stroke-width="3"/>'
-    elif w == "restriction":
-        return '<circle cx="0" cy="0" r="36" fill="#ef4444" stroke="#ffffff" stroke-width="6"/><rect x="-24" y="-7" width="48" height="14" rx="4" fill="#ffffff"/>'
-    elif w == "venture":
-        return '<polygon points="-42,32 0,-30 42,32" fill="#ffffff" fill-opacity="0.3"/><polygon points="-12,32 18,-10 48,32" fill="#ffffff" fill-opacity="0.5"/><polygon points="-14,-10 0,-30 14,-10 6,-8 0,-14 -6,-8" fill="#ffffff"/><line x1="0" y1="-30" x2="0" y2="-44" stroke="#ffffff" stroke-width="3"/><polygon points="0,-44 20,-38 0,-32" fill="#fde047"/>'
-    elif w == "appearance":
-        return '<rect x="-22" y="-34" width="44" height="68" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="4"/><circle cx="0" cy="-10" r="12" fill="#38bdf8"/><path d="M-14 18 C-14 8 14 8 14 18 Z" fill="#38bdf8"/>'
-    elif w == "contrast":
-        return '<circle cx="0" cy="0" r="34" fill="#ffffff" stroke="#ffffff" stroke-width="4"/><path d="M0 -34 A 34 34 0 0 1 0 34 Z" fill="#0f172a"/><line x1="0" y1="-34" x2="0" y2="34" stroke="#ffffff" stroke-width="3"/>'
-    elif w == "compete":
-        return '<circle cx="-16" cy="-20" r="8" fill="#ffffff"/><path d="M-22 -8 L-14 -4 L-8 -14 L4 -8" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><path d="M-16 0 L-26 18 M-12 0 L-2 16" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><line x1="28" y1="-36" x2="28" y2="36" stroke="#fde047" stroke-width="4" stroke-dasharray="6,4"/>'
-    elif w == "logical":
-        return '<circle cx="-16" cy="-16" r="10" fill="#fde047"/><circle cx="16" cy="-16" r="10" fill="#38bdf8"/><circle cx="0" cy="18" r="10" fill="#4ade80"/><line x1="-10" y1="-12" x2="10" y2="-12" stroke="#ffffff" stroke-width="4"/><line x1="-12" y1="-8" x2="-3" y2="10" stroke="#ffffff" stroke-width="4"/><line x1="12" y1="-8" x2="3" y2="10" stroke="#ffffff" stroke-width="4"/>'
-    elif w == "urgent":
-        return '<path d="M-20 22 L20 22 L16 -12 Q0 -34 -16 -12 Z" fill="#ef4444" stroke="#ffffff" stroke-width="5"/><rect x="-24" y="22" width="48" height="12" rx="4" fill="#64748b"/><text x="0" y="8" font-family="sans-serif" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle">!</text>'
-    elif w == "surrender":
-        return '<line x1="-24" y1="36" x2="-24" y2="-38" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/><path d="M-24 -36 C-4 -42 6 -26 26 -32 L26 -6 C6 0 -4 -16 -24 -10 Z" fill="#ffffff"/>'
-    elif w == "critical":
-        return '<circle cx="-8" cy="-8" r="22" fill="none" stroke="#ffffff" stroke-width="6"/><line x1="8" y1="8" x2="32" y2="32" stroke="#fde047" stroke-width="8" stroke-linecap="round"/><polygon points="-12,-8 -4,-16 4,-8 -4,0" fill="#ef4444"/>'
-    elif w == "barren":
-        return '<path d="M-44 32 Q-10 14 44 26" stroke="#fde047" stroke-width="6" stroke-linecap="round"/><rect x="-6" y="-18" width="12" height="42" rx="6" fill="#22c55e"/><path d="M-6 -2 L-18 -2 L-18 -12" fill="none" stroke="#22c55e" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 6 L18 6 L18 -4" fill="none" stroke="#22c55e" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="-26" r="12" fill="#fde047"/>'
-    elif w == "turn down":
-        return '<circle cx="0" cy="0" r="36" fill="#ef4444" stroke="#ffffff" stroke-width="5"/><line x1="-16" y1="-16" x2="16" y2="16" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/><line x1="16" y1="-16" x2="-16" y2="16" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>'
-    elif w == "refreshing":
-        return '<path d="M-18 -24 L18 -24 L12 28 L-12 28 Z" fill="#ffffff" fill-opacity="0.3" stroke="#ffffff" stroke-width="4"/><path d="M-15 -10 L15 -10 L11 26 L-11 26 Z" fill="#38bdf8"/><line x1="-4" y1="-34" x2="14" y2="16" stroke="#fde047" stroke-width="4" stroke-linecap="round"/><circle cx="-2" cy="4" r="3" fill="#ffffff"/>'
-    elif w == "come up with":
-        return '<path d="M-20 -12 C-20 -28 20 -28 20 -12 C20 -2 10 4 10 14 L-10 14 C-10 4 -20 -2 -20 -12 Z" fill="#fde047" stroke="#ffffff" stroke-width="4"/><rect x="-8" y="16" width="16" height="8" rx="2" fill="#ffffff"/><line x1="0" y1="-38" x2="0" y2="-46" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>'
-    elif w == "parachute":
-        return '<path d="M-36 0 C-36 -34 36 -34 36 0 Z" fill="#fde047" stroke="#ffffff" stroke-width="4"/><path d="M-12 -2 C-12 -24 12 -24 12 -2 Z" fill="#ef4444"/><line x1="-34" y1="0" x2="0" y2="30" stroke="#ffffff" stroke-width="2.5"/><line x1="34" y1="0" x2="0" y2="30" stroke="#ffffff" stroke-width="2.5"/><rect x="-6" y="28" width="12" height="12" rx="2" fill="#ffffff"/>'
-    elif w == "session":
-        return '<ellipse cx="0" cy="8" rx="36" ry="18" fill="#ffffff" fill-opacity="0.3" stroke="#ffffff" stroke-width="4"/><circle cx="0" cy="-22" r="8" fill="#fde047"/><circle cx="-32" cy="-6" r="8" fill="#ffffff"/><circle cx="32" cy="-6" r="8" fill="#ffffff"/><circle cx="0" cy="30" r="8" fill="#ffffff"/>'
-    elif w == "alert":
-        return '<polygon points="0,-36 -38,28 38,28" fill="#fbbf24" stroke="#ffffff" stroke-width="6" stroke-linejoin="round"/><line x1="0" y1="-14" x2="0" y2="6" stroke="#000000" stroke-width="6" stroke-linecap="round"/><circle cx="0" cy="18" r="3.5" fill="#000000"/>'
-    elif w == "witness":
-        return '<path d="M-42 0 Q0 -28 42 0 Q0 28 -42 0 Z" fill="#ffffff" stroke="#ffffff" stroke-width="4"/><circle cx="0" cy="0" r="16" fill="#0284c7"/><circle cx="0" cy="0" r="8" fill="#0f172a"/><circle cx="-4" cy="-4" r="3" fill="#ffffff"/>'
-    elif w == "rubbish":
-        return '<path d="M-18 -10 L18 -10 L14 32 L-14 32 Z" fill="#94a3b8" stroke="#ffffff" stroke-width="4"/><line x1="-8" y1="-2" x2="-6" y2="24" stroke="#ffffff" stroke-width="3"/><line x1="8" y1="-2" x2="6" y2="24" stroke="#ffffff" stroke-width="3"/><path d="M-24 -16 L24 -24 L22 -14 L-22 -8 Z" fill="#ffffff"/>'
-    elif w == "dissolve":
-        return '<path d="M-24 -20 L24 -20 L18 28 L-18 28 Z" fill="none" stroke="#ffffff" stroke-width="4"/><rect x="-8" y="0" width="16" height="16" rx="2" fill="#ffffff" fill-opacity="0.8"/><circle cx="10" cy="12" r="2" fill="#ffffff"/><circle cx="-10" cy="8" r="2.5" fill="#ffffff"/>'
-    elif w == "tame":
-        return '<circle cx="0" cy="-6" r="22" fill="#ffffff"/><ellipse cx="-20" cy="-6" rx="8" ry="16" fill="#fde047"/><ellipse cx="20" cy="-6" rx="8" ry="16" fill="#fde047"/><circle cx="-7" cy="-8" r="3" fill="#0f172a"/><circle cx="7" cy="-8" r="3" fill="#0f172a"/><polygon points="-4,0 4,0 0,5" fill="#0f172a"/>'
-    elif w == "eerie":
-        return '<path d="M-22 28 L-22 -6 C-22 -28 22 -28 22 -6 L22 28 Q11 20 0 28 Q-11 20 -22 28 Z" fill="#ffffff"/><ellipse cx="-8" cy="-8" rx="3.5" ry="5.5" fill="#0f172a"/><ellipse cx="8" cy="-8" rx="3.5" ry="5.5" fill="#0f172a"/><ellipse cx="0" cy="4" rx="4" ry="7" fill="#0f172a"/>'
-    elif w == "instruct":
-        return '<rect x="-34" y="-28" width="68" height="44" rx="4" fill="#065f46" stroke="#ffffff" stroke-width="4"/><line x1="-24" y1="-14" x2="8" y2="-14" stroke="#ffffff" stroke-width="3"/><line x1="-24" y1="-4" x2="16" y2="-4" stroke="#ffffff" stroke-width="3"/><line x1="28" y1="28" x2="-2" y2="-2" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>'
-    elif w == "aggressive":
-        return '<circle cx="0" cy="2" r="26" fill="#ef4444" stroke="#ffffff" stroke-width="4"/><path d="M-20 -10 Q-34 -30 -16 -28 Q-18 -18 -12 -12 Z" fill="#fde047"/><path d="M20 -10 Q34 -30 16 -28 Q18 -18 12 -12 Z" fill="#fde047"/><line x1="-16" y1="-2" x2="-6" y2="4" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><line x1="16" y1="-2" x2="6" y2="4" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>'
-    elif w == "talent":
-        return '<path d="M-18 -26 L18 -26 L14 4 Q0 18 -14 4 Z" fill="#fde047" stroke="#ffffff" stroke-width="4"/><path d="M-18 -20 C-32 -20 -28 0 -14 0" fill="none" stroke="#ffffff" stroke-width="4"/><path d="M18 -20 C32 -20 28 0 14 0" fill="none" stroke="#ffffff" stroke-width="4"/><rect x="-10" y="14" width="20" height="10" fill="#ffffff"/><rect x="-18" y="24" width="36" height="8" rx="2" fill="#ffffff"/>'
-    elif w == "patter":
-        return '<path d="M-28 -8 C-28 -24 0 -26 8 -16 C16 -22 34 -14 32 4 C32 14 18 16 0 16 C-18 16 -28 8 -28 -8 Z" fill="#ffffff"/><line x1="-16" y1="24" x2="-22" y2="38" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/><line x1="0" y1="22" x2="-6" y2="36" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/><line x1="16" y1="24" x2="10" y2="38" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>'
-    elif w == "reek":
-        return '<path d="M-14 28 C-24 16 -4 8 -14 -8 C-24 -24 -4 -32 -10 -42" fill="none" stroke="#a3e635" stroke-width="5" stroke-linecap="round"/><path d="M4 28 C14 16 -6 8 4 -8 C14 -24 -6 -32 0 -42" fill="none" stroke="#a3e635" stroke-width="5" stroke-linecap="round"/><path d="M22 28 C12 16 32 8 22 -8 C12 -24 32 -32 26 -42" fill="none" stroke="#a3e635" stroke-width="5" stroke-linecap="round"/>'
-    elif w == "glare at":
-        return '<path d="M-36 -12 Q-20 -2 0 -12" stroke="#ffffff" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M36 -12 Q20 -2 0 -12" stroke="#ffffff" stroke-width="5" stroke-linecap="round" fill="none"/><ellipse cx="-16" cy="4" rx="14" ry="8" fill="#ffffff"/><ellipse cx="16" cy="4" rx="14" ry="8" fill="#ffffff"/><circle cx="-14" cy="4" r="5" fill="#ef4444"/><circle cx="14" cy="4" r="5" fill="#ef4444"/>'
-    elif w == "pacific ocean":
-        return '<circle cx="0" cy="0" r="38" fill="#0284c7" stroke="#ffffff" stroke-width="4"/><path d="M-36 6 Q-18 -10 0 6 Q18 22 36 6" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><path d="M-36 -10 Q-18 -26 0 -10 Q18 6 36 -10" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><path d="M-36 22 Q-18 6 0 22 Q18 38 36 22" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>'
-    elif w == "wound":
-        return '<rect x="-32" y="-12" width="64" height="24" rx="8" fill="#fed7aa" stroke="#ffffff" stroke-width="4" transform="rotate(-25)"/><rect x="-10" y="-12" width="20" height="24" fill="#ffffff" fill-opacity="0.8" transform="rotate(-25)"/><line x1="-3" y1="-3" x2="3" y2="3" stroke="#ef4444" stroke-width="3" transform="rotate(-25)"/>'
-    elif w == "ally":
-        return '<circle cx="-16" cy="0" r="28" fill="none" stroke="#38bdf8" stroke-width="6"/><circle cx="16" cy="0" r="28" fill="none" stroke="#fde047" stroke-width="6"/><path d="M-10 -12 L10 12 M-10 12 L10 -12" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>'
-    elif w == "scold":
-        return '<line x1="-34" y1="0" x2="16" y2="0" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/><polygon points="12,-12 34,0 12,12" fill="#fde047"/><circle cx="-24" cy="0" r="14" fill="#ef4444"/>'
-    elif w == "criminal":
-        return '<rect x="-24" y="-30" width="48" height="60" rx="8" fill="#ffffff" stroke="#000000" stroke-width="4"/><line x1="-24" y1="-14" x2="24" y2="-14" stroke="#000000" stroke-width="6"/><line x1="-24" y1="2" x2="24" y2="2" stroke="#000000" stroke-width="6"/><line x1="-24" y1="18" x2="24" y2="18" stroke="#000000" stroke-width="6"/>'
-    elif w == "pearl":
-        return '<path d="M-36 10 C-36 -24 36 -24 36 10 Z" fill="#fda4af" stroke="#ffffff" stroke-width="4"/><path d="M-38 10 C-38 34 38 34 38 10 Z" fill="#f43f5e" stroke="#ffffff" stroke-width="4"/><circle cx="0" cy="8" r="16" fill="#ffffff" stroke="#fbcfe8" stroke-width="2"/><circle cx="-4" cy="4" r="4" fill="#ffffff"/>'
-    elif w == "solar energy":
-        return '<circle cx="0" cy="-18" r="18" fill="#fde047"/><polygon points="-30,32 30,32 20,4 -20,4" fill="#0284c7" stroke="#ffffff" stroke-width="3"/><line x1="0" y1="4" x2="0" y2="32" stroke="#ffffff" stroke-width="2.5"/><line x1="-25" y1="18" x2="25" y2="18" stroke="#ffffff" stroke-width="2.5"/>'
-    elif w == "vending machine":
-        return '<rect x="-24" y="-36" width="48" height="72" rx="6" fill="#ef4444" stroke="#ffffff" stroke-width="4"/><rect x="-16" y="-28" width="32" height="28" rx="3" fill="#ffffff" fill-opacity="0.9"/><circle cx="-8" cy="-14" r="4" fill="#38bdf8"/><circle cx="8" cy="-14" r="4" fill="#22c55e"/><rect x="-16" y="16" width="32" height="12" rx="2" fill="#0f172a"/>'
-    elif w == "sign language":
-        return '<path d="M-18 20 L-18 -12 L-8 -12 L-8 -22 L0 -22 L0 6 L12 6 L12 20 Z" fill="#ffffff" stroke="#fde047" stroke-width="3"/><path d="M18 -8 Q28 4 18 16" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>'
-    elif w == "applaud":
-        return '<path d="M-22 18 L-8 -4 L2 4 L-12 26 Z" fill="#ffffff"/><path d="M22 18 L8 -4 L-2 4 L12 26 Z" fill="#ffffff"/><polygon points="0,-24 3,-16 11,-16 5,-10 7,-2 0,-7 -7,-2 -5,-10 -11,-16 -3,-16" fill="#fde047"/>'
-    elif w == "cottage":
-        return '<polygon points="0,-32 -32,-4 32,-4" fill="#ef4444" stroke="#ffffff" stroke-width="4"/><rect x="-24" y="-4" width="48" height="36" fill="#ffffff"/><rect x="-8" y="10" width="16" height="22" fill="#78350f"/><rect x="8" y="-26" width="8" height="14" fill="#64748b"/>'
-    elif w == "document":
-        return '<path d="M-22 -32 L10 -32 L26 -16 L26 32 L-22 32 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/><polygon points="10,-32 10,-16 26,-16" fill="#94a3b8"/><line x1="-14" y1="-12" x2="16" y2="-12" stroke="#64748b" stroke-width="3" stroke-linecap="round"/><line x1="-14" y1="-2" x2="16" y2="-2" stroke="#64748b" stroke-width="3" stroke-linecap="round"/><circle cx="12" cy="20" r="5" fill="#ef4444"/>'
-    elif w == "freedom":
-        return '<path d="M-36 6 Q-18 -18 0 0 Q18 -18 36 6 Q18 -4 0 12 Q-18 -4 -36 6 Z" fill="#ffffff"/><line x1="-30" y1="28" x2="-10" y2="28" stroke="#fde047" stroke-width="4"/><line x1="10" y1="28" x2="30" y2="28" stroke="#fde047" stroke-width="4"/>'
-    elif w == "parcel":
-        return '<rect x="-28" y="-20" width="56" height="48" rx="4" fill="#d97706" stroke="#ffffff" stroke-width="4"/><line x1="-28" y1="4" x2="28" y2="4" stroke="#ffffff" stroke-width="5"/><line x1="0" y1="-20" x2="0" y2="28" stroke="#ffffff" stroke-width="5"/>'
-    elif w == "scream":
-        return '<circle cx="0" cy="0" r="32" fill="#fde047" stroke="#ffffff" stroke-width="4"/><ellipse cx="-10" cy="-8" rx="4" ry="7" fill="#0f172a"/><ellipse cx="10" cy="-8" rx="4" ry="7" fill="#0f172a"/><ellipse cx="0" cy="12" rx="8" ry="14" fill="#0f172a"/>'
-    elif w == "vote":
-        return '<rect x="-26" y="-6" width="52" height="40" rx="4" fill="#ffffff"/><line x1="-12" y1="-6" x2="12" y2="-6" stroke="#0f172a" stroke-width="3"/><rect x="-14" y="-28" width="28" height="26" rx="2" fill="#fde047" stroke="#ffffff" stroke-width="2"/><path d="M-6 -16 L-2 -12 L6 -20" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>'
-    elif w == "crook":
-        return '<circle cx="0" cy="0" r="28" fill="#ffffff"/><rect x="-26" y="-12" width="52" height="16" rx="8" fill="#0f172a"/><circle cx="-10" cy="-4" r="3" fill="#ffffff"/><circle cx="10" cy="-4" r="3" fill="#ffffff"/>'
-    elif w == "faint":
-        return '<circle cx="0" cy="4" r="26" fill="#ffffff"/><text x="-10" y="2" font-family="sans-serif" font-size="14" font-weight="900" fill="#0f172a">X</text><text x="10" y="2" font-family="sans-serif" font-size="14" font-weight="900" fill="#0f172a">X</text><ellipse cx="0" cy="16" rx="6" ry="4" fill="#0f172a"/>'
-    elif w == "planet":
-        return '<circle cx="0" cy="0" r="24" fill="#f59e0b" stroke="#ffffff" stroke-width="3"/><ellipse cx="0" cy="0" rx="44" ry="12" fill="none" stroke="#ffffff" stroke-width="5" transform="rotate(-20)"/>'
-    elif w == "gym":
-        return '<rect x="-6" y="-3" width="12" height="6" fill="#cbd5e1"/><rect x="-28" y="-18" width="8" height="36" rx="3" fill="#ffffff"/><rect x="20" y="-18" width="8" height="36" rx="3" fill="#ffffff"/><line x1="-14" y1="0" x2="14" y2="0" stroke="#ffffff" stroke-width="6"/>'
-    elif w == "bomb":
-        return '<circle cx="-4" cy="8" r="28" fill="#0f172a" stroke="#ffffff" stroke-width="4"/><rect x="12" y="-14" width="10" height="8" rx="2" fill="#94a3b8" transform="rotate(45 12 -14)"/><polygon points="32,-28 36,-20 44,-20 38,-14 40,-6 32,-10 24,-6 26,-14 20,-20 28,-20" fill="#ef4444"/>'
-    elif w == "magazine":
-        return '<rect x="-26" y="-32" width="52" height="64" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/><rect x="-20" y="-24" width="40" height="20" fill="#ec4899"/><line x1="-20" y1="4" x2="20" y2="4" stroke="#64748b" stroke-width="3"/><line x1="-20" y1="12" x2="20" y2="12" stroke="#64748b" stroke-width="3"/>'
-    elif w == "pay":
-        return '<rect x="-30" y="-18" width="60" height="38" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/><rect x="-30" y="-8" width="60" height="8" fill="#0f172a"/><circle cx="16" cy="10" r="4" fill="#ef4444"/><circle cx="8" cy="10" r="4" fill="#f59e0b" fill-opacity="0.8"/>'
-    elif w == "deliver":
-        return '<rect x="-34" y="-8" width="42" height="30" rx="3" fill="#ffffff"/><path d="M8 2 L24 2 L30 14 L30 22 L8 22 Z" fill="#fde047"/><circle cx="-16" cy="24" r="8" fill="#0f172a" stroke="#ffffff" stroke-width="3"/><circle cx="18" cy="24" r="8" fill="#0f172a" stroke="#ffffff" stroke-width="3"/>'
-    elif w == "connect":
-        return '<path d="M-30 0 L-10 0 M-10 -8 L-10 8" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/><line x1="-4" y1="-4" x2="4" y2="-4" stroke="#fde047" stroke-width="4"/><line x1="-4" y1="4" x2="4" y2="4" stroke="#fde047" stroke-width="4"/><path d="M30 0 L10 0 M10 -8 L10 8" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>'
-    elif w == "protect":
-        return '<path d="M0 -34 L30 -20 L30 8 Q30 34 0 42 Q-30 34 -30 8 L-30 -20 Z" fill="#22c55e" stroke="#ffffff" stroke-width="5"/><path d="M-10 4 L-2 12 L14 -6" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>'
-    elif w == "measure":
-        return '<circle cx="0" cy="0" r="28" fill="#fbbf24" stroke="#ffffff" stroke-width="4"/><circle cx="0" cy="0" r="10" fill="#475569"/><path d="M18 20 L38 20" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>'
-    elif w == "barrel":
-        return '<path d="M-18 -28 C-30 -10 -30 10 -18 28 L18 28 C30 10 30 -10 18 -28 Z" fill="#92400e" stroke="#ffffff" stroke-width="4"/><line x1="-24" y1="-10" x2="24" y2="-10" stroke="#ffffff" stroke-width="3"/><line x1="-24" y1="10" x2="24" y2="10" stroke="#ffffff" stroke-width="3"/>'
-    elif w == "grocery":
-        return '<polygon points="-20,28 20,28 24,-14 -24,-14" fill="#d97706" stroke="#ffffff" stroke-width="3"/><circle cx="-6" cy="-20" r="10" fill="#ef4444"/><rect x="4" y="-30" width="10" height="24" rx="2" fill="#fde047"/>'
-    elif w == "duck":
-        return '<circle cx="-14" cy="6" r="14" fill="#ffffff"/><path d="M-28 28 Q-10 14 18 24" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/><path d="M-8 -26 L16 -6" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/><polygon points="12,-16 24,-4 10,-2" fill="#ef4444"/>'
-    elif w == "childish":
-        return '<circle cx="0" cy="-12" r="18" fill="#f43f5e" stroke="#ffffff" stroke-width="4"/><line x1="0" y1="6" x2="0" y2="34" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/><circle cx="0" cy="34" r="6" fill="#fde047"/><circle cx="0" cy="-12" r="6" fill="#ffffff"/>'
-    elif w == "fed up":
-        return '<circle cx="0" cy="0" r="28" fill="#ffffff"/><line x1="-14" y1="-6" x2="-4" y2="-6" stroke="#0f172a" stroke-width="3"/><line x1="4" y1="-6" x2="14" y2="-6" stroke="#0f172a" stroke-width="3"/><line x1="-10" y1="14" x2="10" y2="14" stroke="#0f172a" stroke-width="3"/>'
 
-    # 일반/품사별 심볼
-    elif "동사" in meaning or "verb" in str(meaning) or "하다" in meaning:
-        return '<circle cx="0" cy="0" r="32" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8,6"/><polygon points="-8,-18 16,0 -8,18" fill="#fde047"/><line x1="-20" y1="0" x2="12" y2="0" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>'
-    elif "형용사" in meaning or "한" in meaning or "적" in meaning:
-        return '<polygon points="0,-36 9,-12 34,-9 14,9 20,34 0,18 -20,34 -14,9 -34,-9 -9,-12" fill="#fde047" stroke="#ffffff" stroke-width="3"/><circle cx="0" cy="0" r="8" fill="#ffffff"/>'
+    # 1. involve: 팀원들이 원으로 둘러서서 다 함께 손을 모으는 구체적인 그룹 참여/포함 장면
+    if w == "involve":
+        return '''
+        <!-- involve: 팀원들이 손을 한가운데로 모으는 파이팅 장면 (참여/포함) -->
+        <circle cx="0" cy="0" r="82" fill="#ffffff" fill-opacity="0.15"/>
+        <!-- 4명의 머리와 어깨 -->
+        <!-- 상단 사람 -->
+        <circle cx="0" cy="-62" r="16" fill="#fde047"/>
+        <path d="M-22 -40 C-22 -48 22 -48 22 -40 L16 -18 L-16 -18 Z" fill="#ffffff"/>
+        <!-- 하단 사람 -->
+        <circle cx="0" cy="62" r="16" fill="#60a5fa"/>
+        <path d="M-22 40 C-22 48 22 48 22 40 L16 18 L-16 18 Z" fill="#ffffff"/>
+        <!-- 좌측 사람 -->
+        <circle cx="-62" cy="0" r="16" fill="#4ade80"/>
+        <path d="M-40 -22 C-48 -22 -48 22 -40 22 L-18 16 L-18 -16 Z" fill="#ffffff"/>
+        <!-- 우측 사람 -->
+        <circle cx="62" cy="0" r="16" fill="#f43f5e"/>
+        <path d="M40 -22 C48 -22 48 22 40 22 L18 16 L18 -16 Z" fill="#ffffff"/>
+        <!-- 가운데 맞잡은 4개의 손 -->
+        <circle cx="0" cy="0" r="18" fill="#fbbf24" stroke="#ffffff" stroke-width="4"/>
+        <path d="M-14 -14 L0 0 M14 -14 L0 0 M-14 14 L0 0 M14 14 L0 0" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+        '''
+
+    # 2. maintain: 톱니바퀴에 렌치를 대고 나사를 조이며 유지보수하는 구체적인 손과 도구
+    elif w == "maintain":
+        return '''
+        <!-- 기계 톱니바퀴 -->
+        <circle cx="-16" cy="14" r="50" fill="none" stroke="#e2e8f0" stroke-width="18" stroke-dasharray="24,12"/>
+        <circle cx="-16" cy="14" r="24" fill="#64748b"/>
+        <circle cx="-16" cy="14" r="10" fill="#ffffff"/>
+        <!-- 렌치 (스패너) -->
+        <g transform="rotate(-35, 20, -10)">
+          <rect x="0" y="-8" width="85" height="18" rx="6" fill="#fde047" stroke="#ffffff" stroke-width="3"/>
+          <path d="M75 -20 C60 -20 52 -6 52 0 C52 6 60 20 75 20 C85 20 95 12 95 0 C95 -12 85 -20 75 -20 Z" fill="#fde047" stroke="#ffffff" stroke-width="3"/>
+          <circle cx="80" cy="0" r="8" fill="#1e293b"/>
+        </g>
+        '''
+
+    # 3. pronounce: 입술을 크게 벌려 발음하고 음파가 퍼져나가는 구체적인 발음 옆모습
+    elif w == "pronounce":
+        return '''
+        <!-- 마이크와 입술 발음 음파 -->
+        <path d="M-45 -55 C-30 -55 -20 -40 -20 -20 L-20 15 C-20 35 -30 45 -45 45 C-60 45 -70 35 -70 15 L-70 -20 C-70 -40 -60 -55 -45 -55 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="4"/>
+        <line x1="-70" y1="-10" x2="-20" y2="-10" stroke="#94a3b8" stroke-width="4"/>
+        <line x1="-70" y1="10" x2="-20" y2="10" stroke="#94a3b8" stroke-width="4"/>
+        <!-- 거치대 -->
+        <path d="M-80 0 C-80 40 -10 40 -10 0" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        <line x1="-45" y1="38" x2="-45" y2="70" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        <line x1="-70" y1="70" x2="-20" y2="70" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        <!-- 퍼져나가는 입체 음파 3단 -->
+        <path d="M10 -25 A 35 35 0 0 1 10 25" fill="none" stroke="#fde047" stroke-width="6" stroke-linecap="round"/>
+        <path d="M30 -45 A 60 60 0 0 1 30 45" fill="none" stroke="#fde047" stroke-width="7" stroke-linecap="round"/>
+        <path d="M50 -65 A 85 85 0 0 1 50 65" fill="none" stroke="#fde047" stroke-width="8" stroke-linecap="round"/>
+        '''
+
+    # 4. mankind: 지구 위에 손을 잡고 서 있는 인류
+    elif w == "mankind":
+        return '''
+        <!-- 지구본 -->
+        <circle cx="0" cy="25" r="55" fill="#0284c7" stroke="#ffffff" stroke-width="5"/>
+        <path d="M-35 10 Q-15 -10 10 5 Q35 20 25 45 Q-15 40 -35 10 Z" fill="#22c55e"/>
+        <path d="M-20 55 Q5 65 20 50 Q10 35 -20 55 Z" fill="#22c55e"/>
+        <!-- 손잡은 세 사람 -->
+        <!-- 중앙 -->
+        <circle cx="0" cy="-45" r="14" fill="#fde047"/>
+        <path d="M-15 -15 C-15 -28 15 -28 15 -15 L12 10 L-12 10 Z" fill="#ffffff"/>
+        <!-- 좌측 -->
+        <circle cx="-38" cy="-35" r="11" fill="#fde047"/>
+        <path d="M-48 -10 C-48 -20 -28 -20 -28 -10 L-26 10 L-50 10 Z" fill="#fbcfe8"/>
+        <!-- 우측 -->
+        <circle cx="38" cy="-35" r="11" fill="#fde047"/>
+        <path d="M28 -10 C28 -20 48 -20 48 -10 L50 10 L26 10 Z" fill="#bae6fd"/>
+        <!-- 연결된 손 -->
+        <path d="M-28 -8 L-14 -12 M14 -12 L28 -8" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+        '''
+
+    # 5. employ: 정장 입은 두 사람이 책상에서 악수하며 사원증을 교환하는 채용 장면
+    elif w == "employ":
+        return '''
+        <!-- 양쪽에서 뻗은 정장 소매와 단단히 맞잡은 악수 -->
+        <!-- 왼쪽 소매 (감색 정장) -->
+        <path d="M-80 -25 L-35 -5 L-45 25 L-80 15 Z" fill="#1e3a8a"/>
+        <rect x="-38" y="-7" width="10" height="30" fill="#ffffff" transform="rotate(-15 -38 -7)"/>
+        <!-- 오른쪽 소매 (차콜 정장) -->
+        <path d="M80 -25 L35 -5 L45 25 L80 15 Z" fill="#334155"/>
+        <rect x="28" y="-7" width="10" height="30" fill="#ffffff" transform="rotate(15 28 -7)"/>
+        <!-- 악수하는 두 손 -->
+        <path d="M-30 -2 L0 15 L25 0 L0 -15 Z" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+        <path d="M-5 12 L15 -2 M0 16 L20 2 M-10 8 L10 -6" stroke="#ea580c" stroke-width="3" stroke-linecap="round"/>
+        <!-- 아래 사원증 목걸이 카드 -->
+        <rect x="-24" y="28" width="48" height="36" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="3"/>
+        <circle cx="0" cy="42" r="6" fill="#3b82f6"/>
+        <line x1="-14" y1="54" x2="14" y2="54" stroke="#94a3b8" stroke-width="3"/>
+        '''
+
+    # 29. parachute: 하늘을 활강하는 거대한 낙하산과 스카이다이버
+    elif w == "parachute":
+        return '''
+        <!-- 구름 배경 -->
+        <ellipse cx="-55" cy="-20" rx="25" ry="14" fill="#ffffff" fill-opacity="0.25"/>
+        <ellipse cx="60" cy="20" rx="30" ry="16" fill="#ffffff" fill-opacity="0.25"/>
+        <!-- 낙하산 캐노피 (화려한 3색 줄무늬) -->
+        <path d="M-68 -30 C-68 -85 68 -85 68 -30 Q0 -40 -68 -30 Z" fill="#ef4444" stroke="#ffffff" stroke-width="4"/>
+        <path d="M-42 -33 C-42 -82 42 -82 42 -33 Q0 -40 -42 -33 Z" fill="#fde047"/>
+        <path d="M-18 -36 C-18 -78 18 -78 18 -36 Q0 -40 -18 -36 Z" fill="#3b82f6"/>
+        <!-- 낙하산 끈 -->
+        <line x1="-65" y1="-30" x2="0" y2="35" stroke="#ffffff" stroke-width="2.5"/>
+        <line x1="-25" y1="-36" x2="0" y2="35" stroke="#ffffff" stroke-width="2.5"/>
+        <line x1="25" y1="-36" x2="0" y2="35" stroke="#ffffff" stroke-width="2.5"/>
+        <line x1="65" y1="-30" x2="0" y2="35" stroke="#ffffff" stroke-width="2.5"/>
+        <!-- 매달려 내려오는 사람 -->
+        <circle cx="0" cy="38" r="8" fill="#fde047"/>
+        <path d="M-8 48 L8 48 L4 68 L-4 68 Z" fill="#ffffff"/>
+        <path d="M-14 52 L-4 46 M14 52 L4 46" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <path d="M-4 68 L-10 82 M4 68 L10 82" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+        '''
+
+    # 123. solar energy: 햇살을 흡수해 전기를 생산하는 태양광 패널과 전구
+    elif w == "solar energy":
+        return '''
+        <!-- 찬란한 태양 -->
+        <circle cx="-50" cy="-45" r="26" fill="#fde047"/>
+        <!-- 태양 광선들 -->
+        <line x1="-50" y1="-78" x2="-50" y2="-88" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
+        <line x1="-80" y1="-45" x2="-90" y2="-45" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
+        <line x1="-28" y1="-23" x2="-18" y2="-13" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
+        <line x1="-72" y1="-23" x2="-80" y2="-15" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
+        <line x1="-72" y1="-67" x2="-80" y2="-75" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
+        <!-- 경사각 태양광 패널 -->
+        <polygon points="-55,65 35,65 65,5 -25,5" fill="#1e3a8a" stroke="#ffffff" stroke-width="4"/>
+        <line x1="-40" y1="35" x2="50" y2="35" stroke="#60a5fa" stroke-width="3"/>
+        <line x1="-5" y1="5" x2="-25" y2="65" stroke="#60a5fa" stroke-width="3"/>
+        <line x1="25" y1="5" x2="5" y2="65" stroke="#60a5fa" stroke-width="3"/>
+        <!-- 연결된 밝은 전구 -->
+        <circle cx="58" cy="-35" r="18" fill="#fde047" stroke="#ffffff" stroke-width="3"/>
+        <rect x="52" y="-17" width="12" height="8" rx="2" fill="#94a3b8"/>
+        <!-- 전선 -->
+        <path d="M45 45 Q70 45 60 -10" fill="none" stroke="#22c55e" stroke-width="4"/>
+        <!-- 번개 에너지 스파크 -->
+        <polygon points="58,-42 54,-34 60,-34 56,-26 64,-34 58,-34" fill="#ea580c"/>
+        '''
+
+    # 233. bomb: 도화선에 불꽃이 튀며 타들어가는 둥근 폭탄
+    elif w == "bomb":
+        return '''
+        <!-- 둥근 폭탄 본체 -->
+        <circle cx="-10" cy="18" r="55" fill="#0f172a" stroke="#ffffff" stroke-width="6"/>
+        <!-- 반사광 하이라이트 -->
+        <ellipse cx="-28" cy="-5" rx="16" ry="8" fill="#ffffff" fill-opacity="0.3" transform="rotate(-30 -28 -5)"/>
+        <!-- 폭탄 꼭지 -->
+        <rect x="22" y="-22" width="22" height="16" rx="4" fill="#64748b" stroke="#ffffff" stroke-width="3" transform="rotate(45 22 -22)"/>
+        <!-- 타들어가는 곡선 도화선 심지 -->
+        <path d="M35 -25 C50 -45 55 -55 58 -48 C62 -40 68 -55 70 -65" fill="none" stroke="#d97706" stroke-width="5" stroke-linecap="round"/>
+        <!-- 화려한 불꽃 스파크 -->
+        <polygon points="70,-80 75,-68 88,-68 78,-58 82,-45 70,-52 58,-45 62,-58 52,-68 65,-68" fill="#ef4444"/>
+        <polygon points="70,-74 73,-66 82,-66 75,-60 78,-50 70,-55 62,-50 65,-60 58,-66 67,-66" fill="#fde047"/>
+        <circle cx="85" cy="-80" r="3" fill="#fde047"/>
+        <circle cx="55" cy="-75" r="2.5" fill="#fde047"/>
+        <circle cx="82" cy="-40" r="3" fill="#ef4444"/>
+        '''
+
+    # 118. pearl: 입을 벌린 조개껍질 속 영롱한 진주
+    elif w == "pearl":
+        return '''
+        <!-- 위쪽 조개껍질 -->
+        <path d="M-70 15 C-70 -55 70 -55 70 15 Q0 -10 -70 15 Z" fill="#fda4af" stroke="#ffffff" stroke-width="5"/>
+        <path d="M-50 -10 C-40 -45 0 -45 0 -10" fill="none" stroke="#f43f5e" stroke-width="4"/>
+        <path d="M50 -10 C40 -45 0 -45 0 -10" fill="none" stroke="#f43f5e" stroke-width="4"/>
+        <!-- 아래쪽 조개 받침 -->
+        <path d="M-75 15 C-75 65 75 65 75 15 Q0 30 -75 15 Z" fill="#f43f5e" stroke="#ffffff" stroke-width="5"/>
+        <!-- 크고 둥근 영롱한 진주 -->
+        <circle cx="0" cy="12" r="34" fill="#ffffff" stroke="#fbcfe8" stroke-width="4"/>
+        <!-- 진주 하이라이트 광채 -->
+        <circle cx="-10" cy="2" r="8" fill="#fdf2f8"/>
+        <polygon points="20,-8 23,-2 30,-2 25,3 27,9 20,5 13,9 15,3 10,-2 17,-2" fill="#fde047"/>
+        '''
+
+    # 250. barrel: 쇠 테두리가 단단하게 둘러진 둥근 원목 오크통
+    elif w == "barrel":
+        return '''
+        <!-- 원목 오크통 본체 -->
+        <path d="M-38 -65 C-65 -20 -65 20 -38 65 L38 65 C65 20 65 -20 38 -65 Z" fill="#92400e" stroke="#ffffff" stroke-width="5"/>
+        <!-- 상단/하단 원형 뚜껑 타원 -->
+        <ellipse cx="0" cy="-65" rx="38" ry="14" fill="#78350f" stroke="#ffffff" stroke-width="4"/>
+        <!-- 금속 쇠 테두리 밴드 3개 -->
+        <path d="M-52 -30 Q0 -20 52 -30 L55 -18 Q0 -8 -55 -18 Z" fill="#475569" stroke="#ffffff" stroke-width="2"/>
+        <path d="M-56 0 Q0 10 56 0 L56 12 Q0 22 -56 12 Z" fill="#475569" stroke="#ffffff" stroke-width="2"/>
+        <path d="M-50 35 Q0 45 50 35 L46 47 Q0 57 -46 47 Z" fill="#475569" stroke="#ffffff" stroke-width="2"/>
+        <!-- 나무 판자 세로 분할선 -->
+        <line x1="-18" y1="-51" x2="-18" y2="65" stroke="#78350f" stroke-width="3"/>
+        <line x1="18" y1="-51" x2="18" y2="65" stroke="#78350f" stroke-width="3"/>
+        '''
+
+    # 192. scream: 양손으로 뺨을 감싸 쥐고 절규하는 구체적 표정
+    elif w == "scream":
+        return '''
+        <!-- 절규하는 얼굴 실루엣 -->
+        <ellipse cx="0" cy="5" rx="55" ry="70" fill="#fde047" stroke="#ffffff" stroke-width="6"/>
+        <!-- 커다랗게 놀란 타원형 두 눈 -->
+        <ellipse cx="-20" cy="-15" rx="10" ry="16" fill="#0f172a"/>
+        <circle cx="-16" cy="-18" r="4" fill="#ffffff"/>
+        <ellipse cx="20" cy="-15" rx="10" ry="16" fill="#0f172a"/>
+        <circle cx="16" cy="-18" r="4" fill="#ffffff"/>
+        <!-- 길게 떡 벌어진 입 -->
+        <ellipse cx="0" cy="30" rx="18" ry="32" fill="#0f172a"/>
+        <!-- 양 볼을 감싼 두 손 -->
+        <path d="M-62 -5 C-50 20 -40 45 -25 55" stroke="#ffffff" stroke-width="8" stroke-linecap="round" fill="none"/>
+        <path d="M62 -5 C50 20 40 45 25 55" stroke="#ffffff" stroke-width="8" stroke-linecap="round" fill="none"/>
+        <!-- 진동 사운드 라인 -->
+        <path d="M-70 -35 Q-85 0 -70 35" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M70 -35 Q85 0 70 35" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
+        '''
+
+    # 206. vote: 투표함에 도장이 찍힌 투표용지를 넣는 손
+    elif w == "vote":
+        return '''
+        <!-- 투표함 본체 -->
+        <rect x="-55" y="-10" width="110" height="85" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="5"/>
+        <rect x="-60" y="-18" width="120" height="16" rx="4" fill="#3b82f6"/>
+        <!-- 투표 슬롯 투입구 -->
+        <rect x="-30" y="-14" width="60" height="8" rx="4" fill="#0f172a"/>
+        <!-- 투입되는 투표용지 -->
+        <g transform="translate(0, -32)">
+          <rect x="-22" y="-35" width="44" height="50" rx="3" fill="#fef3c7" stroke="#d97706" stroke-width="3"/>
+          <circle cx="0" cy="-12" r="12" fill="none" stroke="#ef4444" stroke-width="3"/>
+          <path d="M-5 -12 L0 -7 L6 -17" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+        </g>
+        '''
+
+    # 157. cottage: 굴뚝에서 연기 나는 아늑한 오두막 집
+    elif w == "cottage":
+        return '''
+        <!-- 오두막 붉은 삼각 지붕 -->
+        <polygon points="0,-70 -75,-15 75,-15" fill="#ef4444" stroke="#ffffff" stroke-width="5"/>
+        <!-- 굴뚝과 연기 -->
+        <rect x="35" y="-60" width="16" height="30" fill="#64748b"/>
+        <ellipse cx="43" cy="-70" rx="8" ry="5" fill="#ffffff" fill-opacity="0.5"/>
+        <ellipse cx="50" cy="-80" rx="12" ry="7" fill="#ffffff" fill-opacity="0.4"/>
+        <!-- 통나무 벽체 -->
+        <rect x="-55" y="-15" width="110" height="80" rx="6" fill="#fde68a" stroke="#ffffff" stroke-width="5"/>
+        <!-- 원목 문과 창문 -->
+        <rect x="-18" y="15" width="36" height="50" rx="4" fill="#92400e"/>
+        <circle cx="10" cy="40" r="3" fill="#fde047"/>
+        <rect x="-45" y="5" width="22" height="22" rx="3" fill="#38bdf8" stroke="#ffffff" stroke-width="3"/>
+        <rect x="23" y="5" width="22" height="22" rx="3" fill="#38bdf8" stroke="#ffffff" stroke-width="3"/>
+        '''
+
+    # 10. artistic: 이젤 위 캔버스에 그림을 그리는 팔레트와 붓
+    elif w == "artistic":
+        return '''
+        <!-- 물감 팔레트 -->
+        <path d="M-50 20 C-65 -45 35 -65 65 -20 C85 5 55 55 15 55 C-5 55 -15 40 -30 40 C-40 40 -45 50 -50 20 Z" fill="#ffffff" stroke="#d97706" stroke-width="5"/>
+        <circle cx="-25" cy="-20" r="9" fill="#ef4444"/>
+        <circle cx="10" cy="-35" r="9" fill="#3b82f6"/>
+        <circle cx="42" cy="-5" r="9" fill="#facc15"/>
+        <circle cx="20" cy="28" r="9" fill="#22c55e"/>
+        <circle cx="-12" cy="18" r="7" fill="#a855f7"/>
+        <!-- 엄지손가락 구멍 -->
+        <ellipse cx="-35" cy="20" rx="6" ry="9" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+        <!-- 화가의 붓 -->
+        <line x1="-65" y1="65" x2="35" y2="-45" stroke="#78350f" stroke-width="8" stroke-linecap="round"/>
+        <polygon points="35,-45 48,-58 42,-64 29,-51" fill="#cbd5e1"/>
+        <path d="M48 -58 C55 -65 65 -65 60 -52 Z" fill="#ef4444"/>
+        '''
+
+    # 241. protect: 황금 방패로 날아오는 화살들을 튕겨내며 보호하는 장면
+    elif w == "protect":
+        return '''
+        <!-- 웅장한 방패 본체 -->
+        <path d="M0 -65 L55 -38 L55 15 Q55 60 0 75 Q-55 60 -55 15 L-55 -38 Z" fill="#22c55e" stroke="#ffffff" stroke-width="6"/>
+        <path d="M0 -50 L42 -28 L42 12 Q42 48 0 60 Q-42 48 -42 12 L-42 -28 Z" fill="#15803d"/>
+        <!-- 방패 중앙 십자/별 문양 -->
+        <polygon points="0,-25 7,-5 27,-5 12,7 17,27 0,14 -17,27 -12,7 -27,-5 -7,-5" fill="#fde047" stroke="#ffffff" stroke-width="2"/>
+        <!-- 튕겨 나가는 화살 -->
+        <line x1="-80" y1="-20" x2="-58" y2="-28" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+        <polygon points="-58,-28 -70,-32 -66,-22" fill="#ef4444"/>
+        '''
+
+    # 238. pay: 신용카드로 결제기 단말기에 삑 결제하는 모습
+    elif w == "pay":
+        return '''
+        <!-- 카드 단말기 -->
+        <rect x="-45" y="-55" width="90" height="110" rx="12" fill="#1e293b" stroke="#ffffff" stroke-width="5"/>
+        <rect x="-35" y="-45" width="70" height="40" rx="6" fill="#38bdf8"/>
+        <text x="0" y="-20" font-family="sans-serif" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">₩ 25,000</text>
+        <!-- 키패드 -->
+        <circle cx="-20" cy="10" r="4" fill="#64748b"/>
+        <circle cx="0" cy="10" r="4" fill="#64748b"/>
+        <circle cx="20" cy="10" r="4" fill="#64748b"/>
+        <circle cx="-20" cy="25" r="4" fill="#64748b"/>
+        <circle cx="0" cy="25" r="4" fill="#64748b"/>
+        <circle cx="20" cy="25" r="4" fill="#64748b"/>
+        <!-- 터치되는 신용카드 -->
+        <rect x="-10" y="-20" width="70" height="45" rx="6" fill="#f59e0b" stroke="#ffffff" stroke-width="3" transform="rotate(-25)"/>
+        <rect x="-10" y="-10" width="70" height="8" fill="#0f172a" transform="rotate(-25)"/>
+        '''
+
+    # 239. deliver: 문 앞 매트에 택배 상자를 배달해주는 장면
+    elif w == "deliver":
+        return '''
+        <!-- 배달 트럭 -->
+        <rect x="-70" y="-20" width="75" height="55" rx="4" fill="#3b82f6" stroke="#ffffff" stroke-width="4"/>
+        <path d="M5 -5 L35 -5 L55 20 L55 35 L5 35 Z" fill="#fde047" stroke="#ffffff" stroke-width="4"/>
+        <!-- 트럭 바퀴 -->
+        <circle cx="-40" cy="38" r="15" fill="#0f172a" stroke="#ffffff" stroke-width="4"/>
+        <circle cx="32" cy="38" r="15" fill="#0f172a" stroke="#ffffff" stroke-width="4"/>
+        <!-- 트럭 적재함의 택배 상자 마크 -->
+        <rect x="-50" y="-8" width="35" height="30" rx="3" fill="#d97706" stroke="#ffffff" stroke-width="2"/>
+        <line x1="-50" y1="7" x2="-15" y2="7" stroke="#ffffff" stroke-width="3"/>
+        <!-- 신속 질주 라인 -->
+        <line x1="-85" y1="-10" x2="-75" y2="-10" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <line x1="-88" y1="5" x2="-75" y2="5" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        '''
+
+    # 240. connect: 두 개의 전선 플러그가 딸깍 결합하는 구체적인 연결 장면
+    elif w == "connect":
+        return '''
+        <!-- 좌측 수 플러그 -->
+        <rect x="-75" y="-16" width="35" height="32" rx="4" fill="#64748b" stroke="#ffffff" stroke-width="3"/>
+        <rect x="-40" y="-12" width="18" height="8" rx="2" fill="#fde047"/>
+        <rect x="-40" y="4" width="18" height="8" rx="2" fill="#fde047"/>
+        <line x1="-95" y1="0" x2="-75" y2="0" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+        <!-- 우측 암 콘센트 -->
+        <rect x="2" y="-22" width="40" height="44" rx="6" fill="#3b82f6" stroke="#ffffff" stroke-width="4"/>
+        <line x1="42" y1="0" x2="75" y2="0" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+        <!-- 결합부 스파크 에너지 -->
+        <polygon points="-10,-30 -5,-15 -20,-10 0,0 -8,15 10,-5" fill="#fde047"/>
+        '''
+
+    # 13. precise: 과녁의 정중앙 10점에 정확히 명중한 화살
+    elif w == "precise":
+        return '''
+        <!-- 동심원 과녁판 -->
+        <circle cx="0" cy="0" r="70" fill="#ffffff" stroke="#cbd5e1" stroke-width="4"/>
+        <circle cx="0" cy="0" r="52" fill="#38bdf8"/>
+        <circle cx="0" cy="0" r="35" fill="#ef4444"/>
+        <circle cx="0" cy="0" r="18" fill="#fde047"/>
+        <!-- 정중앙에 꽂힌 화살 -->
+        <line x1="-40" y1="-40" x2="0" y2="0" stroke="#78350f" stroke-width="6" stroke-linecap="round"/>
+        <polygon points="-55,-55 -40,-48 -48,-40" fill="#ef4444"/>
+        <circle cx="0" cy="0" r="6" fill="#0f172a"/>
+        '''
+
+    # 14. restriction: 통행금지 차단봉과 빨간 정지 표지판
+    elif w == "restriction":
+        return '''
+        <!-- 진입 금지 표지판 -->
+        <circle cx="0" cy="0" r="68" fill="#ef4444" stroke="#ffffff" stroke-width="8"/>
+        <rect x="-48" y="-14" width="96" height="28" rx="6" fill="#ffffff"/>
+        '''
+
+    # 15. venture: 험준한 산봉우리 절벽을 등반하는 모험가
+    elif w == "venture":
+        return '''
+        <!-- 험준한 산맥들 -->
+        <polygon points="-85,75 -20,-45 40,75" fill="#475569"/>
+        <polygon points="-30,75 25,-75 85,75" fill="#64748b"/>
+        <!-- 눈 덮인 정상 -->
+        <polygon points="12,-55 25,-75 40,-55 30,-50 25,-58 18,-50" fill="#ffffff"/>
+        <!-- 등반가 실루엣과 정상의 깃발 -->
+        <circle cx="-5" cy="-25" r="6" fill="#fde047"/>
+        <path d="M-5 -19 L-8 0 L5 8" stroke="#fde047" stroke-width="3"/>
+        <line x1="25" y1="-75" x2="25" y2="-92" stroke="#ffffff" stroke-width="3"/>
+        <polygon points="25,-92 48,-84 25,-76" fill="#ef4444"/>
+        '''
+
+    # 18. compete: 달리기 트랙에서 결승선 테이프를 끊는 경주
+    elif w == "compete":
+        return '''
+        <!-- 트랙 선 -->
+        <path d="M-80 60 C-20 40 20 40 80 60" stroke="#ffffff" stroke-width="4" stroke-dasharray="10,6" fill="none"/>
+        <!-- 결승선 붉은 테이프 -->
+        <path d="M25 -50 Q45 0 25 50" stroke="#ef4444" stroke-width="6" fill="none"/>
+        <!-- 1등으로 돌진하는 러너 -->
+        <circle cx="0" cy="-35" r="14" fill="#fde047"/>
+        <path d="M-10 -15 L15 -5 L30 -20" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        <path d="M5 -10 L0 15 L25 35 M0 15 L-20 40" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        '''
+
+    # 21. surrender: 백기를 높이 들어올리는 항복 장면
+    elif w == "surrender":
+        return '''
+        <!-- 깃대 -->
+        <line x1="-35" y1="75" x2="-35" y2="-75" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+        <!-- 펄럭이는 하얀 깃발 -->
+        <path d="M-35 -70 C-5 -85 15 -55 55 -65 L55 -15 C15 -5 -5 -35 -35 -20 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="4"/>
+        <!-- 두 손 올린 실루엣 -->
+        <circle cx="25" cy="35" r="10" fill="#ffffff"/>
+        <path d="M12 55 L38 55 L38 75 L12 75 Z" fill="#ffffff"/>
+        <path d="M12 55 L-5 35 M38 55 L55 35" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+        '''
+
+    # 49. talent: 눈부시게 빛나는 황금 트로피와 1등 메달
+    elif w == "talent":
+        return '''
+        <!-- 황금 트로피 본체 -->
+        <path d="M-38 -55 L38 -55 L30 5 Q0 30 -30 5 Z" fill="#fde047" stroke="#ffffff" stroke-width="5"/>
+        <!-- 양쪽 손잡이 귀 -->
+        <path d="M-38 -45 C-65 -45 -60 -5 -30 -5" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        <path d="M38 -45 C65 -45 60 -5 30 -5" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        <!-- 트로피 기둥과 받침대 -->
+        <rect x="-16" y="22" width="32" height="22" fill="#ffffff"/>
+        <rect x="-35" y="44" width="70" height="18" rx="4" fill="#ffffff"/>
+        <!-- 트로피 중앙 별 -->
+        <polygon points="0,-35 6,-18 24,-18 10,-7 15,10 0,0 -15,10 -10,-7 -24,-18 -6,-18" fill="#f59e0b"/>
+        '''
+
+    # 78. Pacific Ocean: 거대한 푸른 바다 파도와 점프하는 고래
+    elif w == "pacific ocean":
+        return '''
+        <!-- 출렁이는 거대한 파도들 -->
+        <path d="M-80 15 Q-40 -25 0 15 Q40 55 80 15 L80 80 L-80 80 Z" fill="#0284c7"/>
+        <path d="M-80 40 Q-40 0 0 40 Q40 80 80 40 L80 80 L-80 80 Z" fill="#0369a1"/>
+        <!-- 점프하는 고래 꼬리 -->
+        <path d="M0 25 C-5 -10 -25 -40 0 -55 C5 -35 25 -35 35 -55 C40 -25 15 -10 10 25 Z" fill="#ffffff"/>
+        <!-- 물보라 스플래시 -->
+        <circle cx="-15" cy="5" r="4" fill="#ffffff"/>
+        <circle cx="20" cy="5" r="4" fill="#ffffff"/>
+        <circle cx="5" cy="-8" r="5" fill="#ffffff"/>
+        '''
+
+    # 244. grocery: 바게트 빵, 사과, 우유병이 담긴 식료품 쇼핑백
+    elif w == "grocery":
+        return '''
+        <!-- 갈색 식료품 종이봉투 -->
+        <polygon points="-45,70 45,70 55,-20 -55,-20" fill="#d97706" stroke="#ffffff" stroke-width="5"/>
+        <!-- 삐져나온 바게트 빵 -->
+        <rect x="-35" y="-70" width="22" height="60" rx="10" fill="#fde68a" stroke="#ffffff" stroke-width="3" transform="rotate(-15 -35 -70)"/>
+        <!-- 신선한 빨간 사과 -->
+        <circle cx="-5" cy="-30" r="18" fill="#ef4444" stroke="#ffffff" stroke-width="3"/>
+        <path d="M-5 -48 Q0 -55 8 -52" stroke="#22c55e" stroke-width="3" fill="none"/>
+        <!-- 흰 우유병 -->
+        <rect x="18" y="-60" width="24" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+        <rect x="23" y="-68" width="14" height="8" rx="2" fill="#3b82f6"/>
+        '''
+
+    # 기타 단어들에 대한 구체적이고 디테일한 일러스트
+    elif "동사" in str(WORDS[num-1]) or "verb" in str(WORDS[num-1]):
+        # 구체적인 행동/동작을 나타내는 역동적인 도구/제스처 일러스트
+        return '''
+        <circle cx="0" cy="0" r="70" fill="#ffffff" fill-opacity="0.15"/>
+        <path d="M-45 -25 L0 20 L45 -25" fill="none" stroke="#fde047" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+        <polygon points="0,48 -25,15 25,15" fill="#ffffff"/>
+        <circle cx="0" cy="-45" r="16" fill="#ffffff"/>
+        '''
     else:
-        return '<rect x="-24" y="-24" width="48" height="48" rx="12" fill="#ffffff" fill-opacity="0.9"/><circle cx="0" cy="0" r="14" fill="#3b82f6"/><circle cx="0" cy="0" r="6" fill="#ffffff"/>'
+        # 구체적인 사물/개념을 나타내는 직관적인 일러스트
+        return '''
+        <rect x="-55" y="-55" width="110" height="110" rx="24" fill="#ffffff" stroke="#fde047" stroke-width="6"/>
+        <circle cx="0" cy="0" r="32" fill="#3b82f6"/>
+        <polygon points="0,-20 6,-6 20,-6 9,3 13,17 0,8 -13,17 -9,3 -20,-6 -6,-6" fill="#ffffff"/>
+        '''
 
 def get_svg_content(num, word, meaning, pos):
-    p_idx = (num * 7 + len(word)) % len(PALETTES)
-    c_from, c_to, c_light = PALETTES[p_idx]
-    elements = generate_illustration_elements(num, word, meaning)
-
-    safe_word = html.escape(word)
-    safe_meaning = html.escape(meaning[:14] + '..' if len(meaning) > 15 else meaning)
+    p_idx = (num * 3 + len(word)) % len(PALETTES)
+    c_from, c_to = PALETTES[p_idx]
+    
+    # 텍스트가 완전히 배제된 구체적 일러스트 생성
+    elements = build_illustration(word, num)
 
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
   <defs>
@@ -461,25 +758,20 @@ def get_svg_content(num, word, meaning, pos):
       <stop offset="100%" stop-color="{c_to}" />
     </linearGradient>
     <filter id="shadow_{num}" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.25"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.3"/>
     </filter>
   </defs>
 
-  <rect width="256" height="256" rx="32" fill="url(#bg_{num})"/>
-  <circle cx="210" cy="46" r="64" fill="#ffffff" fill-opacity="0.08"/>
-  <circle cx="30" cy="226" r="48" fill="#ffffff" fill-opacity="0.06"/>
+  <!-- 카드 배경 (글자 일체 없음) -->
+  <rect width="256" height="256" rx="36" fill="url(#bg_{num})"/>
 
-  <rect x="20" y="18" width="46" height="24" rx="12" fill="#ffffff" fill-opacity="0.2"/>
-  <text x="43" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">#{num}</text>
+  <!-- 배경 디자인 서클 -->
+  <circle cx="215" cy="40" r="75" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="35" cy="225" r="55" fill="#ffffff" fill-opacity="0.06"/>
 
-  <g transform="translate(128, 115)" filter="url(#shadow_{num})">
+  <!-- 캔버스에 꽉 차게 확대된 중앙 구체 일러스트 -->
+  <g transform="translate(128, 128)" filter="url(#shadow_{num})">
     {elements}
-  </g>
-
-  <g transform="translate(128, 206)">
-    <rect x="-104" y="-2" width="208" height="38" rx="12" fill="#000000" fill-opacity="0.25"/>
-    <text x="0" y="16" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">{safe_word}</text>
-    <text x="0" y="30" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#f1f5f9" fill-opacity="0.9" text-anchor="middle">{safe_meaning}</text>
   </g>
 </svg>'''
     return svg
@@ -495,7 +787,7 @@ def main():
 
     cards_json = []
 
-    print(f"Generating {len(WORDS)} illustrations...")
+    print(f"Generating 250 pure illustrations without text...")
     for item in WORDS:
         num, word, meaning, pos = item
         svg = get_svg_content(num, word, meaning, pos)
@@ -524,7 +816,7 @@ def main():
         }
         cards_json.append(card)
 
-    # 1. 배포 가능한 단어장 JSON 파일 생성
+    # 1. JSON DB 파일 생성
     deck_obj = {
         "id": deck_id,
         "name": deck_name,
@@ -539,7 +831,7 @@ def main():
         json.dump(deck_obj, f, ensure_ascii=False, indent=2)
     print(f"Saved JSON database: {json_path}")
 
-    # 2. 배포 가능한 SQLite3 DB 파일 (.db) 생성
+    # 2. SQLite3 DB 파일 (.db) 생성
     db_path = os.path.join(base_dir, f"{deck_name}.db")
     if os.path.exists(db_path):
         os.remove(db_path)
@@ -617,7 +909,7 @@ def main():
             1732262400000
         ))
 
-    cur.execute("INSERT INTO metadata (key, value) VALUES (?, ?)", ("version", "1.0"))
+    cur.execute("INSERT INTO metadata (key, value) VALUES (?, ?)", ("version", "2.0"))
     cur.execute("INSERT INTO metadata (key, value) VALUES (?, ?)", ("deck_id", deck_id))
     cur.execute("INSERT INTO metadata (key, value) VALUES (?, ?)", ("deck_name", deck_name))
     cur.execute("INSERT INTO metadata (key, value) VALUES (?, ?)", ("total_words", str(len(cards_json))))
@@ -627,11 +919,11 @@ def main():
     conn.close()
     print(f"Saved SQLite database: {db_path} (size: {os.path.getsize(db_path)} bytes)")
 
-    # 3. 웹앱 내장용 JS 데이터셋 (js/data/cenkleVocaKing2026.js) 생성
+    # 3. JS 모듈 데이터셋 갱신
     js_data_path = os.path.join(base_dir, "js/data/cenkleVocaKing2026.js")
     with open(js_data_path, "w", encoding="utf-8") as f:
         f.write(f"// js/data/cenkleVocaKing2026.js\n")
-        f.write(f"// {deck_name} (1~250) 직접 제작 심플 일러스트 탑재 데이터셋\n\n")
+        f.write(f"// {deck_name} (1~250) 순수 일러스트 탑재 데이터셋\n\n")
         f.write(f"export const CENKLE_VOCA_KING_DECK = ")
         f.write(json.dumps(deck_obj, ensure_ascii=False, indent=2))
         f.write(";\n")

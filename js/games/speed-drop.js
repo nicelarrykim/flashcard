@@ -265,9 +265,14 @@ export class SpeedDropGame {
             </svg>
           </div>
 
-          <!-- 방패 아래 적힌 단어의 '뜻' (핵심) -->
-          <div class="my-auto text-center w-full px-1">
-            <p class="text-xs sm:text-sm font-black text-white leading-tight break-keep line-clamp-2 drop-shadow-md">
+          <!-- 방패 아래 적힌 단어의 '뜻' (핵심) + 그림 썸네일 -->
+          <div class="my-auto text-center w-full px-0.5 sm:px-1 flex flex-col items-center justify-center gap-1">
+            ${(typeof StorageManager !== 'undefined' && StorageManager.shouldShowPhoto(shield.wordObj)) ? `
+              <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg overflow-hidden border border-white/20 bg-black/40 flex items-center justify-center p-0.5">
+                <img src="${shield.wordObj.imageUrl}" alt="${shield.meaning}" onerror="this.parentElement.style.display='none'" class="w-full h-full object-contain">
+              </div>
+            ` : ''}
+            <p class="text-[10px] sm:text-xs font-black text-white leading-tight break-keep line-clamp-2 drop-shadow-md">
               ${shield.meaning}
             </p>
           </div>

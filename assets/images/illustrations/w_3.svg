@@ -1,28 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
   <defs>
     <linearGradient id="bg_3" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4f46e5" />
-      <stop offset="100%" stop-color="#7c3aed" />
+      <stop offset="0%" stop-color="#14b8a6" />
+      <stop offset="100%" stop-color="#0f766e" />
     </linearGradient>
     <filter id="shadow_3" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.25"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.3"/>
     </filter>
   </defs>
 
-  <rect width="256" height="256" rx="32" fill="url(#bg_3)"/>
-  <circle cx="210" cy="46" r="64" fill="#ffffff" fill-opacity="0.08"/>
-  <circle cx="30" cy="226" r="48" fill="#ffffff" fill-opacity="0.06"/>
+  <!-- 카드 배경 (글자 일체 없음) -->
+  <rect width="256" height="256" rx="36" fill="url(#bg_3)"/>
 
-  <rect x="20" y="18" width="46" height="24" rx="12" fill="#ffffff" fill-opacity="0.2"/>
-  <text x="43" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">#3</text>
+  <!-- 배경 디자인 서클 -->
+  <circle cx="215" cy="40" r="75" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="35" cy="225" r="55" fill="#ffffff" fill-opacity="0.06"/>
 
-  <g transform="translate(128, 115)" filter="url(#shadow_3)">
-    <rect x="-14" y="-28" width="28" height="42" rx="14" fill="#ffffff"/><path d="M-24 -6 C-24 16 24 16 24 -6" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><line x1="0" y1="16" x2="0" y2="34" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><line x1="-16" y1="34" x2="16" y2="34" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><path d="M34 -16 A 26 26 0 0 1 34 16" fill="none" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
-  </g>
-
-  <g transform="translate(128, 206)">
-    <rect x="-104" y="-2" width="208" height="38" rx="12" fill="#000000" fill-opacity="0.25"/>
-    <text x="0" y="16" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">pronounce</text>
-    <text x="0" y="30" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#f1f5f9" fill-opacity="0.9" text-anchor="middle">발음하다</text>
+  <!-- 캔버스에 꽉 차게 확대된 중앙 구체 일러스트 -->
+  <g transform="translate(128, 128)" filter="url(#shadow_3)">
+    
+        <!-- 마이크와 입술 발음 음파 -->
+        <path d="M-45 -55 C-30 -55 -20 -40 -20 -20 L-20 15 C-20 35 -30 45 -45 45 C-60 45 -70 35 -70 15 L-70 -20 C-70 -40 -60 -55 -45 -55 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="4"/>
+        <line x1="-70" y1="-10" x2="-20" y2="-10" stroke="#94a3b8" stroke-width="4"/>
+        <line x1="-70" y1="10" x2="-20" y2="10" stroke="#94a3b8" stroke-width="4"/>
+        <!-- 거치대 -->
+        <path d="M-80 0 C-80 40 -10 40 -10 0" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        <line x1="-45" y1="38" x2="-45" y2="70" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        <line x1="-70" y1="70" x2="-20" y2="70" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+        <!-- 퍼져나가는 입체 음파 3단 -->
+        <path d="M10 -25 A 35 35 0 0 1 10 25" fill="none" stroke="#fde047" stroke-width="6" stroke-linecap="round"/>
+        <path d="M30 -45 A 60 60 0 0 1 30 45" fill="none" stroke="#fde047" stroke-width="7" stroke-linecap="round"/>
+        <path d="M50 -65 A 85 85 0 0 1 50 65" fill="none" stroke="#fde047" stroke-width="8" stroke-linecap="round"/>
+        
   </g>
 </svg>

@@ -180,13 +180,20 @@ export class QuizGame {
         <div id="quiz-promotion-banner" class="hidden w-full mb-4 p-3 rounded-2xl text-center shadow-lg transform transition-all"></div>
 
         <!-- 문제 카드 -->
-        <div class="w-full bg-gradient-to-br from-indigo-500 via-purple-600 to-indigo-700 text-white rounded-3xl p-8 mb-6 text-center shadow-xl relative overflow-hidden">
-          <div class="text-xs uppercase tracking-widest text-indigo-200 mb-1 flex items-center justify-center gap-2">
+        <div class="w-full bg-gradient-to-br from-indigo-500 via-purple-600 to-indigo-700 text-white rounded-3xl p-6 sm:p-8 mb-6 text-center shadow-xl relative overflow-hidden flex flex-col items-center">
+          <div class="text-xs uppercase tracking-widest text-indigo-200 mb-2 flex items-center justify-center gap-2">
             ${currentWord.number ? `<span class="px-2 py-0.5 rounded-md bg-white/20 font-mono font-bold">No. ${currentWord.number}</span>` : ''}
             <span>${this.mode === 'en-to-ko' ? '다음 단어의 올바른 뜻은?' : '다음 뜻에 알맞은 영어 단어는?'}</span>
           </div>
 
-          <h3 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
+          <!-- 한국어 뜻 ➔ 영어 모드에서 뜻과 함께 그림 표시 -->
+          ${(this.mode === 'ko-to-en' && StorageManager.shouldShowPhoto(currentWord)) ? `
+            <div class="mb-3 w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden shadow-md border-2 border-white/30 bg-white/10 flex items-center justify-center p-1">
+              <img src="${currentWord.imageUrl}" alt="${currentWord.meaning}" onerror="this.parentElement.style.display='none'" class="w-full h-full object-contain">
+            </div>
+          ` : ''}
+
+          <h3 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-2">
             ${this.mode === 'en-to-ko' ? currentWord.word : currentWord.meaning}
           </h3>
 
@@ -201,19 +208,27 @@ export class QuizGame {
 
         <!-- 보기 4개 버튼 그리드 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full" id="quiz-options-container">
-          ${options.map((opt, idx) => `
-            <button data-word-id="${opt.id}" class="quiz-option-btn group text-left p-4 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-medium transition transform hover:-translate-y-0.5 active:translate-y-0 shadow-sm flex items-center justify-between">
-              <span class="flex items-center gap-3">
-                <span class="w-7 h-7 rounded-xl bg-slate-100 dark:bg-slate-700 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-950 text-slate-600 dark:text-slate-300 group-hover:text-indigo-600 text-xs font-bold flex items-center justify-center transition">
+          ${options.map((opt, idx) => {
+            const showOptPhoto = (this.mode === 'en-to-ko' && StorageManager.shouldShowPhoto(opt));
+            return `
+            <button data-word-id="${opt.id}" class="quiz-option-btn group text-left p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-medium transition transform hover:-translate-y-0.5 active:translate-y-0 shadow-sm flex items-center justify-between gap-2">
+              <span class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+                <span class="w-7 h-7 shrink-0 rounded-xl bg-slate-100 dark:bg-slate-700 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-950 text-slate-600 dark:text-slate-300 group-hover:text-indigo-600 text-xs font-bold flex items-center justify-center transition">
                   ${['A', 'B', 'C', 'D'][idx]}
                 </span>
-                <span class="text-base font-semibold">
+                ${showOptPhoto ? `
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-0.5">
+                    <img src="${opt.imageUrl}" alt="${opt.meaning}" onerror="this.parentElement.style.display='none'" class="w-full h-full object-contain">
+                  </div>
+                ` : ''}
+                <span class="text-sm sm:text-base font-semibold truncate">
                   ${this.mode === 'en-to-ko' ? opt.meaning : opt.word}
                 </span>
               </span>
-              <span class="option-indicator text-lg opacity-0 transition"></span>
+              <span class="option-indicator text-lg opacity-0 transition shrink-0"></span>
             </button>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       </div>
     `;

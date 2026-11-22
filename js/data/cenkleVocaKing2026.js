@@ -1,5 +1,5 @@
 // js/data/cenkleVocaKing2026.js
-// 센클보카킹2026하반기 (1~250) 직접 제작 심플 일러스트 탑재 데이터셋
+// 센클보카킹2026하반기 (1~250) 순수 일러스트 탑재 데이터셋
 
 export const CENKLE_VOCA_KING_DECK = {
   "id": "deck_cenkle_2026_2",

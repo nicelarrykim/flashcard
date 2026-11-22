@@ -474,6 +474,23 @@ export class StorageManager {
   }
 
   /**
+   * 단어의 연상 그림(일러스트)을 현재 옵션/숙련도에 따라 표시해야 하는지 판정
+   */
+  static shouldShowPhoto(word) {
+    if (!word || !word.imageUrl || !word.imageUrl.trim()) return false;
+    const mode = this.getPhotoDisplayMode();
+    if (mode === 'always_off') return false;
+    if (mode === 'always_on') return true;
+    // auto: 왕실근위대나 마스터 등급이 아니면 항상 표시!
+    try {
+      const rank = MasteryManager.getWordRank(word);
+      return (rank !== RANK_TYPES.ROYAL_GUARD && rank !== RANK_TYPES.MASTER);
+    } catch {
+      return true;
+    }
+  }
+
+  /**
    * 사진 표시 옵션 저장
    */
   static setPhotoDisplayMode(mode) {

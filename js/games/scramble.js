@@ -129,6 +129,14 @@ export class ScrambleGame {
           <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 mb-2">
             ${word.partOfSpeech || '단어'}
           </span>
+
+          <!-- 뜻 표시와 함께 연상 일러스트 항시 노출 -->
+          ${StorageManager.shouldShowPhoto(word) ? `
+            <div class="mb-3 w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden shadow-md border-2 border-indigo-100 dark:border-indigo-900 bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-1">
+              <img src="${word.imageUrl}" alt="${word.meaning}" onerror="this.parentElement.style.display='none'" class="w-full h-full object-contain">
+            </div>
+          ` : ''}
+
           <h3 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">
             ${word.meaning}
           </h3>
