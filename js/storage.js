@@ -1,11 +1,12 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261123_03';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_03';
-import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261123_03';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_03';
-import { ServerSyncManager } from './serverSync.js?v=20261123_03';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261123_04';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_04';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261123_04';
+import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261123_04';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_04';
+import { ServerSyncManager } from './serverSync.js?v=20261123_04';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -232,6 +233,7 @@ export class StorageManager {
         // 초기 기본 단어장 생성
         decks = [
           JSON.parse(JSON.stringify(CENKLE_VOCA_KING_DECK)),
+          JSON.parse(JSON.stringify(ELEMENTARY_WORDS_50_DECK)),
           {
             id: 'deck_default',
             name: '기본 추천 단어장',
@@ -253,6 +255,16 @@ export class StorageManager {
         // 센클보카킹 단어장이 아직 없으면 자동으로 목록 맨 위에 추가
         if (Array.isArray(decks) && !decks.some(d => d.id === CENKLE_VOCA_KING_DECK.id || d.name === CENKLE_VOCA_KING_DECK.name)) {
           decks.unshift(JSON.parse(JSON.stringify(CENKLE_VOCA_KING_DECK)));
+          this.saveDecks(decks);
+        }
+        // 초급단어50 단어장이 아직 없으면 자동으로 목록에 추가
+        if (Array.isArray(decks) && !decks.some(d => d.id === ELEMENTARY_WORDS_50_DECK.id || d.name === ELEMENTARY_WORDS_50_DECK.name)) {
+          const cenkleIdx = decks.findIndex(d => d.id === CENKLE_VOCA_KING_DECK.id || d.name === CENKLE_VOCA_KING_DECK.name);
+          if (cenkleIdx >= 0) {
+            decks.splice(cenkleIdx + 1, 0, JSON.parse(JSON.stringify(ELEMENTARY_WORDS_50_DECK)));
+          } else {
+            decks.unshift(JSON.parse(JSON.stringify(ELEMENTARY_WORDS_50_DECK)));
+          }
           this.saveDecks(decks);
         }
       }

@@ -3,20 +3,40 @@
 // 4x6 골짜기 미로 전장, 단어장 실제 인원수(1:1) 기반 10명 단위 원클릭&드래그 증원 배치,
 // 100웨이브 판타지 몹 대군단 스웜 디펜스, 10웨이브 단위 맵 변경 & 50% 부활, 성 함락 화염 연출
 
-import { StorageManager } from '../storage.js?v=20261123_03';
-import { SoundManager } from '../tts.js?v=20261123_03';
-import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261123_03';
+import { StorageManager } from '../storage.js?v=20261123_04';
+import { SoundManager } from '../tts.js?v=20261123_04';
+import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261123_04';
 
 export class SiegeManager {
-  static STORAGE_KEY = 'vocaquest_siege_record_v2';
+  static getStorageKey() {
+    let profId = 'prof_default';
+    try {
+      if (typeof StorageManager !== 'undefined' && StorageManager.getActiveProfileId) {
+        profId = StorageManager.getActiveProfileId() || 'prof_default';
+      }
+    } catch (e) {
+      profId = 'prof_default';
+    }
+    return `vocaquest_siege_record_${profId}_v2`;
+  }
 
   /**
-   * 오늘 공성전 기록 및 남은 횟수 조회 (새벽 12시 자동 리셋)
+   * 오늘 공성전 기록 및 남은 횟수 조회 (새벽 12시 자동 리셋, 프로필별 독립 2회)
    */
   static getRecord() {
     const today = new Date().toISOString().slice(0, 10);
+    const key = this.getStorageKey();
     try {
-      const data = localStorage.getItem(this.STORAGE_KEY);
+      let data = localStorage.getItem(key);
+      // 이전 전역 키가 있고 기본 프로필인 경우 마이그레이션 호환 처리
+      if (!data && key === 'vocaquest_siege_record_prof_default_v2') {
+        const legacy = localStorage.getItem('vocaquest_siege_record_v2');
+        if (legacy) {
+          data = legacy;
+          localStorage.setItem(key, legacy);
+        }
+      }
+
       if (data) {
         const parsed = JSON.parse(data);
         if (parsed.date === today) {
@@ -47,7 +67,8 @@ export class SiegeManager {
 
   static saveRecord(rec) {
     try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(rec));
+      const key = this.getStorageKey();
+      localStorage.setItem(key, JSON.stringify(rec));
     } catch (e) {}
   }
 

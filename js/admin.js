@@ -1,10 +1,10 @@
 // js/admin.js
 // 관리자 인증(암호 2217) 및 다중 학습자 프로필 관리 모듈
 
-import { StorageManager } from './storage.js?v=20261123_03';
-import { KingdomManager } from './kingdom.js?v=20261123_03';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_03';
-import { ServerSyncManager } from './serverSync.js?v=20261123_03';
+import { StorageManager } from './storage.js?v=20261123_04';
+import { KingdomManager } from './kingdom.js?v=20261123_04';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_04';
+import { ServerSyncManager } from './serverSync.js?v=20261123_04';
 
 export const ADMIN_PASSWORD = '2217';
 
