@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg_78" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#374151" />
+      <stop offset="100%" stop-color="#4b5563" />
+    </linearGradient>
+    <filter id="shadow_78" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <rect width="256" height="256" rx="32" fill="url(#bg_78)"/>
+  <circle cx="210" cy="46" r="64" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="30" cy="226" r="48" fill="#ffffff" fill-opacity="0.06"/>
+
+  <rect x="20" y="18" width="46" height="24" rx="12" fill="#ffffff" fill-opacity="0.2"/>
+  <text x="43" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">#78</text>
+
+  <g transform="translate(128, 115)" filter="url(#shadow_78)">
+    <circle cx="0" cy="0" r="38" fill="#0284c7" stroke="#ffffff" stroke-width="4"/><path d="M-36 6 Q-18 -10 0 6 Q18 22 36 6" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><path d="M-36 -10 Q-18 -26 0 -10 Q18 6 36 -10" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><path d="M-36 22 Q-18 6 0 22 Q18 38 36 22" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(128, 206)">
+    <rect x="-104" y="-2" width="208" height="38" rx="12" fill="#000000" fill-opacity="0.25"/>
+    <text x="0" y="16" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">Pacific Ocean</text>
+    <text x="0" y="30" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" fill="#f1f5f9" fill-opacity="0.9" text-anchor="middle">태평양</text>
+  </g>
+</svg>

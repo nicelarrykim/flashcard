@@ -3,6 +3,7 @@
 
 import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261122_05';
 import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_05';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261122_20';
 import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_05';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
@@ -217,8 +218,9 @@ export class StorageManager {
       let decks = null;
 
       if (!data) {
-        // 초기 기본 단어장 2개 생성
+        // 초기 기본 단어장 생성
         decks = [
+          JSON.parse(JSON.stringify(CENKLE_VOCA_KING_DECK)),
           {
             id: 'deck_default',
             name: '기본 추천 단어장',
@@ -230,13 +232,18 @@ export class StorageManager {
             id: 'deck_textbook',
             name: '교재 사진 단어장 (177~236)',
             description: '첨부된 책 사진에서 추출한 60개 단어 및 숙어',
-            createdAt: Date.now(),
+            createdAt: Date.now() - 5000,
             words: TEXTBOOK_WORDS
           }
         ];
         this.saveDecks(decks);
       } else {
         decks = JSON.parse(data);
+        // 센클보카킹 단어장이 아직 없으면 자동으로 목록 맨 위에 추가
+        if (Array.isArray(decks) && !decks.some(d => d.id === CENKLE_VOCA_KING_DECK.id || d.name === CENKLE_VOCA_KING_DECK.name)) {
+          decks.unshift(JSON.parse(JSON.stringify(CENKLE_VOCA_KING_DECK)));
+          this.saveDecks(decks);
+        }
       }
 
       if (Array.isArray(decks) && decks.length > 0) {
@@ -866,30 +873,262 @@ export class StorageManager {
     downloadAnchor.remove();
   }
 
-  static importJSON(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
+  /**
+   * SQLite3 데이터베이스 파일 (.db)로 현재 활성 단어장 내보내기
+   */
+  static async exportDB() {
+    const activeDeck = this.getActiveDeck();
+    if (!window.initSqlJs) {
+      alert('SQLite 엔진(sql.js)이 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    try {
+      const SQL = await window.initSqlJs({
+        locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+      });
+      const db = new SQL.Database();
+
+      // 테이블 생성
+      db.run(`
+        CREATE TABLE decks (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT,
+          imagePosition TEXT DEFAULT 'meaning',
+          createdAt INTEGER
+        );
+        CREATE TABLE words (
+          id TEXT PRIMARY KEY,
+          deck_id TEXT NOT NULL,
+          number INTEGER,
+          word TEXT NOT NULL,
+          phonetic TEXT,
+          partOfSpeech TEXT,
+          meaning TEXT NOT NULL,
+          example TEXT,
+          exampleMeaning TEXT,
+          imageUrl TEXT,
+          audioUrl TEXT,
+          tags TEXT,
+          level TEXT DEFAULT 'intermediate',
+          memorized INTEGER DEFAULT 0,
+          wrongCount INTEGER DEFAULT 0,
+          createdAt INTEGER
+        );
+        CREATE TABLE metadata (
+          key TEXT PRIMARY KEY,
+          value TEXT
+        );
+      `);
+
+      // 단어장 삽입
+      db.run("INSERT INTO decks VALUES (?, ?, ?, ?, ?)", [
+        activeDeck.id,
+        activeDeck.name,
+        activeDeck.description || '',
+        activeDeck.imagePosition || 'meaning',
+        activeDeck.createdAt || Date.now()
+      ]);
+
+      // 단어 목록 삽입
+      const words = activeDeck.words || [];
+      words.forEach(w => {
+        db.run("INSERT INTO words VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
+          w.id,
+          activeDeck.id,
+          w.number || null,
+          w.word,
+          w.phonetic || '',
+          w.partOfSpeech || 'word',
+          w.meaning,
+          w.example || '',
+          w.exampleMeaning || '',
+          w.imageUrl || '',
+          w.audioUrl || '',
+          JSON.stringify(w.tags || []),
+          w.level || 'intermediate',
+          w.memorized ? 1 : 0,
+          w.wrongCount || 0,
+          w.createdAt || Date.now()
+        ]);
+      });
+
+      // 메타데이터 백업 삽입
+      db.run("INSERT INTO metadata VALUES (?, ?)", ["deck_name", activeDeck.name]);
+      db.run("INSERT INTO metadata VALUES (?, ?)", ["total_words", String(words.length)]);
+      db.run("INSERT INTO metadata VALUES (?, ?)", ["backup_json", JSON.stringify(activeDeck)]);
+
+      const binaryArray = db.export();
+      const blob = new Blob([binaryArray], { type: 'application/x-sqlite3' });
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", url);
+      downloadAnchor.setAttribute("download", `${activeDeck.name}_${new Date().toISOString().slice(0, 10)}.db`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Failed to export DB:', e);
+      alert('DB 내보내기 중 오류가 발생했습니다: ' + e.message);
+    }
+  }
+
+  /**
+   * DB 파일 (.db, .sqlite, .sqlite3) 또는 JSON 파일 단어장 가져오기
+   */
+  static async importDatabaseFile(file) {
+    if (!file) throw new Error('파일이 선택되지 않았습니다.');
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8 = new Uint8Array(arrayBuffer);
+
+    // 1. SQLite 헤더 검사 ("SQLite format 3\000")
+    const headerStr = String.fromCharCode(...uint8.slice(0, 16));
+    const isSQLite = headerStr.startsWith("SQLite format 3");
+
+    if (isSQLite) {
+      return this.parseAndImportSQLite(uint8, file.name);
+    }
+
+    // 2. 일반 텍스트(JSON)로 시도
+    const text = new TextDecoder('utf-8').decode(uint8);
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) {
+        return this.createDeck(file.name.replace(/\.[^/.]+$/, ''), '가져온 단어장', parsed);
+      } else if (parsed && Array.isArray(parsed.words)) {
+        return this.createDeck(parsed.name || file.name.replace(/\.[^/.]+$/, ''), parsed.description || '', parsed.words);
+      } else {
+        throw new Error('올바른 단어장 형식이 아닙니다.');
+      }
+    } catch (err) {
+      throw new Error(`파일 파싱 실패: ${err.message}`);
+    }
+  }
+
+  /**
+   * SQLite 바이트 배열 파싱 및 단어장 생성
+   */
+  static async parseAndImportSQLite(uint8, fileName) {
+    let deckObj = null;
+
+    // 방법 A: sql.js 사용 (브라우저 WASM)
+    if (window.initSqlJs) {
+      try {
+        const SQL = await window.initSqlJs({
+          locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+        });
+        const db = new SQL.Database(uint8);
+
+        // 1) metadata 테이블에 backup_json이 있는지 확인
         try {
-          const parsed = JSON.parse(e.target.result);
-          if (Array.isArray(parsed)) {
-            // 단어 배열인 경우 새 단어장으로 임포트
-            this.createDeck(file.name.replace('.json', ''), '가져온 단어장', parsed);
-            resolve();
-          } else if (parsed && Array.isArray(parsed.words)) {
-            // 단어장 객체인 경우
-            this.createDeck(parsed.name || file.name.replace('.json', ''), parsed.description || '', parsed.words);
-            resolve();
-          } else {
-            reject(new Error('올바른 단어장 JSON 형식이 아닙니다.'));
+          const metaRes = db.exec("SELECT value FROM metadata WHERE key='backup_json'");
+          if (metaRes.length > 0 && metaRes[0].values.length > 0) {
+            const rawJson = metaRes[0].values[0][0];
+            deckObj = JSON.parse(rawJson);
           }
-        } catch (err) {
-          reject(err);
+        } catch (e) {
+          // metadata 테이블이 없을 수 있음
         }
-      };
-      reader.onerror = () => reject(new Error('파일 읽기 실패'));
-      reader.readAsText(file);
-    });
+
+        // 2) backup_json이 없으면 직접 decks / words 테이블 쿼리
+        if (!deckObj) {
+          let deckName = fileName.replace(/\.[^/.]+$/, '');
+          let deckDesc = '가져온 DB 단어장';
+          let imagePosition = 'meaning';
+
+          try {
+            const dRes = db.exec("SELECT name, description, imagePosition FROM decks LIMIT 1");
+            if (dRes.length > 0 && dRes[0].values.length > 0) {
+              const row = dRes[0].values[0];
+              deckName = row[0] || deckName;
+              deckDesc = row[1] || deckDesc;
+              imagePosition = row[2] || imagePosition;
+            }
+          } catch (e) {}
+
+          const wRes = db.exec("SELECT number, word, meaning, partOfSpeech, phonetic, example, exampleMeaning, imageUrl, audioUrl, tags, level FROM words ORDER BY number ASC, id ASC");
+          if (wRes.length > 0 && wRes[0].values.length > 0) {
+            const cols = wRes[0].columns;
+            const words = wRes[0].values.map(row => {
+              const item = {};
+              cols.forEach((col, idx) => { item[col] = row[idx]; });
+              let tags = [deckName];
+              try { if (item.tags) tags = JSON.parse(item.tags); } catch {}
+              return {
+                id: 'w_' + (item.number || Date.now()) + '_' + Math.random().toString(36).substr(2, 5),
+                number: item.number ? parseInt(item.number, 10) : null,
+                word: String(item.word || '').trim(),
+                meaning: String(item.meaning || '').trim(),
+                partOfSpeech: item.partOfSpeech || 'word',
+                phonetic: item.phonetic || '',
+                example: item.example || '',
+                exampleMeaning: item.exampleMeaning || '',
+                imageUrl: item.imageUrl || '',
+                audioUrl: item.audioUrl || `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(String(item.word || '').trim().toLowerCase())}&type=2`,
+                tags: tags,
+                level: item.level || 'intermediate',
+                memorized: false,
+                wrongCount: 0
+              };
+            });
+
+            deckObj = {
+              name: deckName,
+              description: deckDesc,
+              imagePosition: imagePosition,
+              words: words
+            };
+          }
+        }
+      } catch (err) {
+        console.warn('sql.js execution failed, trying binary fallback:', err);
+      }
+    }
+
+    // 방법 B: sql.js 로드 실패 시 순수 바이너리 텍스트 스캔 폴백
+    if (!deckObj) {
+      const decoded = new TextDecoder('utf-8', { fatal: false }).decode(uint8);
+      // "backup_json" 뒤의 JSON 검색
+      const backupIdx = decoded.indexOf('"backup_json"');
+      if (backupIdx !== -1) {
+        const startBrace = decoded.indexOf('{', backupIdx);
+        if (startBrace !== -1) {
+          // 브라켓 매칭으로 올바른 JSON 추출
+          let depth = 0;
+          let endBrace = -1;
+          for (let i = startBrace; i < decoded.length; i++) {
+            if (decoded[i] === '{') depth++;
+            else if (decoded[i] === '}') {
+              depth--;
+              if (depth === 0) {
+                endBrace = i;
+                break;
+              }
+            }
+          }
+          if (endBrace !== -1) {
+            try {
+              const jsonSlice = decoded.substring(startBrace, endBrace + 1);
+              deckObj = JSON.parse(jsonSlice);
+            } catch (e) {
+              console.error('Fallback JSON parse error:', e);
+            }
+          }
+        }
+      }
+    }
+
+    if (deckObj && Array.isArray(deckObj.words) && deckObj.words.length > 0) {
+      return this.createDeck(deckObj.name || fileName.replace(/\.[^/.]+$/, ''), deckObj.description || '', deckObj.words, deckObj.imagePosition || 'meaning');
+    } else {
+      throw new Error('SQLite DB 파일에서 유효한 단어 데이터를 추출하지 못했습니다.');
+    }
+  }
+
+  static importJSON(file) {
+    return this.importDatabaseFile(file);
   }
 }
 

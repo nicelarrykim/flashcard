@@ -1,0 +1,4762 @@
+// js/data/cenkleVocaKing2026.js
+// 센클보카킹2026하반기 (1~250) 직접 제작 심플 일러스트 탑재 데이터셋
+
+export const CENKLE_VOCA_KING_DECK = {
+  "id": "deck_cenkle_2026_2",
+  "name": "센클보카킹2026하반기",
+  "description": "센클 보카킹 2026 하반기 영어 단어장 (1~250)",
+  "createdAt": 1732262400000,
+  "imagePosition": "meaning",
+  "words": [
+    {
+      "id": "cenkle_1",
+      "number": 1,
+      "word": "involve",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "수반하다, 포함하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_1.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=involve&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_2",
+      "number": 2,
+      "word": "maintain",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "유지하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_2.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=maintain&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_3",
+      "number": 3,
+      "word": "pronounce",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "발음하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_3.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=pronounce&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_4",
+      "number": 4,
+      "word": "mankind",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "인류, 인간",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_4.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=mankind&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_5",
+      "number": 5,
+      "word": "employ",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "고용하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_5.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=employ&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_6",
+      "number": 6,
+      "word": "expectation",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "기대",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_6.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=expectation&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_7",
+      "number": 7,
+      "word": "digest",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "소화하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_7.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=digest&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_8",
+      "number": 8,
+      "word": "continent",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "대륙, 육지",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_8.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=continent&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_9",
+      "number": 9,
+      "word": "belief",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "신념, 확신",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_9.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=belief&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_10",
+      "number": 10,
+      "word": "artistic",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "예술적인, 예술의",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_10.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=artistic&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_11",
+      "number": 11,
+      "word": "assess",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "평가하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_11.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=assess&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_12",
+      "number": 12,
+      "word": "collaborate",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "협력하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_12.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=collaborate&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_13",
+      "number": 13,
+      "word": "precise",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "정확한, 정밀한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_13.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=precise&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_14",
+      "number": 14,
+      "word": "restriction",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "제한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_14.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=restriction&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_15",
+      "number": 15,
+      "word": "venture",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "모험하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_15.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=venture&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_16",
+      "number": 16,
+      "word": "appearance",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "겉모습, 외모",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_16.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=appearance&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_17",
+      "number": 17,
+      "word": "contrast",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "대조하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_17.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=contrast&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_18",
+      "number": 18,
+      "word": "compete",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "경쟁하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_18.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=compete&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_19",
+      "number": 19,
+      "word": "logical",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "논리적인",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_19.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=logical&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_20",
+      "number": 20,
+      "word": "urgent",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "긴급한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_20.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=urgent&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_21",
+      "number": 21,
+      "word": "surrender",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "항복하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_21.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=surrender&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_22",
+      "number": 22,
+      "word": "critical",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "비판적인, 비평하는",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_22.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=critical&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_23",
+      "number": 23,
+      "word": "slightly",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "약간",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_23.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=slightly&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_24",
+      "number": 24,
+      "word": "barren",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "척박한, 황량한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_24.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=barren&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_25",
+      "number": 25,
+      "word": "turn down",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "거절하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_25.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=turn%20down&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_26",
+      "number": 26,
+      "word": "refreshing",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "신선한, 상쾌한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_26.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=refreshing&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_27",
+      "number": 27,
+      "word": "come up with",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "생각해내다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_27.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=come%20up%20with&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_28",
+      "number": 28,
+      "word": "on purpose",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "고의로, 일부러",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_28.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=on%20purpose&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_29",
+      "number": 29,
+      "word": "parachute",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "낙하산",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_29.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=parachute&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_30",
+      "number": 30,
+      "word": "session",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "회의, 수업",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_30.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=session&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_31",
+      "number": 31,
+      "word": "vary",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "바꾸다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_31.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=vary&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_32",
+      "number": 32,
+      "word": "alert",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "경계하는, 조심하는",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_32.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=alert&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_33",
+      "number": 33,
+      "word": "witness",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "목격하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_33.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=witness&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_34",
+      "number": 34,
+      "word": "cling",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "달라붙다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_34.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=cling&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_35",
+      "number": 35,
+      "word": "rubbish",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "쓰레기",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_35.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=rubbish&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_36",
+      "number": 36,
+      "word": "subject",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "과목, 주제",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_36.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=subject&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_37",
+      "number": 37,
+      "word": "dissolve",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "녹다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_37.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=dissolve&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_38",
+      "number": 38,
+      "word": "misunderstanding",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "오해",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_38.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=misunderstanding&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_39",
+      "number": 39,
+      "word": "emphasis",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "강조",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_39.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=emphasis&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_40",
+      "number": 40,
+      "word": "tame",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "길들여진",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_40.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=tame&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_41",
+      "number": 41,
+      "word": "strain",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "안간힘을 쓰다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_41.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=strain&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_42",
+      "number": 42,
+      "word": "eerie",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "으스스한, 괴상한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_42.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=eerie&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_43",
+      "number": 43,
+      "word": "instruct",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "가르치다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_43.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=instruct&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_44",
+      "number": 44,
+      "word": "rant",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "고함치다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_44.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=rant&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_45",
+      "number": 45,
+      "word": "ignorant",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "무식한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_45.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=ignorant&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_46",
+      "number": 46,
+      "word": "aggressive",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "공격적인",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_46.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=aggressive&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_47",
+      "number": 47,
+      "word": "intercept",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "가로막다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_47.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=intercept&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_48",
+      "number": 48,
+      "word": "in public",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "대중 앞에서",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_48.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=in%20public&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_49",
+      "number": 49,
+      "word": "talent",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "재능, 장기",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_49.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=talent&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-50"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_50",
+      "number": 50,
+      "word": "retrieve",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "회수하다, 되찾다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_50.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=retrieve&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "1-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_51",
+      "number": 51,
+      "word": "patter",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "후드득 떨어지다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_51.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=patter&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_52",
+      "number": 52,
+      "word": "reek",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "악취를 풍기다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_52.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=reek&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_53",
+      "number": 53,
+      "word": "stoop",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "몸을 굽히다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_53.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=stoop&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_54",
+      "number": 54,
+      "word": "throb",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "욱신거리다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_54.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=throb&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_55",
+      "number": 55,
+      "word": "nibble",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "야금 야금 먹다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_55.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=nibble&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_56",
+      "number": 56,
+      "word": "glare at",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "노려보다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_56.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=glare%20at&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_57",
+      "number": 57,
+      "word": "long for",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "열망하다, 갈망하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_57.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=long%20for&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_58",
+      "number": 58,
+      "word": "sulky",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "뚱한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_58.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=sulky&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_59",
+      "number": 59,
+      "word": "mean",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "성질나쁜",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_59.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=mean&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_60",
+      "number": 60,
+      "word": "varnish",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "광택제",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_60.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=varnish&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_61",
+      "number": 61,
+      "word": "indignantly",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "분개하여",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_61.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=indignantly&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_62",
+      "number": 62,
+      "word": "physical",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "육체의, 신체의",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_62.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=physical&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_63",
+      "number": 63,
+      "word": "brief",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "단시간의; 간결한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_63.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=brief&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_64",
+      "number": 64,
+      "word": "fill out",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "기입하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_64.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=fill%20out&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_65",
+      "number": 65,
+      "word": "concentrate on",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "집중하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_65.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=concentrate%20on&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_66",
+      "number": 66,
+      "word": "furiously",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "맹렬히",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_66.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=furiously&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_67",
+      "number": 67,
+      "word": "damage",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "상하게 하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_67.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=damage&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_68",
+      "number": 68,
+      "word": "destiny",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "운명",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_68.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=destiny&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_69",
+      "number": 69,
+      "word": "incident",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "사건",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_69.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=incident&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_70",
+      "number": 70,
+      "word": "fury",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "격노",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_70.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=fury&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_71",
+      "number": 71,
+      "word": "leftover",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "남은 음식, 잔재",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_71.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=leftover&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_72",
+      "number": 72,
+      "word": "hoist",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "들어올리다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_72.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=hoist&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_73",
+      "number": 73,
+      "word": "conquer",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "정복하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_73.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=conquer&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_74",
+      "number": 74,
+      "word": "vanish",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "사라지다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_74.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=vanish&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_75",
+      "number": 75,
+      "word": "treaty",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "조약",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_75.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=treaty&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_76",
+      "number": 76,
+      "word": "oppose",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "반대하다, 겨루다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_76.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=oppose&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_77",
+      "number": 77,
+      "word": "colony",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "식민지",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_77.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=colony&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_78",
+      "number": 78,
+      "word": "Pacific Ocean",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "태평양",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_78.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=pacific%20ocean&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_79",
+      "number": 79,
+      "word": "wound",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "부상을 입히다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_79.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=wound&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_80",
+      "number": 80,
+      "word": "ally",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "동맹국, 협력자",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_80.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=ally&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_81",
+      "number": 81,
+      "word": "cautiously",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "조심스럽게",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_81.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=cautiously&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_82",
+      "number": 82,
+      "word": "tramp",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "터벅터벅 걷다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_82.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=tramp&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_83",
+      "number": 83,
+      "word": "yank",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "홱 잡아당기다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_83.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=yank&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_84",
+      "number": 84,
+      "word": "scold",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "꾸짖다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_84.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=scold&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_85",
+      "number": 85,
+      "word": "criminal",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "범죄자",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_85.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=criminal&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_86",
+      "number": 86,
+      "word": "suspect",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "용의자",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_86.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=suspect&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_87",
+      "number": 87,
+      "word": "gooey",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "끈적거리는",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_87.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=gooey&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_88",
+      "number": 88,
+      "word": "reincarnate",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "환생하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_88.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=reincarnate&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_89",
+      "number": 89,
+      "word": "no wonder",
+      "phonetic": "",
+      "partOfSpeech": "phrase",
+      "meaning": "당연하다, 놀랄 일이 아니다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_89.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=no%20wonder&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_90",
+      "number": 90,
+      "word": "put up with",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "~을 참고 견디다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_90.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=put%20up%20with&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_91",
+      "number": 91,
+      "word": "gorgeous",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "멋진, 세련된",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_91.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=gorgeous&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_92",
+      "number": 92,
+      "word": "run out of",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "다 떨어지다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_92.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=run%20out%20of&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_93",
+      "number": 93,
+      "word": "obstruct",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "방해하다, 막다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_93.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=obstruct&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_94",
+      "number": 94,
+      "word": "grumble",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "투덜거리다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_94.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=grumble&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_95",
+      "number": 95,
+      "word": "cram",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "밀어 넣다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_95.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=cram&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_96",
+      "number": 96,
+      "word": "attach",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "붙이다, 첨부하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_96.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=attach&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_97",
+      "number": 97,
+      "word": "guide",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "안내하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_97.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=guide&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_98",
+      "number": 98,
+      "word": "dreadful",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "끔찍한, 지독한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_98.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=dreadful&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_99",
+      "number": 99,
+      "word": "dart",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "쏜살같이 달리다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_99.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=dart&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-100"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_100",
+      "number": 100,
+      "word": "rummage",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "뒤지다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_100.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=rummage&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "51-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_101",
+      "number": 101,
+      "word": "replica",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "복제품, 모형",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_101.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=replica&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_102",
+      "number": 102,
+      "word": "equipment",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "장비, 용품",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_102.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=equipment&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_103",
+      "number": 103,
+      "word": "hostile",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "적대적인",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_103.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=hostile&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_104",
+      "number": 104,
+      "word": "take advantage of",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "~을 이용하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_104.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=take%20advantage%20of&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_105",
+      "number": 105,
+      "word": "brag",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "자랑하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_105.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=brag&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_106",
+      "number": 106,
+      "word": "squirt",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "찍 나오다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_106.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=squirt&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_107",
+      "number": 107,
+      "word": "free",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "풀어주다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_107.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=free&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_108",
+      "number": 108,
+      "word": "absently",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "멍하니, 무심코",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_108.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=absently&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_109",
+      "number": 109,
+      "word": "bug",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "괴롭히다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_109.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=bug&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_110",
+      "number": 110,
+      "word": "scamper",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "날쌔게 움직이다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_110.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=scamper&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_111",
+      "number": 111,
+      "word": "betray",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "배반하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_111.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=betray&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_112",
+      "number": 112,
+      "word": "rub off on",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "~에 영향을 주다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_112.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=rub%20off%20on&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_113",
+      "number": 113,
+      "word": "sicken",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "병이 나다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_113.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=sicken&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_114",
+      "number": 114,
+      "word": "crack up",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "마구 웃다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_114.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=crack%20up&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_115",
+      "number": 115,
+      "word": "shorten",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "짧게 하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_115.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=shorten&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_116",
+      "number": 116,
+      "word": "due",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "~로 예정된",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_116.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=due&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_117",
+      "number": 117,
+      "word": "signal",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "신호를 보내다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_117.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=signal&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_118",
+      "number": 118,
+      "word": "pearl",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "진주",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_118.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=pearl&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_119",
+      "number": 119,
+      "word": "poke",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "쿡 찌르다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_119.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=poke&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_120",
+      "number": 120,
+      "word": "exhibit",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "전시품, 전시하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_120.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=exhibit&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_121",
+      "number": 121,
+      "word": "a bunch of",
+      "phonetic": "",
+      "partOfSpeech": "phrase",
+      "meaning": "다수의",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_121.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=a%20bunch%20of&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_122",
+      "number": 122,
+      "word": "switch",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "바꾸다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_122.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=switch&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_123",
+      "number": 123,
+      "word": "solar energy",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "태양 에너지",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_123.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=solar%20energy&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_124",
+      "number": 124,
+      "word": "innocent",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "아무 잘못이 없는",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_124.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=innocent&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_125",
+      "number": 125,
+      "word": "for a moment",
+      "phonetic": "",
+      "partOfSpeech": "phrase",
+      "meaning": "잠시 동안",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_125.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=for%20a%20moment&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_126",
+      "number": 126,
+      "word": "vending machine",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "자판기",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_126.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=vending%20machine&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_127",
+      "number": 127,
+      "word": "clutch",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "움켜잡다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_127.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=clutch&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_128",
+      "number": 128,
+      "word": "crouch",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "웅크리다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_128.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=crouch&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_129",
+      "number": 129,
+      "word": "sign language",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "수화",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_129.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=sign%20language&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_130",
+      "number": 130,
+      "word": "civilization",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "문명화",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_130.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=civilization&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_131",
+      "number": 131,
+      "word": "still",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "고요한, 가만히 있는",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_131.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=still&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_132",
+      "number": 132,
+      "word": "come to an end",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "끝나다, 죽다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_132.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=come%20to%20an%20end&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_133",
+      "number": 133,
+      "word": "presence",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "있음, 존재함",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_133.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=presence&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_134",
+      "number": 134,
+      "word": "be crowded with",
+      "phonetic": "",
+      "partOfSpeech": "phrase",
+      "meaning": "~로 꽉 차다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_134.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=be%20crowded%20with&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_135",
+      "number": 135,
+      "word": "mighty",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "힘센, 강력한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_135.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=mighty&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_136",
+      "number": 136,
+      "word": "outline",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "윤곽을 보여주다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_136.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=outline&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_137",
+      "number": 137,
+      "word": "damp",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "축축한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_137.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=damp&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_138",
+      "number": 138,
+      "word": "doom",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "비운, 죽음",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_138.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=doom&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_139",
+      "number": 139,
+      "word": "chilly",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "추운",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_139.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=chilly&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_140",
+      "number": 140,
+      "word": "generous",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "인자한, 관대한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_140.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=generous&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_141",
+      "number": 141,
+      "word": "applaud",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "박수치다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_141.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=applaud&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_142",
+      "number": 142,
+      "word": "polish",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "닦다, 윤을 내다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_142.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=polish&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_143",
+      "number": 143,
+      "word": "sort",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "분류하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_143.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=sort&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_144",
+      "number": 144,
+      "word": "former",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "과거의, 이전의",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_144.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=former&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_145",
+      "number": 145,
+      "word": "trait",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "특성",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_145.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=trait&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_146",
+      "number": 146,
+      "word": "sibling",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "형제자매",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_146.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=sibling&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_147",
+      "number": 147,
+      "word": "daybreak",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "새벽",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_147.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=daybreak&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_148",
+      "number": 148,
+      "word": "brilliant",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "훌륭한, 멋진",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_148.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=brilliant&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_149",
+      "number": 149,
+      "word": "fellow",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "동료",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_149.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=fellow&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-150"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_150",
+      "number": 150,
+      "word": "knowledge",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "지식",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_150.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=knowledge&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "101-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_151",
+      "number": 151,
+      "word": "apart",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "따로 떨어져서",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_151.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=apart&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_152",
+      "number": 152,
+      "word": "desire",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "바라다, 원하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_152.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=desire&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_153",
+      "number": 153,
+      "word": "trust",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "믿다, 신뢰하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_153.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=trust&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_154",
+      "number": 154,
+      "word": "merchant",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "상인",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_154.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=merchant&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_155",
+      "number": 155,
+      "word": "document",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "서류",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_155.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=document&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_156",
+      "number": 156,
+      "word": "slender",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "날씬한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_156.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=slender&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_157",
+      "number": 157,
+      "word": "cottage",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "작은 집",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_157.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=cottage&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_158",
+      "number": 158,
+      "word": "argue",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "주장하다, 다투다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_158.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=argue&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_159",
+      "number": 159,
+      "word": "freedom",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "자유",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_159.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=freedom&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_160",
+      "number": 160,
+      "word": "right",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "권리, 권한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_160.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=right&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_161",
+      "number": 161,
+      "word": "set off",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "출발하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_161.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=set%20off&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_162",
+      "number": 162,
+      "word": "stroke",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "쓰다듬다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_162.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=stroke&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_163",
+      "number": 163,
+      "word": "firmly",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "단호하게",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_163.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=firmly&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_164",
+      "number": 164,
+      "word": "bewitch",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "홀리다, 넋을 빼놓다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_164.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=bewitch&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_165",
+      "number": 165,
+      "word": "injury",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "부상",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_165.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=injury&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_166",
+      "number": 166,
+      "word": "give up",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "포기하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_166.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=give%20up&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_167",
+      "number": 167,
+      "word": "sharpen",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "날카롭게 깎다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_167.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=sharpen&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_168",
+      "number": 168,
+      "word": "rescue",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "구하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_168.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=rescue&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_169",
+      "number": 169,
+      "word": "parcel",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "소포",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_169.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=parcel&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_170",
+      "number": 170,
+      "word": "rib",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "갈비뼈",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_170.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=rib&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_171",
+      "number": 171,
+      "word": "awkward",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "어색한, 곤란한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_171.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=awkward&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_172",
+      "number": 172,
+      "word": "wicked",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "못된",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_172.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=wicked&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_173",
+      "number": 173,
+      "word": "menace",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "위협하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_173.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=menace&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_174",
+      "number": 174,
+      "word": "gloomy",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "우울한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_174.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=gloomy&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_175",
+      "number": 175,
+      "word": "agony",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "고통",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_175.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=agony&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_176",
+      "number": 176,
+      "word": "stool",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "의자",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_176.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=stool&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_177",
+      "number": 177,
+      "word": "Lost and Found",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "분실물 보관소",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_177.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=lost%20and%20found&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_178",
+      "number": 178,
+      "word": "deed",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "행위, 행동",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_178.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=deed&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_179",
+      "number": 179,
+      "word": "separately",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "각각",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_179.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=separately&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_180",
+      "number": 180,
+      "word": "what if",
+      "phonetic": "",
+      "partOfSpeech": "phrase",
+      "meaning": "~이면 어쩌지",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_180.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=what%20if&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_181",
+      "number": 181,
+      "word": "hand out",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "나누어 주다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_181.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=hand%20out&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_182",
+      "number": 182,
+      "word": "skip",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "뛰어다니다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_182.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=skip&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_183",
+      "number": 183,
+      "word": "admit",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "인정하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_183.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=admit&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_184",
+      "number": 184,
+      "word": "dumb",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "멍청한, 벙어리의",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_184.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=dumb&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_185",
+      "number": 185,
+      "word": "journal",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "일기",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_185.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=journal&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_186",
+      "number": 186,
+      "word": "peek",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "재빨리 훔쳐보다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_186.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=peek&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_187",
+      "number": 187,
+      "word": "complexion",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "안색",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_187.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=complexion&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_188",
+      "number": 188,
+      "word": "day off",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "쉬는 날",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_188.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=day%20off&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_189",
+      "number": 189,
+      "word": "keep from ~ing",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "~하지 못하게 하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_189.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=keep%20from%20~ing&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_190",
+      "number": 190,
+      "word": "hygiene",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "위생",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_190.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=hygiene&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_191",
+      "number": 191,
+      "word": "brand new",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "완전 새 것인",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_191.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=brand%20new&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_192",
+      "number": 192,
+      "word": "scream",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "소리지르다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_192.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=scream&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_193",
+      "number": 193,
+      "word": "attention",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "주의, 집중, 주목",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_193.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=attention&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_194",
+      "number": 194,
+      "word": "fuss",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "호들갑, 야단",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_194.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=fuss&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_195",
+      "number": 195,
+      "word": "priceless",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "대단히 귀중한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_195.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=priceless&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_196",
+      "number": 196,
+      "word": "equal",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "같은, 동등한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_196.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=equal&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_197",
+      "number": 197,
+      "word": "border",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "국경",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_197.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=border&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_198",
+      "number": 198,
+      "word": "satisfy",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "만족시키다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_198.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=satisfy&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_199",
+      "number": 199,
+      "word": "half",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "절반",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_199.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=half&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-200"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_200",
+      "number": 200,
+      "word": "murder",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "살해하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_200.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=murder&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "151-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_201",
+      "number": 201,
+      "word": "increase",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "증가하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_201.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=increase&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_202",
+      "number": 202,
+      "word": "quit",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "그만두다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_202.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=quit&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_203",
+      "number": 203,
+      "word": "fishy",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "수상한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_203.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=fishy&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_204",
+      "number": 204,
+      "word": "selfish",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "이기적인",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_204.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=selfish&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_205",
+      "number": 205,
+      "word": "recently",
+      "phonetic": "",
+      "partOfSpeech": "adv",
+      "meaning": "최근에",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_205.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=recently&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_206",
+      "number": 206,
+      "word": "vote",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "투표하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_206.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=vote&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_207",
+      "number": 207,
+      "word": "crook",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "사기꾼",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_207.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=crook&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_208",
+      "number": 208,
+      "word": "merchandise",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "물품, 상품",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_208.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=merchandise&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_209",
+      "number": 209,
+      "word": "get a move on",
+      "phonetic": "",
+      "partOfSpeech": "phrase",
+      "meaning": "빨리 해, 서둘러",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_209.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=get%20a%20move%20on&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_210",
+      "number": 210,
+      "word": "faint",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "기절하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_210.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=faint&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_211",
+      "number": 211,
+      "word": "toss",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "던지다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_211.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=toss&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_212",
+      "number": 212,
+      "word": "shame",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "부끄럼",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_212.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=shame&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_213",
+      "number": 213,
+      "word": "throw up",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "토하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_213.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=throw%20up&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_214",
+      "number": 214,
+      "word": "tease",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "놀리다, 괴롭히다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_214.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=tease&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_215",
+      "number": 215,
+      "word": "breathe",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "숨 쉬다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_215.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=breathe&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_216",
+      "number": 216,
+      "word": "actress",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "여배우",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_216.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=actress&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_217",
+      "number": 217,
+      "word": "tourist",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "관광객",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_217.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=tourist&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_218",
+      "number": 218,
+      "word": "rule",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "통치하다, 다스리다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_218.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=rule&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_219",
+      "number": 219,
+      "word": "rapid",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "빠른",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_219.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=rapid&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_220",
+      "number": 220,
+      "word": "polite",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "예의 바른",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_220.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=polite&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_221",
+      "number": 221,
+      "word": "normal",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "보통의, 평범한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_221.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=normal&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_222",
+      "number": 222,
+      "word": "terrific",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "빼어난, 대단한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_222.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=terrific&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_223",
+      "number": 223,
+      "word": "death",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "죽음, 사망",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_223.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=death&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_224",
+      "number": 224,
+      "word": "planet",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "행성",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_224.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=planet&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_225",
+      "number": 225,
+      "word": "slave",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "노예",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_225.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=slave&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_226",
+      "number": 226,
+      "word": "gym",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "체육관",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_226.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=gym&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_227",
+      "number": 227,
+      "word": "gentle",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "온화한, 순한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_227.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=gentle&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_228",
+      "number": 228,
+      "word": "chamber",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "회의실",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_228.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=chamber&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_229",
+      "number": 229,
+      "word": "overcome",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "극복하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_229.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=overcome&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_230",
+      "number": 230,
+      "word": "hire",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "고용하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_230.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=hire&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_231",
+      "number": 231,
+      "word": "steal",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "훔치다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_231.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=steal&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_232",
+      "number": 232,
+      "word": "nervous",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "긴장한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_232.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=nervous&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_233",
+      "number": 233,
+      "word": "bomb",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "폭탄",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_233.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=bomb&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_234",
+      "number": 234,
+      "word": "arrive",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "도착하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_234.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=arrive&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_235",
+      "number": 235,
+      "word": "feed",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "먹이를 주다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_235.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=feed&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_236",
+      "number": 236,
+      "word": "fetch",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "가져오다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_236.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=fetch&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_237",
+      "number": 237,
+      "word": "magazine",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "잡지",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_237.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=magazine&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_238",
+      "number": 238,
+      "word": "pay",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "(돈을) 지불하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_238.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=pay&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_239",
+      "number": 239,
+      "word": "deliver",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "배달하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_239.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=deliver&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_240",
+      "number": 240,
+      "word": "connect",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "연결하다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_240.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=connect&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_241",
+      "number": 241,
+      "word": "protect",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "보호하다, 지키다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_241.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=protect&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_242",
+      "number": 242,
+      "word": "for free",
+      "phonetic": "",
+      "partOfSpeech": "phrase",
+      "meaning": "공짜로",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_242.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=for%20free&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_243",
+      "number": 243,
+      "word": "measure",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "측정하다, 재다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_243.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=measure&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_244",
+      "number": 244,
+      "word": "grocery",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "식료품",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_244.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=grocery&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_245",
+      "number": 245,
+      "word": "duck",
+      "phonetic": "",
+      "partOfSpeech": "verb",
+      "meaning": "숙이다, 처박다",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_245.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=duck&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_246",
+      "number": 246,
+      "word": "childish",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "유치한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_246.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=childish&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_247",
+      "number": 247,
+      "word": "fed up",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "지긋지긋한, 신물 난",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_247.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=fed%20up&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_248",
+      "number": 248,
+      "word": "sight",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "광경, 시력",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_248.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=sight&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_249",
+      "number": 249,
+      "word": "nasty",
+      "phonetic": "",
+      "partOfSpeech": "adj",
+      "meaning": "끔찍한",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_249.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=nasty&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    },
+    {
+      "id": "cenkle_250",
+      "number": 250,
+      "word": "barrel",
+      "phonetic": "",
+      "partOfSpeech": "noun",
+      "meaning": "통",
+      "example": "",
+      "exampleMeaning": "",
+      "imageUrl": "assets/images/illustrations/w_250.svg",
+      "audioUrl": "https://dict.youdao.com/dictvoice?audio=barrel&type=2",
+      "tags": [
+        "센클보카킹2026하반기",
+        "201-250"
+      ],
+      "level": "intermediate",
+      "memorized": false,
+      "wrongCount": 0
+    }
+  ]
+};

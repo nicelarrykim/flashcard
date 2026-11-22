@@ -1,10 +1,10 @@
 // js/wordManager.js
 // 다중 단어장(Deck) CRUD 관리 및 다중 사진 일괄 OCR 스캐너 모듈
 
-import { StorageManager } from './storage.js?v=20261122_19';
-import { SoundManager } from './tts.js?v=20261122_19';
-import { OCRParser } from './ocr.js?v=20261122_19';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_19';
+import { StorageManager } from './storage.js?v=20261122_21';
+import { SoundManager } from './tts.js?v=20261122_21';
+import { OCRParser } from './ocr.js?v=20261122_21';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_21';
 
 export class WordManager {
   constructor(containerId) {
@@ -271,13 +271,16 @@ export class WordManager {
 
         <!-- 하단 백업 및 초기화 영역 -->
         <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 pt-2 px-2">
-          <div class="flex items-center gap-2">
-            <button id="mgr-export-btn" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-semibold transition">
-              💾 현재 단어장 백업 (JSON)
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="mgr-export-db-btn" class="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 font-bold transition flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800">
+              <span>💾</span> DB 백업 (.db)
             </button>
-            <label class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-semibold cursor-pointer transition">
-              📂 단어장 가져오기 (JSON)
-              <input type="file" id="mgr-import-file" accept=".json" class="hidden">
+            <button id="mgr-export-btn" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-semibold transition">
+              JSON 백업
+            </button>
+            <label class="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 font-bold cursor-pointer transition flex items-center gap-1.5 border border-emerald-300 dark:border-emerald-700">
+              <span>📂</span> 단어장 가져오기 (.db / .json)
+              <input type="file" id="mgr-import-file" accept=".db,.sqlite,.sqlite3,.json" class="hidden">
             </label>
           </div>
 
@@ -415,7 +418,10 @@ export class WordManager {
     const ocrBtn = document.getElementById('mgr-open-ocr-btn');
     if (ocrBtn) ocrBtn.addEventListener('click', () => this.openMultiOCRModal());
 
-    // JSON 내보내기 & 가져오기
+    // DB 및 JSON 내보내기 & 가져오기
+    const exportDbBtn = document.getElementById('mgr-export-db-btn');
+    if (exportDbBtn) exportDbBtn.addEventListener('click', () => StorageManager.exportDB());
+
     const exportBtn = document.getElementById('mgr-export-btn');
     if (exportBtn) exportBtn.addEventListener('click', () => StorageManager.exportJSON());
 
@@ -425,11 +431,13 @@ export class WordManager {
         const file = e.target.files[0];
         if (file) {
           try {
-            await StorageManager.importJSON(file);
-            alert('단어장 데이터를 성공적으로 불러왔습니다!');
+            await StorageManager.importDatabaseFile(file);
+            alert(`단어장 [${file.name}] 데이터를 성공적으로 불러왔습니다!`);
             this.render();
           } catch (err) {
             alert('파일 불러오기 실패: ' + err.message);
+          } finally {
+            e.target.value = '';
           }
         }
       });
