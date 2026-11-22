@@ -101,7 +101,15 @@
       </div>
 
       <!-- 중앙/우측 학습 요약 뱃지 (모바일 가로스크롤 방지 슬림 패딩) -->
-      <div class="flex items-center gap-1.5 sm:gap-3">
+      <div class="flex items-center gap-1.5 sm:gap-2.5">
+        
+        <!-- 현재 학습자 프로필 뱃지 (클릭 시 관리자 모드 프롬프트) -->
+        <div id="header-profile-badge" class="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/80 px-2 py-1 rounded-xl text-xs font-bold text-amber-800 dark:text-amber-300 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/60 transition shrink-0" title="클릭하여 학습자 프로필 관리 (암호: 2217)">
+          <span id="active-profile-avatar">🛡️</span>
+          <span id="active-profile-name" class="max-w-[60px] sm:max-w-[85px] truncate">기본 학습자</span>
+          <span class="text-[10px] text-amber-600 dark:text-amber-400 font-extrabold">👑</span>
+        </div>
+
         <!-- 단어 통계 pill -->
         <div class="flex items-center gap-1 sm:gap-2 bg-slate-100 dark:bg-slate-800/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-semibold border border-slate-200/50 dark:border-slate-700/50">
           <span class="text-slate-500 dark:text-slate-400">단어 <strong id="stat-total-words" class="text-indigo-600 dark:text-indigo-400">0</strong></span>
@@ -219,6 +227,11 @@
       <button data-tab="manager" class="nav-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition whitespace-nowrap text-indigo-600 dark:text-indigo-400">
         <span>📚</span> <span>단어장 & OCR</span>
       </button>
+
+      <!-- 관리자 모드 버튼 (암호: 2217) -->
+      <button id="nav-admin-btn" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition whitespace-nowrap text-amber-700 dark:text-amber-300 bg-amber-100/70 hover:bg-amber-200 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 border border-amber-300 dark:border-amber-800 shadow-sm" title="관리자 페이지 (암호: 2217)">
+        <span>👑</span> <span>관리자</span>
+      </button>
     </div>
   </nav>
 
@@ -248,6 +261,9 @@
 
   </main>
 
+  <!-- 관리자 모달 컨테이너 -->
+  <div id="admin-modal-container"></div>
+
   <!-- 푸터 (모바일에서는 화면 확보를 위해 숨김: hidden sm:block) -->
   <footer class="mt-auto py-5 sm:py-6 border-t border-slate-200/80 dark:border-slate-800/80 text-center text-xs text-slate-400 px-3 hidden sm:block">
     <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
@@ -261,6 +277,6 @@
   </footer>
 
   <!-- 앱 메인 스크립트 (ES Module - 캐시 방지 버전 파라미터 적용) -->
-  <script type="module" src="js/app.js?v=20261122_17"></script>
+  <script type="module" src="js/app.js?v=20261122_18"></script>
 </body>
 </html>

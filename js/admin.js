@@ -1,0 +1,318 @@
+// js/admin.js
+// 관리자 인증(암호 2217) 및 다중 학습자 프로필 관리 모듈
+
+import { StorageManager } from './storage.js?v=20261122_17';
+import { KingdomManager } from './kingdom.js?v=20261122_17';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_17';
+
+export const ADMIN_PASSWORD = '2217';
+
+export class AdminManager {
+  static container = null;
+
+  static init() {
+    this.container = document.getElementById('admin-modal-container');
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = 'admin-modal-container';
+      document.body.appendChild(this.container);
+    }
+  }
+
+  /**
+   * 관리자 접근 암호 프롬프트 모달
+   */
+  static requestAccess() {
+    this.init();
+
+    this.container.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div class="text-center mb-4">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center text-2xl shadow-inner mb-3">
+              👑
+            </div>
+            <h3 class="text-lg font-black text-slate-900 dark:text-white">관리자 인증</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">학습자 프로필을 관리하려면 암호를 입력하세요.</p>
+          </div>
+
+          <form id="admin-auth-form" class="space-y-3">
+            <div>
+              <input type="password" id="admin-pass-input" placeholder="관리자 암호 4자리" maxlength="10" autofocus
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-center text-lg font-mono tracking-widest text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+              <p id="admin-auth-error" class="hidden text-xs text-rose-500 font-bold mt-1.5 text-center">암호가 일치하지 않습니다.</p>
+            </div>
+
+            <div class="flex items-center gap-2 pt-2">
+              <button type="button" id="admin-auth-cancel" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-300 text-xs font-bold transition">
+                취소
+              </button>
+              <button type="submit" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white text-xs font-bold shadow-md transition">
+                인증 확인
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    const cancelBtn = document.getElementById('admin-auth-cancel');
+    if (cancelBtn) cancelBtn.onclick = () => this.close();
+
+    const form = document.getElementById('admin-auth-form');
+    const passInput = document.getElementById('admin-pass-input');
+    const errorEl = document.getElementById('admin-auth-error');
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const val = passInput ? passInput.value.trim() : '';
+      if (val === ADMIN_PASSWORD) {
+        this.openAdminPanel();
+      } else {
+        if (errorEl) errorEl.classList.remove('hidden');
+        if (passInput) {
+          passInput.value = '';
+          passInput.focus();
+        }
+      }
+    };
+  }
+
+  /**
+   * 관리자 프로필 관리 메인 모달
+   */
+  static openAdminPanel() {
+    this.init();
+    const profiles = StorageManager.getProfiles();
+    const activeProfileId = StorageManager.getActiveProfileId();
+    const decks = StorageManager.getDecks();
+    const allWords = decks.flatMap(d => (d && Array.isArray(d.words)) ? d.words : []).filter(Boolean);
+
+    this.container.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[92vh] flex flex-col">
+          
+          <!-- 상단 헤더 -->
+          <div class="flex items-start justify-between pb-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 text-xs font-black mb-1">
+                <span>👑</span> <span>관리자 모드</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <span>학습자 프로필 & 성과 관리</span>
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                단어장은 <strong>모든 학습자가 공통</strong>으로 사용하며, 단어별 숙련도 및 <strong>나의 왕국 발전도는 프로필별로 독립적으로 관리</strong>됩니다.
+              </p>
+            </div>
+            <button id="admin-close-btn" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold">
+              ✕
+            </button>
+          </div>
+
+          <!-- 프로필 추가 버튼 바 -->
+          <div class="py-3 flex items-center justify-between gap-2 shrink-0">
+            <span class="text-xs font-bold text-slate-600 dark:text-slate-300">
+              등록된 학습자: <strong>${profiles.length}명</strong>
+            </span>
+            <button id="admin-add-profile-btn" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition flex items-center gap-1.5">
+              <span>➕</span> <span>새 학습자 프로필 추가</span>
+            </button>
+          </div>
+
+          <!-- 프로필 카드 리스트 (스크롤) -->
+          <div class="flex-1 overflow-y-auto space-y-3 pr-1 py-1">
+            ${profiles.map(prof => {
+              const isActive = prof.id === activeProfileId;
+              // 프로필별 성취도 계산
+              const pData = StorageManager.getProfileData(prof.id);
+              let totalScore = 0;
+              let memorizedCount = 0;
+              let masterCount = 0;
+              let royalGuardCount = 0;
+
+              // 임시 단어 리스트에 프로필 성취도 주입하여 왕국 전투력 계산
+              const tempWords = allWords.map(w => {
+                const copy = { ...w };
+                const pd = pData[w.id];
+                if (pd) {
+                  copy.memorized = !!pd.memorized;
+                  copy.wrongCount = pd.wrongCount || 0;
+                  copy.mastery = pd.mastery ? { ...pd.mastery } : null;
+                } else {
+                  copy.memorized = false;
+                  copy.wrongCount = 0;
+                  copy.mastery = null;
+                }
+                MasteryManager.ensureMastery(copy);
+                totalScore += copy.mastery.score || 0;
+                if (copy.memorized) memorizedCount++;
+                if (copy.mastery.status === RANK_TYPES.MASTER) masterCount++;
+                if (copy.mastery.status === RANK_TYPES.ROYAL_GUARD) royalGuardCount++;
+                return copy;
+              });
+
+              const pPower = KingdomManager.calculateKingdomPower(tempWords);
+
+              return `
+                <div class="p-4 rounded-2xl border-2 transition ${isActive ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-md' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-750/50 hover:border-slate-300'}">
+                  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    
+                    <!-- 프로필 기본 정보 -->
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-inner shrink-0">
+                        ${prof.avatar || '🛡️'}
+                      </div>
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                          <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white truncate">
+                            ${prof.name}
+                          </h4>
+                          ${isActive ? `
+                            <span class="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold shadow-sm">
+                              ✓ 현재 학습 중
+                            </span>
+                          ` : ''}
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                          ${prof.description || '등록된 설명 없음'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- 왕국 & 기사단 성취도 요약 뱃지 -->
+                    <div class="flex items-center gap-2 text-xs shrink-0 self-stretch sm:self-auto justify-between sm:justify-start bg-slate-100 dark:bg-slate-700/60 p-2 rounded-xl">
+                      <div class="text-center px-1.5">
+                        <div class="text-[10px] text-slate-400">영지 등급</div>
+                        <div class="font-extrabold text-indigo-600 dark:text-indigo-400 font-mono">T${pPower.tier?.level || 1} ${pPower.tier?.name || ''}</div>
+                      </div>
+                      <div class="w-px h-6 bg-slate-300 dark:bg-slate-600"></div>
+                      <div class="text-center px-1.5">
+                        <div class="text-[10px] text-slate-400">기사단 포인트</div>
+                        <div class="font-black text-amber-500 font-mono">${(pPower.totalPoints || 0)} pts</div>
+                      </div>
+                      <div class="w-px h-6 bg-slate-300 dark:bg-slate-600"></div>
+                      <div class="text-center px-1.5">
+                        <div class="text-[10px] text-slate-400">외움 / 마스터</div>
+                        <div class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">${memorizedCount}개 / ${masterCount}개</div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- 하단 관리 버튼 그룹 -->
+                  <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-700/60 text-xs">
+                    <div class="text-[11px] text-slate-400">
+                      생성일: ${new Date(prof.createdAt || Date.now()).toLocaleDateString('ko-KR')}
+                    </div>
+
+                    <div class="flex items-center gap-1.5">
+                      ${!isActive ? `
+                        <button data-action="switch" data-id="${prof.id}" class="prof-action-btn px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 font-bold transition">
+                          👉 이 프로필로 전환
+                        </button>
+                      ` : ''}
+
+                      <button data-action="edit" data-id="${prof.id}" class="prof-action-btn px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-semibold transition">
+                        ✏️ 수정
+                      </button>
+
+                      <button data-action="reset" data-id="${prof.id}" data-name="${prof.name}" class="prof-action-btn px-2 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 font-semibold transition" title="이 학습자의 단어 숙련도를 0점으로 초기화">
+                        🔄 성과 초기화
+                      </button>
+
+                      ${profiles.length > 1 ? `
+                        <button data-action="delete" data-id="${prof.id}" data-name="${prof.name}" class="prof-action-btn px-2 py-1 rounded-lg hover:bg-rose-100 text-rose-500 font-semibold transition" title="프로필 삭제">
+                          🗑️
+                        </button>
+                      ` : ''}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- 하단 푸터 닫기 -->
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end shrink-0">
+            <button id="admin-done-btn" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition shadow">
+              관리자 모드 닫기
+            </button>
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    this.bindAdminEvents();
+  }
+
+  static bindAdminEvents() {
+    const closeBtn = document.getElementById('admin-close-btn');
+    const doneBtn = document.getElementById('admin-done-btn');
+    if (closeBtn) closeBtn.onclick = () => this.close();
+    if (doneBtn) doneBtn.onclick = () => this.close();
+
+    // 새 프로필 추가 버튼
+    const addBtn = document.getElementById('admin-add-profile-btn');
+    if (addBtn) {
+      addBtn.onclick = () => {
+        const name = prompt('새 학습자 프로필 이름을 입력하세요 (예: 홍길동, 학생 A):');
+        if (name && name.trim()) {
+          const desc = prompt('학습자 메모/설명 (선택):') || '';
+          const avatars = ['🛡️', '⚔️', '🏹', '🧙‍♂️', '🦁', '🦅', '👑', '⭐'];
+          const avatar = avatars[Math.floor(Math.random() * avatars.length)];
+          const newProf = StorageManager.createProfile(name.trim(), desc.trim(), avatar);
+          alert(`'${newProf.name}' 학습자 프로필이 생성되었습니다!`);
+          this.openAdminPanel();
+        }
+      };
+    }
+
+    // 각 프로필 카드 액션 버튼들
+    this.container.querySelectorAll('.prof-action-btn').forEach(btn => {
+      btn.onclick = () => {
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+
+        if (action === 'switch') {
+          StorageManager.setActiveProfileId(id);
+          this.openAdminPanel();
+        } else if (action === 'edit') {
+          const prof = StorageManager.getProfiles().find(p => p.id === id);
+          if (prof) {
+            const newName = prompt('학습자 이름을 수정하세요:', prof.name);
+            if (newName && newName.trim()) {
+              const newDesc = prompt('학습자 메모/설명을 수정하세요:', prof.description || '') || '';
+              StorageManager.updateProfile(id, { name: newName.trim(), description: newDesc.trim() });
+              this.openAdminPanel();
+            }
+          }
+        } else if (action === 'reset') {
+          if (confirm(`⚠️ '${name}' 학습자의 모든 단어 숙련도, 오답노트, 기사단 및 왕국 발전도를 0점으로 완전히 초기화하시겠습니까?`)) {
+            StorageManager.resetProfileData(id);
+            alert(`'${name}' 학습자의 성과가 초기화되었습니다.`);
+            this.openAdminPanel();
+          }
+        } else if (action === 'delete') {
+          if (confirm(`⚠️ '${name}' 학습자 프로필과 해당 학습자의 모든 성과 데이터를 영구히 삭제하시겠습니까?`)) {
+            try {
+              StorageManager.deleteProfile(id);
+              alert('프로필이 삭제되었습니다.');
+              this.openAdminPanel();
+            } catch (err) {
+              alert(err.message);
+            }
+          }
+        }
+      };
+    });
+  }
+
+  static close() {
+    if (this.container) {
+      this.container.innerHTML = '';
+    }
+  }
+}

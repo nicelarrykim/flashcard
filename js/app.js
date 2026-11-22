@@ -1,15 +1,16 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261122_16';
-import { SoundManager } from './tts.js?v=20261122_16';
-import { FlashcardGame } from './games/flashcard.js?v=20261122_16';
-import { QuizGame } from './games/quiz.js?v=20261122_16';
-import { MatchGame } from './games/match.js?v=20261122_16';
-import { ScrambleGame } from './games/scramble.js?v=20261122_16';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261122_16';
-import { WordManager } from './wordManager.js?v=20261122_16';
-import { PerformanceView } from './performance.js?v=20261122_16';
+import { StorageManager } from './storage.js?v=20261122_18';
+import { SoundManager } from './tts.js?v=20261122_18';
+import { FlashcardGame } from './games/flashcard.js?v=20261122_18';
+import { QuizGame } from './games/quiz.js?v=20261122_18';
+import { MatchGame } from './games/match.js?v=20261122_18';
+import { ScrambleGame } from './games/scramble.js?v=20261122_18';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261122_18';
+import { WordManager } from './wordManager.js?v=20261122_18';
+import { PerformanceView } from './performance.js?v=20261122_18';
+import { AdminManager } from './admin.js?v=20261122_18';
 
 class App {
   constructor() {
@@ -28,10 +29,12 @@ class App {
     StorageManager.checkRoyalGuardDemotions();
 
     this.bindHeader();
+    this.bindAdmin();
     this.bindGlobalDeckSelector();
     this.bindStudyControls();
     this.bindTabs();
     this.updateStats();
+    this.updateActiveProfileBadge();
 
     // 초기 탭 렌더링
     this.switchTab('flashcard');
@@ -57,8 +60,46 @@ class App {
       this.reloadCurrentTab();
     });
 
+    // 프로필 변경 감지 (학습자가 바뀌면 해당 학습자 성취도로 전체 화면 즉시 갱신)
+    window.addEventListener('vocaquest_profile_changed', () => {
+      this.updateActiveProfileBadge();
+      this.updateStats();
+      this.renderDeckSelector();
+      this.reloadCurrentTab();
+    });
+
+    window.addEventListener('vocaquest_profiles_updated', () => {
+      this.updateActiveProfileBadge();
+    });
+
     // 전역 함수로 탭 전환 등록
     window.switchTab = (tabName) => this.switchTab(tabName);
+  }
+
+  bindAdmin() {
+    // 헤더 프로필 뱃지 및 네비게이션 관리자 버튼 클릭 시 인증 프롬프트
+    const profileBadge = document.getElementById('header-profile-badge');
+    const navAdminBtn = document.getElementById('nav-admin-btn');
+
+    if (profileBadge) {
+      profileBadge.addEventListener('click', () => {
+        AdminManager.requestAccess();
+      });
+    }
+
+    if (navAdminBtn) {
+      navAdminBtn.addEventListener('click', () => {
+        AdminManager.requestAccess();
+      });
+    }
+  }
+
+  updateActiveProfileBadge() {
+    const prof = StorageManager.getActiveProfile();
+    const nameEl = document.getElementById('active-profile-name');
+    const avatarEl = document.getElementById('active-profile-avatar');
+    if (nameEl && prof) nameEl.innerText = prof.name || '기본 학습자';
+    if (avatarEl && prof) avatarEl.innerText = prof.avatar || '🛡️';
   }
 
   bindHeader() {

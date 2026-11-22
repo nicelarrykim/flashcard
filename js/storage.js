@@ -11,16 +11,214 @@ const SETTINGS_KEY = 'vocaquest_settings_v1';
 const STUDY_RANGE_KEY = 'vocaquest_study_range_v1';
 const PHOTO_MODE_KEY = 'vocaquest_photo_mode_v1';
 
+// 프로필 및 프로필별 성취도 관리 키
+const PROFILES_KEY = 'vocaquest_profiles_v1';
+const ACTIVE_PROFILE_KEY = 'vocaquest_active_profile_v1';
+const PROFILE_DATA_PREFIX = 'vocaquest_prof_data_';
+
 export class StorageManager {
   /**
-   * 모든 단어장 목록 조회
+   * ==========================================
+   * 1. 프로필 관리 시스템 (학습자별 분리)
+   * ==========================================
+   */
+
+  /**
+   * 모든 학습자 프로필 목록 조회
+   */
+  static getProfiles() {
+    try {
+      const data = localStorage.getItem(PROFILES_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load profiles:', e);
+    }
+
+    // 기본 프로필 생성
+    const defaultProfile = {
+      id: 'prof_default',
+      name: '기본 학습자',
+      description: '메인 학습 프로필',
+      createdAt: Date.now(),
+      avatar: '🛡️'
+    };
+    const list = [defaultProfile];
+    this.saveProfiles(list);
+    return list;
+  }
+
+  static saveProfiles(profiles) {
+    try {
+      localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+      window.dispatchEvent(new CustomEvent('vocaquest_profiles_updated', { detail: profiles }));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * 현재 활성 프로필 ID
+   */
+  static getActiveProfileId() {
+    try {
+      const id = localStorage.getItem(ACTIVE_PROFILE_KEY);
+      const profiles = this.getProfiles();
+      if (id && profiles.some(p => p.id === id)) {
+        return id;
+      }
+      return profiles[0]?.id || 'prof_default';
+    } catch {
+      return 'prof_default';
+    }
+  }
+
+  /**
+   * 활성 프로필 전환
+   */
+  static setActiveProfileId(profileId) {
+    try {
+      localStorage.setItem(ACTIVE_PROFILE_KEY, profileId);
+      window.dispatchEvent(new CustomEvent('vocaquest_profile_changed', { detail: { profileId } }));
+      window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
+      window.dispatchEvent(new CustomEvent('vocaquest_mastery_changed', { detail: { profileId } }));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * 현재 활성 프로필 객체
+   */
+  static getActiveProfile() {
+    const id = this.getActiveProfileId();
+    const profiles = this.getProfiles();
+    return profiles.find(p => p.id === id) || profiles[0];
+  }
+
+  /**
+   * 새 프로필 추가
+   */
+  static createProfile(name, description = '', avatar = '⚔️') {
+    const profiles = this.getProfiles();
+    const newProfile = {
+      id: 'prof_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      name: (name || '새 학습자').trim(),
+      description: (description || '').trim(),
+      createdAt: Date.now(),
+      avatar: avatar || '⚔️'
+    };
+    profiles.push(newProfile);
+    this.saveProfiles(profiles);
+    this.setActiveProfileId(newProfile.id);
+    return newProfile;
+  }
+
+  /**
+   * 프로필 수정
+   */
+  static updateProfile(profileId, { name, description, avatar }) {
+    const profiles = this.getProfiles();
+    const profile = profiles.find(p => p.id === profileId);
+    if (profile) {
+      if (name !== undefined) profile.name = name.trim();
+      if (description !== undefined) profile.description = description.trim();
+      if (avatar !== undefined) profile.avatar = avatar;
+      this.saveProfiles(profiles);
+      return profile;
+    }
+    return null;
+  }
+
+  /**
+   * 프로필 삭제 (최소 1개 유지)
+   */
+  static deleteProfile(profileId) {
+    let profiles = this.getProfiles();
+    if (profiles.length <= 1) {
+      throw new Error('최소 1개 이상의 학습자 프로필이 유지되어야 합니다.');
+    }
+    profiles = profiles.filter(p => p.id !== profileId);
+    this.saveProfiles(profiles);
+
+    // 해당 프로필 성취도 데이터 삭제
+    try {
+      localStorage.removeItem(PROFILE_DATA_PREFIX + profileId);
+    } catch (e) {}
+
+    if (this.getActiveProfileId() === profileId) {
+      this.setActiveProfileId(profiles[0].id);
+    }
+    return profiles;
+  }
+
+  /**
+   * 특정 프로필의 단어 성취도 맵 { [wordId]: { memorized, wrongCount, mastery } }
+   */
+  static getProfileData(profileId = null) {
+    const targetId = profileId || this.getActiveProfileId();
+    try {
+      const data = localStorage.getItem(PROFILE_DATA_PREFIX + targetId);
+      if (data) {
+        return JSON.parse(data) || {};
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return {};
+  }
+
+  static saveProfileData(data, profileId = null) {
+    const targetId = profileId || this.getActiveProfileId();
+    try {
+      localStorage.setItem(PROFILE_DATA_PREFIX + targetId, JSON.stringify(data || {}));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * 특정 프로필의 성취도 데이터 초기화
+   */
+  static resetProfileData(profileId = null) {
+    const targetId = profileId || this.getActiveProfileId();
+    this.saveProfileData({}, targetId);
+    window.dispatchEvent(new CustomEvent('vocaquest_mastery_changed', { detail: { profileId: targetId } }));
+    window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
+  }
+
+  /**
+   * 단어의 성취도 상태를 현재 활성 프로필에 동기화 저장
+   */
+  static syncWordToProfile(word, profileId = null) {
+    if (!word || !word.id) return;
+    const profData = this.getProfileData(profileId);
+    profData[word.id] = {
+      memorized: !!word.memorized,
+      wrongCount: typeof word.wrongCount === 'number' ? word.wrongCount : 0,
+      mastery: word.mastery ? JSON.parse(JSON.stringify(word.mastery)) : null
+    };
+    this.saveProfileData(profData, profileId);
+  }
+
+  /**
+   * ==========================================
+   * 2. 공통 단어장(Decks) 및 단어 관리 시스템
+   * (단어장은 모든 프로필 공통, 성취도는 프로필별 분리 머지)
+   * ==========================================
    */
   static getDecks() {
     try {
       const data = localStorage.getItem(DECKS_KEY);
+      let decks = null;
+
       if (!data) {
         // 초기 기본 단어장 2개 생성
-        const initialDecks = [
+        decks = [
           {
             id: 'deck_default',
             name: '기본 추천 단어장',
@@ -36,14 +234,16 @@ export class StorageManager {
             words: TEXTBOOK_WORDS
           }
         ];
-        this.saveDecks(initialDecks);
-        return initialDecks;
+        this.saveDecks(decks);
+      } else {
+        decks = JSON.parse(data);
       }
 
-      const decks = JSON.parse(data);
       if (Array.isArray(decks) && decks.length > 0) {
-        // 단어장 객체 검증 및 보정 (words 배열 보장)
         let upgraded = false;
+        // 현재 활성 프로필의 성취도 데이터 로드
+        const profData = this.getProfileData();
+
         decks.forEach(deck => {
           if (!deck) return;
           if (!Array.isArray(deck.words)) {
@@ -56,7 +256,6 @@ export class StorageManager {
               word.imageUrl = '';
               upgraded = true;
             }
-            // 기존 단어의 audioUrl이 gstatic 404 링크이거나 대문자 포함 시 표준 유다오 소문자 원어민 MP3로 자동 보정
             if (word && word.word) {
               const cleanWord = word.word.toLowerCase().trim();
               const standardAudio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`;
@@ -67,14 +266,35 @@ export class StorageManager {
                 }
               }
             }
-            if (word) {
-              MasteryManager.ensureMastery(word);
+
+            // ⭐ 프로필별 성취도 데이터 동적 주입 (프로필 분리 핵심)
+            const pData = profData[word.id];
+            if (pData) {
+              word.memorized = !!pData.memorized;
+              word.wrongCount = typeof pData.wrongCount === 'number' ? pData.wrongCount : 0;
+              word.mastery = pData.mastery ? JSON.parse(JSON.stringify(pData.mastery)) : null;
+            } else if (word.mastery) {
+              // 기존에 단어에 직접 저장되어 있던 성취도가 있고 프로필 데이터가 없으면 최초 1회 마이그레이션
+              profData[word.id] = {
+                memorized: !!word.memorized,
+                wrongCount: typeof word.wrongCount === 'number' ? word.wrongCount : 0,
+                mastery: JSON.parse(JSON.stringify(word.mastery))
+              };
+            } else {
+              word.memorized = false;
+              word.wrongCount = 0;
+              word.mastery = null;
             }
+
+            MasteryManager.ensureMastery(word);
           });
         });
+
         if (upgraded) {
           localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
         }
+        // 마이그레이션된 성취도 영구 보존
+        this.saveProfileData(profData);
         return decks;
       }
       return this.resetToDefaultDecks();
@@ -434,6 +654,8 @@ export class StorageManager {
         if (memorized && w.wrongCount > 0) {
           w.wrongCount = Math.max(0, w.wrongCount - 1);
         }
+        // 프로필별 성취도 저장소에 동기화
+        this.syncWordToProfile(w);
         this.saveDecks(decks);
         return;
       }
@@ -450,6 +672,8 @@ export class StorageManager {
       if (w) {
         w.wrongCount = (w.wrongCount || 0) + 1;
         w.memorized = false;
+        // 프로필별 성취도 저장소에 동기화
+        this.syncWordToProfile(w);
         this.saveDecks(decks);
         return;
       }
@@ -474,6 +698,8 @@ export class StorageManager {
         } else if (action === 'fc_unknown' || action === 'quiz_wrong' || action === 'game_wrong') {
           w.memorized = false;
         }
+        // 프로필별 성취도 저장소에 동기화
+        this.syncWordToProfile(w);
         this.saveDecks(decks);
 
         // 승급 이벤트 발송
@@ -508,6 +734,7 @@ export class StorageManager {
         MasteryManager.resetMastery(w);
         w.memorized = false;
         w.wrongCount = 0;
+        this.syncWordToProfile(w);
         this.saveDecks(decks);
         window.dispatchEvent(new CustomEvent('vocaquest_mastery_changed', {
           detail: { wordId, action: 'reset' }
@@ -531,6 +758,7 @@ export class StorageManager {
             MasteryManager.resetMastery(w);
             w.memorized = false;
             w.wrongCount = 0;
+            this.syncWordToProfile(w);
             count++;
           });
         }
@@ -551,6 +779,9 @@ export class StorageManager {
       const decks = this.getDecks();
       const demotedCount = MasteryManager.checkAndApplyDemotions(decks);
       if (demotedCount > 0) {
+        decks.forEach(d => {
+          (d.words || []).forEach(w => this.syncWordToProfile(w));
+        });
         this.saveDecks(decks);
         console.log(`[VocaQuest] 왕실근위대 기간(2일) 만료로 ${demotedCount}개 단어가 고급기사로 강등되었습니다.`);
       }
