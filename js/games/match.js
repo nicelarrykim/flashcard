@@ -2,8 +2,8 @@
 // 칼(공격/영단어 8개) vs 방패(방어/한글뜻 8개) 실시간 배틀 짝맞추기 게임 모듈
 // 카드는 모두 오픈 상태이며, 정답 매칭 시 방어 효과와 함께 새 단어가 보충되어 8:8 랜덤 재배치됨
 
-import { StorageManager } from '../storage.js?v=20261122_09';
-import { SoundManager } from '../tts.js?v=20261122_09';
+import { StorageManager } from '../storage.js?v=20261122_30';
+import { SoundManager } from '../tts.js?v=20261122_30';
 
 export class MatchGame {
   constructor(containerId) {

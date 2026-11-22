@@ -1,10 +1,10 @@
 // js/admin.js
 // 관리자 인증(암호 2217) 및 다중 학습자 프로필 관리 모듈
 
-import { StorageManager } from './storage.js?v=20261122_17';
-import { KingdomManager } from './kingdom.js?v=20261122_17';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_17';
-import { ServerSyncManager } from './serverSync.js?v=20261122_25';
+import { StorageManager } from './storage.js?v=20261122_30';
+import { KingdomManager } from './kingdom.js?v=20261122_30';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_30';
+import { ServerSyncManager } from './serverSync.js?v=20261122_30';
 
 export const ADMIN_PASSWORD = '2217';
 
@@ -283,9 +283,14 @@ export class AdminManager {
       syncBtn.onclick = async () => {
         syncBtn.disabled = true;
         syncBtn.innerText = '동기화 중...';
-        await StorageManager.initServerSync();
-        alert('서버와의 프로필 및 성취도 동기화가 완료되었습니다!');
-        this.openAdminPanel();
+        try {
+          await ServerSyncManager.initSync(StorageManager);
+          alert('서버와의 프로필 및 성취도 동기화가 완료되었습니다!');
+        } catch (err) {
+          alert('동기화 중 오류가 발생했습니다: ' + (err.message || err));
+        } finally {
+          this.openAdminPanel();
+        }
       };
     }
 
@@ -479,9 +484,14 @@ export class AdminManager {
       syncBtn.onclick = async () => {
         syncBtn.disabled = true;
         syncBtn.innerText = '동기화 중...';
-        await StorageManager.initServerSync();
-        alert('서버와 동기화가 완료되었습니다!');
-        this.close();
+        try {
+          await ServerSyncManager.initSync(StorageManager);
+          alert('서버와 동기화가 완료되었습니다!');
+        } catch (err) {
+          alert('동기화 중 오류가 발생했습니다: ' + (err.message || err));
+        } finally {
+          this.close();
+        }
       };
     }
   }

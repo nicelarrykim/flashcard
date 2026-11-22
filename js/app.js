@@ -1,16 +1,17 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261122_26';
-import { SoundManager } from './tts.js?v=20261122_26';
-import { FlashcardGame } from './games/flashcard.js?v=20261122_26';
-import { QuizGame } from './games/quiz.js?v=20261122_26';
-import { MatchGame } from './games/match.js?v=20261122_26';
-import { ScrambleGame } from './games/scramble.js?v=20261122_26';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261122_26';
-import { WordManager } from './wordManager.js?v=20261122_26';
-import { PerformanceView } from './performance.js?v=20261122_26';
-import { AdminManager } from './admin.js?v=20261122_26';
+import { StorageManager } from './storage.js?v=20261122_30';
+import { ServerSyncManager } from './serverSync.js?v=20261122_30';
+import { SoundManager } from './tts.js?v=20261122_30';
+import { FlashcardGame } from './games/flashcard.js?v=20261122_30';
+import { QuizGame } from './games/quiz.js?v=20261122_30';
+import { MatchGame } from './games/match.js?v=20261122_30';
+import { ScrambleGame } from './games/scramble.js?v=20261122_30';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261122_30';
+import { WordManager } from './wordManager.js?v=20261122_30';
+import { PerformanceView } from './performance.js?v=20261122_30';
+import { AdminManager } from './admin.js?v=20261122_30';
 
 class App {
   constructor() {
@@ -39,8 +40,16 @@ class App {
     // 초기 탭 렌더링
     this.switchTab('flashcard');
 
-    // 서버 동기화 초기화 (비동기)
-    StorageManager.initServerSync();
+    // 서버 동기화 초기화 (비동기 안전 실행)
+    if (typeof ServerSyncManager !== 'undefined' && typeof ServerSyncManager.initSync === 'function') {
+      ServerSyncManager.initSync(StorageManager).catch(err => {
+        console.warn('[VocaQuest] 서버 동기화 초기화 경고:', err);
+      });
+    } else if (typeof StorageManager.initServerSync === 'function') {
+      StorageManager.initServerSync().catch(err => {
+        console.warn('[VocaQuest] 서버 동기화 초기화 경고:', err);
+      });
+    }
 
     // 단어 또는 단어장 데이터 변경 감지
     window.addEventListener('vocaquest_words_updated', () => {

@@ -1,11 +1,11 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261122_05';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_05';
-import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261122_20';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_05';
-import { ServerSyncManager } from './serverSync.js?v=20261122_25';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261122_30';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_30';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261122_30';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_30';
+import { ServerSyncManager } from './serverSync.js?v=20261122_30';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -1161,6 +1161,10 @@ export class StorageManager {
 }
 
 // 브라우저 전역 안전 접근 바인딩 (구버전 캐시 또는 모듈 분리 시 안전성 보장)
+StorageManager.initServerSync = async function() {
+  return await ServerSyncManager.initSync(StorageManager);
+};
+
 if (typeof window !== 'undefined') {
   window.StorageManager = StorageManager;
 }
