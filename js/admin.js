@@ -1,10 +1,10 @@
 // js/admin.js
 // 관리자 인증(암호 2217) 및 다중 학습자 프로필 관리 모듈
 
-import { StorageManager } from './storage.js?v=20261122_33';
-import { KingdomManager } from './kingdom.js?v=20261122_33';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_33';
-import { ServerSyncManager } from './serverSync.js?v=20261122_33';
+import { StorageManager } from './storage.js?v=20261122_35';
+import { KingdomManager } from './kingdom.js?v=20261122_35';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_35';
+import { ServerSyncManager } from './serverSync.js?v=20261122_35';
 
 export const ADMIN_PASSWORD = '2217';
 
@@ -428,14 +428,14 @@ export class AdminManager {
                 동기화 서버 주소 (API URL):
               </label>
               <div class="flex items-center gap-2">
-                <input type="text" id="server-cfg-url-input" value="${currentUrl}" placeholder="http://localhost:8080 또는 http://192.168.0.110:8080"
+                <input type="text" id="server-cfg-url-input" value="${currentUrl}" placeholder="https://... 또는 http://..."
                   class="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 font-mono text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                 <button type="button" id="server-cfg-test-btn" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-sm shrink-0">
                   연결 확인
                 </button>
               </div>
               <p class="text-[11px] text-slate-400 mt-1">
-                기본값은 비워두면 현재 웹 접속 주소를 사용합니다.
+                기본값으로 보안 HTTPS 동기화 서버 주소가 자동으로 채워집니다.
               </p>
             </div>
 

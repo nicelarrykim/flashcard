@@ -16,6 +16,9 @@ import json
 import os
 import sys
 import time
+import subprocess
+import shutil
+import re
 import mimetypes
 from urllib.parse import urlparse, parse_qs
 
@@ -374,27 +377,57 @@ class VocaQuestHandler(http.server.SimpleHTTPRequestHandler):
 class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True
 
+def start_cloudflared_tunnel(port):
+    """cloudflared를 실행하여 GitHub Pages(HTTPS)에서 차단되지 않는 공인 HTTPS URL 발급"""
+    cf_bin = shutil.which('cloudflared') or os.path.expanduser('~/.local/bin/cloudflared')
+    if not os.path.exists(cf_bin) and not shutil.which('cloudflared'):
+        return None, None
+
+    cmd = [cf_bin, 'tunnel', '--url', f'http://localhost:{port}']
+    try:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    except Exception as e:
+        return None, None
+
+    https_url = None
+    start_time = time.time()
+    for line in iter(proc.stderr.readline, ''):
+        if 'trycloudflare.com' in line:
+            m = re.search(r'https://[a-zA-Z0-9-]+\.trycloudflare\.com', line)
+            if m:
+                https_url = m.group(0)
+                break
+        if time.time() - start_time > 8:
+            break
+
+    return proc, https_url
+
 def main():
     init_db()
     server_address = ('0.0.0.0', PORT)
     httpd = ThreadingHTTPServer(server_address, VocaQuestHandler)
 
     ips = get_local_ips()
+    tunnel_proc, https_url = start_cloudflared_tunnel(PORT)
+
     print("=" * 65)
     print(f"🚀 VocaQuest 백엔드 & 동기화 서버가 실행되었습니다!")
-    print(f"📌 로컬 브라우저 접속: http://localhost:{PORT}")
+    if https_url:
+        print(f"\n🔒 [중요] GitHub Pages(HTTPS) 전용 동기화 보안 주소:")
+        print(f"   👉 {https_url}")
+        print(f"   (GitHub Pages에서 위 주소를 [동기화 서버 주소]에 넣으시면 차단 없이 100% 연결됩니다!)\n")
+    print(f"📌 로컬 네트워크 접속: http://localhost:{PORT}")
     if ips:
-        print(f"📱 스마트폰/태블릿/다른 PC 접속:")
-        for ip in ips:
-            print(f"   👉 http://{ip}:{PORT}")
+        print(f"📱 동일 Wi-Fi 접속: http://{ips[0]}:{PORT}")
     print(f"💾 데이터베이스: {DB_PATH} (SQLite 영구 보존)")
-    print(f"🛡️  다중 기기 프로필 & 성취도 실시간 동기화 지원")
     print("=" * 65)
 
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         print("\n서버를 종료합니다.")
+        if tunnel_proc:
+            tunnel_proc.terminate()
         httpd.server_close()
 
 if __name__ == '__main__':

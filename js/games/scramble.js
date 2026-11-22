@@ -1,8 +1,8 @@
 // js/games/scramble.js
 // 스펠링 스크램블 (Word Scramble) 게임 모듈
 
-import { StorageManager } from '../storage.js?v=20261122_33';
-import { SoundManager } from '../tts.js?v=20261122_33';
+import { StorageManager } from '../storage.js?v=20261122_35';
+import { SoundManager } from '../tts.js?v=20261122_35';
 
 export class ScrambleGame {
   constructor(containerId) {

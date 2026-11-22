@@ -4,6 +4,7 @@
 
 const SERVER_URL_KEY = 'vocaquest_server_custom_url_v1';
 const LAST_SYNC_KEY = 'vocaquest_last_sync_time_v1';
+export const DEFAULT_HTTPS_SERVER_URL = 'https://organizing-solaris-feel-attachments.trycloudflare.com';
 
 export class ServerSyncManager {
   static isServerConnected = false;
@@ -23,7 +24,12 @@ export class ServerSyncManager {
       }
     } catch (e) {}
 
-    // 2. 현재 웹페이지가 http:// 또는 https:// 로 제공 중인 경우
+    // 2. GitHub Pages 등 HTTPS 사이트 접속 시 기본 HTTPS 동기화 서버 주소 자동 사용
+    if (window.location.protocol === 'https:') {
+      return DEFAULT_HTTPS_SERVER_URL;
+    }
+
+    // 3. 현재 웹페이지가 http://로 제공 중인 경우
     if (window.location.protocol.startsWith('http')) {
       if (window.location.port === '8080') {
         return window.location.origin;
@@ -32,11 +38,10 @@ export class ServerSyncManager {
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.')) {
         return `http://${window.location.hostname}:8080`;
       }
-      return 'http://192.168.0.110:8080';
     }
 
-    // 3. 로컬 파일(file:///) 등으로 열었을 경우 기본 localhost:8080 사용
-    return 'http://localhost:8080';
+    // 4. 기본 동기화 주소
+    return DEFAULT_HTTPS_SERVER_URL;
   }
 
   static setCustomServerUrl(url) {
