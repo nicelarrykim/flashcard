@@ -1,10 +1,10 @@
 // js/admin.js
 // 관리자 인증(암호 2217) 및 다중 학습자 프로필 관리 모듈
 
-import { StorageManager } from './storage.js?v=20261122_30';
-import { KingdomManager } from './kingdom.js?v=20261122_30';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_30';
-import { ServerSyncManager } from './serverSync.js?v=20261122_30';
+import { StorageManager } from './storage.js?v=20261122_31';
+import { KingdomManager } from './kingdom.js?v=20261122_31';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_31';
+import { ServerSyncManager } from './serverSync.js?v=20261122_31';
 
 export const ADMIN_PASSWORD = '2217';
 
@@ -124,12 +124,15 @@ export class AdminManager {
                 </p>
               </div>
             </div>
-            <div class="flex items-center gap-1.5 ml-auto">
-              <button id="admin-manual-sync-btn" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 text-xs font-bold transition flex items-center gap-1 shadow-sm">
-                <span>🔄</span> <span>즉시 동기화</span>
+            <div class="flex items-center gap-1.5 ml-auto flex-wrap">
+              <button id="admin-banner-upload-btn" class="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="이 기기의 학습 성과를 서버로 저장">
+                <span>📤</span> <span>서버로 올리기</span>
               </button>
-              <button id="admin-server-setup-btn" class="px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 text-xs font-bold transition flex items-center gap-1 shadow-sm">
-                <span>⚙️</span> <span>서버 설정</span>
+              <button id="admin-banner-download-btn" class="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="서버의 성과 데이터를 이 기기로 받기">
+                <span>📥</span> <span>서버에서 받기</span>
+              </button>
+              <button id="admin-server-setup-btn" class="px-2.5 py-1 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                <span>⚙️</span> <span>설정</span>
               </button>
             </div>
           </div>
@@ -277,19 +280,41 @@ export class AdminManager {
     if (closeBtn) closeBtn.onclick = () => this.close();
     if (doneBtn) doneBtn.onclick = () => this.close();
 
-    // 서버 수동 동기화 버튼
-    const syncBtn = document.getElementById('admin-manual-sync-btn');
-    if (syncBtn) {
-      syncBtn.onclick = async () => {
-        syncBtn.disabled = true;
-        syncBtn.innerText = '동기화 중...';
-        try {
-          await ServerSyncManager.initSync(StorageManager);
-          alert('서버와의 프로필 및 성취도 동기화가 완료되었습니다!');
-        } catch (err) {
-          alert('동기화 중 오류가 발생했습니다: ' + (err.message || err));
-        } finally {
+    // 배너 1. 내 로컬 성과를 서버로 올리기 (업로드)
+    const bannerUploadBtn = document.getElementById('admin-banner-upload-btn');
+    if (bannerUploadBtn) {
+      bannerUploadBtn.onclick = async () => {
+        bannerUploadBtn.disabled = true;
+        bannerUploadBtn.innerText = '올리는 중...';
+        const res = await ServerSyncManager.uploadAllLocalToServer(StorageManager);
+        bannerUploadBtn.disabled = false;
+        bannerUploadBtn.innerHTML = '<span>📤</span> <span>서버로 올리기</span>';
+
+        if (res.success) {
+          alert('🎉 현재 기기의 모든 학습 성과(프로필, 단어 암기 상태, 오답, 기사단 등급, 왕국 발전도)가 서버로 완벽히 저장되었습니다!\n\n이제 스마트폰이나 다른 기기에서 열면 이 성과가 그대로 나타납니다.');
           this.openAdminPanel();
+        } else {
+          alert(`❌ 서버 업로드 실패: ${res.error}\n\n서버 설정에서 서버 주소가 http://192.168.0.110:8000 등으로 올바르게 지정되었는지 확인하세요.`);
+        }
+      };
+    }
+
+    // 배너 2. 서버 성과를 이 기기로 받기 (다운로드)
+    const bannerDownloadBtn = document.getElementById('admin-banner-download-btn');
+    if (bannerDownloadBtn) {
+      bannerDownloadBtn.onclick = async () => {
+        if (!confirm('⚠️ 서버에 저장된 학습 데이터로 이 기기의 데이터를 덮어쓰시겠습니까?')) return;
+        bannerDownloadBtn.disabled = true;
+        bannerDownloadBtn.innerText = '받는 중...';
+        const res = await ServerSyncManager.downloadFromServerToLocal(StorageManager);
+        bannerDownloadBtn.disabled = false;
+        bannerDownloadBtn.innerHTML = '<span>📥</span> <span>서버에서 받기</span>';
+
+        if (res.success) {
+          alert('✅ 서버의 최신 학습 데이터를 성공적으로 이 기기로 가져왔습니다!');
+          this.openAdminPanel();
+        } else {
+          alert(`❌ 서버 데이터 가져오기 실패: ${res.error}`);
         }
       };
     }
@@ -410,6 +435,21 @@ export class AdminManager {
               </p>
             </div>
 
+            <!-- 양방향 수동 동기화 제어 카드 -->
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 space-y-2">
+              <span class="block font-bold text-slate-800 dark:text-slate-200">데이터 동기화 방향 선택:</span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button type="button" id="server-cfg-upload-btn" class="p-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-md transition flex flex-col items-center text-center gap-1">
+                  <span class="text-sm">📤 내 로컬 성과 ➔ 서버로 올리기</span>
+                  <span class="text-[10px] font-normal opacity-90">이 기기에서 공부한 성과를 서버에 저장</span>
+                </button>
+                <button type="button" id="server-cfg-download-btn" class="p-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xs shadow-md transition flex flex-col items-center text-center gap-1">
+                  <span class="text-sm">📥 서버 성과 ➔ 이 기기로 받기</span>
+                  <span class="text-[10px] font-normal opacity-90">서버의 최신 성과로 이 기기 덮어쓰기</span>
+                </button>
+              </div>
+            </div>
+
             <!-- 다중 기기 학습 안내 카드 -->
             <div class="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 text-indigo-900 dark:text-indigo-200 space-y-1.5 leading-relaxed">
               <h4 class="font-black text-xs flex items-center gap-1.5 text-indigo-800 dark:text-indigo-300">
@@ -417,9 +457,8 @@ export class AdminManager {
               </h4>
               <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
                 <li>컴퓨터 터미널에서 <code>python3 server.py</code>를 실행합니다.</li>
-                <li>같은 Wi-Fi(공유기)에 연결된 스마트폰 또는 태블릿의 웹 브라우저를 엽니다.</li>
-                <li>서버 실행 시 출력된 주소(예: <code>http://192.168.x.x:8000</code>)로 접속합니다.</li>
-                <li><strong>모든 사용자 프로필과 단어별 숙련도/왕국 발전도가 실시간으로 서버에 저장되어 그대로 연동</strong>됩니다!</li>
+                <li>기존에 공부하던 기기에서 <strong>[📤 내 로컬 성과 ➔ 서버로 올리기]</strong>를 누릅니다.</li>
+                <li>새 기기(스마트폰 등)에서 <code>http://192.168.0.110:8000</code>으로 접속하면 이전 성과가 그대로 연동됩니다!</li>
               </ol>
             </div>
           </div>
@@ -429,11 +468,8 @@ export class AdminManager {
               기본 주소로 초기화
             </button>
             <div class="flex items-center gap-2">
-              <button type="button" id="server-cfg-close-bottom" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition">
+              <button type="button" id="server-cfg-close-bottom" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition">
                 닫기
-              </button>
-              <button type="button" id="server-cfg-sync-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-indigo-600 hover:from-emerald-600 hover:to-indigo-700 text-white text-xs font-bold shadow-md transition">
-                지금 서버와 동기화
               </button>
             </div>
           </div>
@@ -451,7 +487,47 @@ export class AdminManager {
     const urlInput = document.getElementById('server-cfg-url-input');
     const testBtn = document.getElementById('server-cfg-test-btn');
     const resetBtn = document.getElementById('server-cfg-reset-btn');
-    const syncBtn = document.getElementById('server-cfg-sync-btn');
+    const uploadBtn = document.getElementById('server-cfg-upload-btn');
+    const downloadBtn = document.getElementById('server-cfg-download-btn');
+
+    // 1. 내 로컬 성과를 서버로 올리기 (업로드)
+    if (uploadBtn) {
+      uploadBtn.onclick = async () => {
+        const val = urlInput ? urlInput.value.trim() : '';
+        uploadBtn.disabled = true;
+        uploadBtn.innerText = '서버로 올리는 중...';
+        const res = await ServerSyncManager.uploadAllLocalToServer(StorageManager, val);
+        uploadBtn.disabled = false;
+        uploadBtn.innerText = '📤 내 로컬 성과 ➔ 서버로 올리기';
+
+        if (res.success) {
+          alert('🎉 현재 기기의 모든 학습 성과(프로필, 단어 외움/오답, 기사단 등급, 왕국 발전도)가 서버로 완벽히 저장되었습니다!\n\n이제 스마트폰이나 다른 기기에서 열면 이 성과가 그대로 나타납니다.');
+          this.close();
+        } else {
+          alert(`❌ 서버 업로드 실패: ${res.error}\n\n서버 주소가 맞는지, 리눅스에서 server.py가 실행 중인지 확인하세요.`);
+        }
+      };
+    }
+
+    // 2. 서버 성과를 이 기기로 내려받기 (다운로드)
+    if (downloadBtn) {
+      downloadBtn.onclick = async () => {
+        if (!confirm('⚠️ 서버에 저장된 학습 데이터로 이 기기의 데이터를 덮어쓰시겠습니까?')) return;
+        const val = urlInput ? urlInput.value.trim() : '';
+        downloadBtn.disabled = true;
+        downloadBtn.innerText = '서버에서 받는 중...';
+        const res = await ServerSyncManager.downloadFromServerToLocal(StorageManager, val);
+        downloadBtn.disabled = false;
+        downloadBtn.innerText = '📥 서버 성과 ➔ 이 기기로 받기';
+
+        if (res.success) {
+          alert('✅ 서버의 최신 학습 데이터를 성공적으로 이 기기로 가져왔습니다!');
+          this.close();
+        } else {
+          alert(`❌ 서버 데이터 가져오기 실패: ${res.error}`);
+        }
+      };
+    }
 
     if (resetBtn) {
       resetBtn.onclick = async () => {
@@ -476,21 +552,6 @@ export class AdminManager {
           this.openServerConfigModal();
         } else {
           alert('❌ 서버에 연결할 수 없습니다. server.py가 실행 중인지 확인하세요.');
-        }
-      };
-    }
-
-    if (syncBtn) {
-      syncBtn.onclick = async () => {
-        syncBtn.disabled = true;
-        syncBtn.innerText = '동기화 중...';
-        try {
-          await ServerSyncManager.initSync(StorageManager);
-          alert('서버와 동기화가 완료되었습니다!');
-        } catch (err) {
-          alert('동기화 중 오류가 발생했습니다: ' + (err.message || err));
-        } finally {
-          this.close();
         }
       };
     }

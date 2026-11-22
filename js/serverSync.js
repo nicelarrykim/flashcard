@@ -86,6 +86,100 @@ export class ServerSyncManager {
   }
 
   /**
+   * 로컬의 모든 학습 데이터(프로필 + 모든 단어 성취도)를 서버로 강제 업로드
+   */
+  static async uploadAllLocalToServer(storageManager, targetUrl = null) {
+    const url = (targetUrl && targetUrl.trim()) ? targetUrl.trim().replace(/\/+$/, '') : this.getServerUrl();
+    const profiles = storageManager.getProfiles();
+    const profileData = {};
+
+    for (const p of profiles) {
+      profileData[p.id] = storageManager.getProfileData(p.id);
+    }
+
+    const payload = {
+      timestamp: Date.now(),
+      profiles,
+      profileData
+    };
+
+    console.log(`[ServerSync] 로컬 데이터 서버 업로드 시도: ${url}/api/sync`, payload);
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+      const res = await fetch(`${url}/api/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        this.isServerConnected = true;
+        this.serverUrl = url;
+        localStorage.setItem(SERVER_URL_KEY, url);
+        this.dispatchStatus({ status: 'online' });
+        return { success: true, count: profiles.length };
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        return { success: false, error: errJson.error || `HTTP ${res.status}` };
+      }
+    } catch (e) {
+      console.warn('[ServerSync] 서버 업로드 실패:', e);
+      return { success: false, error: e.message || '네트워크 연결 실패' };
+    }
+  }
+
+  /**
+   * 서버의 데이터를 이 기기(로컬)로 강제 내려받기
+   */
+  static async downloadFromServerToLocal(storageManager, targetUrl = null) {
+    const url = (targetUrl && targetUrl.trim()) ? targetUrl.trim().replace(/\/+$/, '') : this.getServerUrl();
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+      const res = await fetch(`${url}/api/sync`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const bundle = await res.json();
+      const serverProfiles = bundle.profiles || [];
+      const serverProfileData = bundle.profileData || {};
+
+      if (serverProfiles.length === 0) {
+        return { success: false, error: '서버에 저장된 프로필 데이터가 없습니다.' };
+      }
+
+      // 서버 데이터로 로컬 덮어쓰기
+      storageManager.saveProfiles(serverProfiles);
+      for (const [pid, pData] of Object.entries(serverProfileData)) {
+        storageManager.saveProfileData(pData, pid);
+      }
+
+      this.isServerConnected = true;
+      this.serverUrl = url;
+      localStorage.setItem(SERVER_URL_KEY, url);
+      this.dispatchStatus({ status: 'online' });
+      window.dispatchEvent(new CustomEvent('vocaquest_sync_completed'));
+
+      return { success: true, count: serverProfiles.length };
+    } catch (e) {
+      console.warn('[ServerSync] 서버 다운로드 실패:', e);
+      return { success: false, error: e.message || '네트워크 연결 실패' };
+    }
+  }
+
+  /**
    * 초기 전체 동기화 실행 (앱 구동 시 호출)
    */
   static async initSync(storageManager) {
@@ -108,6 +202,25 @@ export class ServerSyncManager {
 
       // 로컬 프로필 조회
       const localProfiles = storageManager.getProfiles();
+
+      // 서버가 완전히 비어있고 로컬에 성취도 데이터가 있는 경우, 로컬 데이터를 서버로 자동 업로드 (로컬 성과 보존)
+      let totalLocalRecords = 0;
+      for (const p of localProfiles) {
+        totalLocalRecords += Object.keys(storageManager.getProfileData(p.id) || {}).length;
+      }
+      let totalServerRecords = 0;
+      for (const p of Object.values(serverProfileData)) {
+        totalServerRecords += Object.keys(p || {}).length;
+      }
+
+      if (totalLocalRecords > 0 && totalServerRecords === 0) {
+        console.log('[ServerSync] 서버가 비어있어 로컬 성과를 서버로 자동 승격 업로드합니다.');
+        await this.uploadAllLocalToServer(storageManager);
+        localStorage.setItem(LAST_SYNC_KEY, Date.now().toString());
+        window.dispatchEvent(new CustomEvent('vocaquest_sync_completed'));
+        return;
+      }
+
       const mergedProfiles = [...localProfiles];
 
       // 서버 프로필을 로컬에 병합
