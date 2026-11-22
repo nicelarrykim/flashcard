@@ -3,6 +3,7 @@
 
 import { StorageManager } from '../storage.js?v=20261122_05';
 import { SoundManager } from '../tts.js?v=20261122_05';
+import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261122_05';
 
 export class FlashcardGame {
   constructor(containerId) {
@@ -23,14 +24,14 @@ export class FlashcardGame {
   }
 
   loadWords() {
-    const mgr = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getWords === 'function')
-      ? StorageManager
-      : (window.StorageManager || null);
-    const allWords = mgr?.getWords?.() || [];
+    const studyWords = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getStudyWords === 'function')
+      ? StorageManager.getStudyWords()
+      : ((typeof StorageManager !== 'undefined' && typeof StorageManager?.getWords === 'function') ? StorageManager.getWords() : []);
+
     if (this.filterOnlyWrong) {
-      this.words = allWords.filter(w => (w.wrongCount || 0) > 0);
+      this.words = studyWords.filter(w => (w.wrongCount || 0) > 0);
     } else {
-      this.words = [...allWords];
+      this.words = [...studyWords];
     }
 
     if (this.isShuffled) {
@@ -84,12 +85,21 @@ export class FlashcardGame {
 
     const word = this.words[this.currentIndex] || this.words[0];
     if (!word) return;
+
+    // 플래시카드에서 처음 본 단어: 기본 20점 시작 (노출만 됨)
+    StorageManager.updateWordMastery(word.id, 'fc_seen');
+
     const total = this.words.length;
     const progressPercent = Math.round(((this.currentIndex + 1) / total) * 100);
     const mgr = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getActiveDeck === 'function')
       ? StorageManager
       : (window.StorageManager || null);
     const activeDeck = mgr?.getActiveDeck?.() || { name: '단어장' };
+
+    const wordRank = MasteryManager.getWordRank(word);
+    const rankCfg = RANK_CONFIG[wordRank] || RANK_CONFIG[RANK_TYPES.RECRUIT];
+    const knightSvg = MasteryManager.getWalkingKnightIcon(wordRank, 36);
+    const scoreVal = word.mastery ? word.mastery.score : 0;
 
     this.container.innerHTML = `
       <div class="max-w-xl mx-auto flex flex-col items-center">
@@ -102,14 +112,17 @@ export class FlashcardGame {
             <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">
               ${this.currentIndex + 1} / ${total}
             </span>
+            <!-- 기사 등급 미니 뱃지 -->
+            <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border ${rankCfg.badgeBg}">
+              <div class="w-5 h-5 flex items-center justify-center shrink-0">
+                ${MasteryManager.getWalkingKnightIcon(wordRank, 20)}
+              </div>
+              <span>${rankCfg.name}</span>
+              <span class="font-mono text-[11px] opacity-80">(${scoreVal}점)</span>
+            </div>
             ${word.wrongCount > 0 ? `
               <span class="px-2 py-0.5 text-xs font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300 rounded-full">
                 오답 ${word.wrongCount}회
-              </span>
-            ` : ''}
-            ${word.memorized ? `
-              <span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 rounded-full">
-                암기완료 ✓
               </span>
             ` : ''}
           </div>
@@ -146,9 +159,10 @@ export class FlashcardGame {
                     ${word.partOfSpeech || 'word'}
                   </span>
                 </div>
-                <span class="text-xs text-slate-400 flex items-center gap-1">
-                  <span>💡 클릭하여 뒤집기</span>
-                </span>
+                <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <div class="w-5 h-5 flex items-center justify-center">${knightSvg}</div>
+                  <span>${rankCfg.name}</span>
+                </div>
               </div>
 
               <div class="my-auto flex flex-col items-center">
@@ -225,17 +239,17 @@ export class FlashcardGame {
           <div class="grid grid-cols-3 gap-3 w-full">
             <button id="fc-hard-btn" class="py-3 px-2 rounded-2xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 font-semibold transition transform hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-1">
               <span class="text-lg">❌</span>
-              <span class="text-sm">모름 (1)</span>
+              <span class="text-sm font-bold">모르겠어요 (-5)</span>
             </button>
 
             <button id="fc-good-btn" class="py-3 px-2 rounded-2xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-300 font-semibold transition transform hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-1">
               <span class="text-lg">🤔</span>
-              <span class="text-sm">헷갈림 (2)</span>
+              <span class="text-sm font-bold">헷갈려요 (유지)</span>
             </button>
 
             <button id="fc-easy-btn" class="py-3 px-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-semibold transition transform hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-1">
               <span class="text-lg">✅</span>
-              <span class="text-sm">외움 (3)</span>
+              <span class="text-sm font-bold">잘 알아요 (+15)</span>
             </button>
           </div>
 
@@ -296,13 +310,18 @@ export class FlashcardGame {
     if (!word) return;
 
     if (type === 'easy') {
+      // 플래시카드에서 "잘 알아요" 선택: +15점 (단, 플래시카드만으로는 최대 70점까지만 상승)
+      StorageManager.updateWordMastery(word.id, 'fc_know');
       StorageManager.markMemorized(word.id, true);
       SoundManager.playTone('correct');
     } else if (type === 'hard') {
+      // 플래시카드에서 "모르겠어요" 선택: -5점 (최소 0점 유지)
+      StorageManager.updateWordMastery(word.id, 'fc_unknown');
       StorageManager.recordMistake(word.id);
       SoundManager.playTone('wrong');
     } else {
-      // good: 헷갈림
+      // good: "헷갈려요" 선택: 점수 유지
+      StorageManager.updateWordMastery(word.id, 'fc_confused');
       SoundManager.playTone('flip');
     }
 

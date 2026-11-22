@@ -29,9 +29,9 @@ export class MatchGame {
     const mgr = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getActiveDeck === 'function')
       ? StorageManager
       : (window.StorageManager || null);
-    const allWords = mgr?.getWords?.() || [];
+    const allWords = StorageManager.getStudyWords ? StorageManager.getStudyWords() : (mgr?.getWords?.() || []);
     const activeDeck = mgr?.getActiveDeck?.() || { name: '기본 단어장' };
-    const canPlay = allWords.length >= this.pairCount;
+    const canPlay = allWords.length >= this.pairCount || (mgr?.getWords?.() || []).length >= this.pairCount;
 
     this.container.innerHTML = `
       <div class="max-w-md mx-auto text-center py-10 px-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
@@ -62,7 +62,10 @@ export class MatchGame {
   }
 
   startGame() {
-    const allWords = StorageManager.getWords();
+    let allWords = StorageManager.getStudyWords ? StorageManager.getStudyWords() : StorageManager.getWords();
+    if (allWords.length < this.pairCount) {
+      allWords = StorageManager.getActiveWords ? StorageManager.getActiveWords() : StorageManager.getWords();
+    }
     if (allWords.length < this.pairCount) return;
 
     // 무작위로 pairCount개의 단어 선정
@@ -217,6 +220,7 @@ export class MatchGame {
           first.card.isMatched = true;
           second.card.isMatched = true;
           this.matchedCount++;
+          StorageManager.updateWordMastery(first.card.wordId, 'game_correct');
           SoundManager.playTone('correct');
 
           this.updateCardUI(first.index);

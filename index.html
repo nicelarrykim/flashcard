@@ -26,7 +26,7 @@
   </script>
 
   <!-- 커스텀 스타일 (3D 플립 등) -->
-  <link rel="stylesheet" href="css/style.css?v=20261122_05">
+  <link rel="stylesheet" href="css/style.css?v=20261122_06">
 
   <!-- Tesseract.js OCR 라이브러리 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -37,8 +37,8 @@
 <body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200 bg-grid-pattern">
 
   <!-- 전역 비상 오류 알림 및 데이터 복구 배너 -->
-  <div id="vq-error-box" class="hidden fixed top-4 inset-x-4 max-w-xl mx-auto z-50 p-4 rounded-2xl bg-rose-50 border-2 border-rose-400 text-rose-800 text-sm shadow-2xl">
-    <div class="flex items-start gap-3">
+  <div class="flex items-start gap-3">
+      <div id="vq-error-box" class="hidden fixed top-4 inset-x-4 max-w-xl mx-auto z-50 p-4 rounded-2xl bg-rose-50 border-2 border-rose-400 text-rose-800 text-sm shadow-2xl">
       <span class="text-2xl">⚠️</span>
       <div class="flex-1">
         <h3 class="font-black text-rose-900 mb-1">앱 실행 중 오류가 발생했습니다</h3>
@@ -164,7 +164,11 @@
       </button>
 
       <button data-tab="speed-drop" class="nav-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition whitespace-nowrap">
-        <span>☄️</span> <span>단어 낙하</span>
+        <span>🛡️</span> <span>단어 낙하 방패</span>
+      </button>
+
+      <button data-tab="performance" class="nav-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition whitespace-nowrap text-purple-600 dark:text-purple-400">
+        <span>🛡️</span> <span>개인 성과</span>
       </button>
 
       <button data-tab="manager" class="nav-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition whitespace-nowrap text-indigo-600 dark:text-indigo-400">
@@ -176,6 +180,9 @@
   <!-- 메인 콘텐츠 영역 -->
   <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 md:p-8">
     
+    <!-- 0. 개인 학습 성과 및 기사단 승급 탭 -->
+    <section id="tab-performance" class="tab-content hidden"></section>
+
     <!-- 1. 플래시카드 탭 -->
     <section id="tab-flashcard" class="tab-content"></section>
 
@@ -209,6 +216,6 @@
   </footer>
 
   <!-- 앱 메인 스크립트 (ES Module - 캐시 방지 버전 파라미터 적용) -->
-  <script type="module" src="js/app.js?v=20261122_05"></script>
+  <script type="module" src="js/app.js?v=20261122_09"></script>
 </body>
 </html>

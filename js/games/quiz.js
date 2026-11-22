@@ -3,6 +3,7 @@
 
 import { StorageManager } from '../storage.js?v=20261122_05';
 import { SoundManager } from '../tts.js?v=20261122_05';
+import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261122_05';
 
 export class QuizGame {
   constructor(containerId) {
@@ -30,29 +31,49 @@ export class QuizGame {
   renderStartScreen() {
     this.container = this.container || document.getElementById(this.containerId);
     if (!this.container) return;
+    const studyWords = StorageManager.getStudyWords ? StorageManager.getStudyWords() : StorageManager.getWords();
+    const allWords = StorageManager.getActiveWords ? StorageManager.getActiveWords() : StorageManager.getWords();
     const mgr = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getActiveDeck === 'function')
       ? StorageManager
       : (window.StorageManager || null);
-    const allWords = mgr?.getWords?.() || [];
     const activeDeck = mgr?.getActiveDeck?.() || { name: '기본 단어장' };
-    const canPlay = allWords.length >= 4;
+    const canPlay = studyWords.length >= 4 || allWords.length >= 4;
 
     this.container.innerHTML = `
       <div class="max-w-md mx-auto text-center py-10 px-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
         <div class="text-6xl mb-4">⚡</div>
         <div class="inline-block px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-black mb-3">
-          📖 단어장: ${activeDeck?.name || '기본 단어장'} (${allWords.length}단어)
+          📖 단어장: ${activeDeck?.name || '기본 단어장'} (도전 가능: ${studyWords.length}단어 / 전체: ${allWords.length}단어)
         </div>
         <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">사지선다 스피드 퀴즈</h2>
         <p class="text-slate-500 dark:text-slate-400 mb-6 text-sm">
           제한시간 안에 올바른 보기를 골라보세요!<br>
-          연속으로 맞추면 <strong>콤보 보너스 점수</strong>가 주어집니다.
+          빠르게 맞추거나 연속 정답 시 <strong>숙련도 보너스 (+15점)</strong>가 부여됩니다.<br>
+          <span class="text-xs text-indigo-500 dark:text-indigo-400 font-semibold">고급기사 상태에서 2연속 정답 시 왕실근위대로 승급합니다! 👑</span>
         </p>
 
         ${!canPlay ? `
           <div class="p-4 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 rounded-2xl text-sm mb-4">
             퀴즈를 진행하려면 최소 4개 이상의 단어가 필요합니다. 단어장에서 단어를 추가해주세요.
           </div>
+        ` : (studyWords.length < 4 && allWords.length >= 4) ? `
+          <div class="p-4 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 rounded-2xl text-sm mb-4">
+            🎉 현재 단어장의 거의 모든 단어가 왕실근위대 또는 마스터 등급을 획득했습니다!<br>
+            전체 단어로 복습 퀴즈를 진행합니다.
+          </div>
+          <!-- 모드 선택 -->
+          <div class="mb-6 flex justify-center gap-2">
+            <button id="quiz-mode-en" class="px-4 py-2 rounded-xl text-sm font-semibold transition ${this.mode === 'en-to-ko' ? 'bg-indigo-600 text-white shadow' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}">
+              영어 ➔ 한국어 뜻
+            </button>
+            <button id="quiz-mode-ko" class="px-4 py-2 rounded-xl text-sm font-semibold transition ${this.mode === 'ko-to-en' ? 'bg-indigo-600 text-white shadow' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}">
+              한국어 뜻 ➔ 영어
+            </button>
+          </div>
+
+          <button id="quiz-start-btn" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-lg rounded-2xl shadow-lg shadow-indigo-500/30 transition transform hover:-translate-y-0.5 active:translate-y-0">
+            복습 퀴즈 시작하기 🚀
+          </button>
         ` : `
           <!-- 모드 선택 -->
           <div class="mb-6 flex justify-center gap-2">
@@ -83,11 +104,15 @@ export class QuizGame {
   }
 
   startGame() {
-    const allWords = StorageManager.getWords();
-    if (allWords.length < 4) return;
+    let pool = StorageManager.getStudyWords ? StorageManager.getStudyWords() : StorageManager.getWords();
+    if (pool.length < 4) {
+      // 4개 미만인 경우 전체 단어로 폴백
+      pool = StorageManager.getActiveWords ? StorageManager.getActiveWords() : StorageManager.getWords();
+    }
+    if (pool.length < 4) return;
 
     // 문제 셔플
-    this.words = [...allWords].sort(() => Math.random() - 0.5);
+    this.words = [...pool].sort(() => Math.random() - 0.5);
     this.totalQuestions = Math.min(10, this.words.length);
     this.currentIndex = 0;
     this.score = 0;
@@ -115,6 +140,11 @@ export class QuizGame {
 
     this.timeLeft = this.maxTime;
 
+    const wordRank = MasteryManager.getWordRank(currentWord);
+    const rankCfg = RANK_CONFIG[wordRank] || RANK_CONFIG[RANK_TYPES.RECRUIT];
+    const knightSvg = MasteryManager.getWalkingKnightIcon(wordRank, 24);
+    const scoreVal = currentWord.mastery ? currentWord.mastery.score : 0;
+
     this.container.innerHTML = `
       <div class="max-w-xl mx-auto flex flex-col items-center">
         <!-- 상단 헤더: 점수, 콤보, 문제 번호 -->
@@ -129,8 +159,15 @@ export class QuizGame {
               </span>
             ` : ''}
           </div>
-          <div class="text-lg font-black text-indigo-600 dark:text-indigo-400">
-            ${this.score} 점
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${rankCfg.badgeBg}">
+              <div class="w-5 h-5 flex items-center justify-center">${knightSvg}</div>
+              <span>${rankCfg.name}</span>
+              <span class="font-mono text-[11px]">(${scoreVal}점)</span>
+            </div>
+            <div class="text-lg font-black text-indigo-600 dark:text-indigo-400">
+              ${this.score} 점
+            </div>
           </div>
         </div>
 
@@ -138,6 +175,9 @@ export class QuizGame {
         <div class="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-6">
           <div id="quiz-timer-bar" class="h-full bg-indigo-500 rounded-full transition-all duration-100 ease-linear" style="width: 100%"></div>
         </div>
+
+        <!-- 승급 토스트 알림 컨테이너 -->
+        <div id="quiz-promotion-banner" class="hidden w-full mb-4 p-3 rounded-2xl text-center shadow-lg transform transition-all"></div>
 
         <!-- 문제 카드 -->
         <div class="w-full bg-gradient-to-br from-indigo-500 via-purple-600 to-indigo-700 text-white rounded-3xl p-8 mb-6 text-center shadow-xl relative overflow-hidden">
@@ -231,15 +271,36 @@ export class QuizGame {
           const pointsEarned = 100 + comboBonus + timeBonus;
           this.score += pointsEarned;
 
+          // 게임에서 정답: +10점 (빠르게 맞추거나 연속 정답이면 보너스 +5점 -> 총 15점)
+          const isQuick = this.timeLeft >= 5;
+          const masteryResult = StorageManager.updateWordMastery(currentWord.id, 'quiz_correct', {
+            isQuick,
+            combo: this.combo
+          });
+
           btn.classList.remove('border-slate-200', 'dark:border-slate-700');
           btn.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/60');
           btn.querySelector('.option-indicator').innerHTML = '✅';
           btn.querySelector('.option-indicator').classList.remove('opacity-0');
 
           SoundManager.playTone('correct');
+
+          let delay = 1200;
+          if (masteryResult && (masteryResult.promotedToMaster || masteryResult.promotedToRoyalGuard)) {
+            this.showPromotionToast(currentWord, masteryResult);
+            delay = 2000;
+          }
+
+          setTimeout(() => {
+            this.currentIndex++;
+            this.renderQuestion();
+          }, delay);
         } else {
           this.combo = 0;
           this.wrongAnswers.push(currentWord);
+
+          // 게임에서 오답: -10점 (최소 0점 유지)
+          StorageManager.updateWordMastery(currentWord.id, 'quiz_wrong');
           StorageManager.recordMistake(currentWord.id);
 
           btn.classList.remove('border-slate-200', 'dark:border-slate-700');
@@ -257,19 +318,55 @@ export class QuizGame {
           }
 
           SoundManager.playTone('wrong');
-        }
 
-        setTimeout(() => {
-          this.currentIndex++;
-          this.renderQuestion();
-        }, 1200);
+          setTimeout(() => {
+            this.currentIndex++;
+            this.renderQuestion();
+          }, 1200);
+        }
       });
     });
+  }
+
+  showPromotionToast(word, result) {
+    const banner = document.getElementById('quiz-promotion-banner');
+    if (!banner) return;
+
+    if (result.promotedToMaster) {
+      banner.className = 'w-full mb-4 p-4 rounded-2xl text-center shadow-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white font-extrabold flex items-center justify-center gap-3 animate-bounce';
+      banner.innerHTML = `
+        <span class="text-3xl">🌟</span>
+        <div>
+          <div class="text-sm uppercase tracking-wider text-emerald-100">최종 마스터 등극!</div>
+          <div class="text-base font-black">'${word.word}' 단어가 전설의 마스터 등급으로 승급했습니다!</div>
+          <div class="text-xs text-teal-100 font-normal">앞으로 플래시카드와 퀴즈를 졸업하여 등장하지 않습니다.</div>
+        </div>
+      `;
+      SoundManager.playTone('fanfare');
+      if (typeof window.confetti === 'function') {
+        window.confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+      }
+    } else if (result.promotedToRoyalGuard) {
+      banner.className = 'w-full mb-4 p-4 rounded-2xl text-center shadow-xl bg-gradient-to-r from-rose-500 via-amber-500 to-yellow-500 text-white font-extrabold flex items-center justify-center gap-3 animate-pulse';
+      banner.innerHTML = `
+        <span class="text-3xl">👑</span>
+        <div>
+          <div class="text-sm uppercase tracking-wider text-amber-100">왕실근위대 승급 (2연속 정답 달성!)</div>
+          <div class="text-base font-black">'${word.word}' 단어가 왕실근위대로 임명되었습니다!</div>
+          <div class="text-xs text-amber-100 font-normal">앞으로 2일간 퀴즈/플래시카드에서 제외되며, 3번 승급 시 마스터가 됩니다 (${word.mastery.promotionsToRoyalGuard}/3).</div>
+        </div>
+      `;
+      SoundManager.playTone('fanfare');
+      if (typeof window.confetti === 'function') {
+        window.confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 } });
+      }
+    }
   }
 
   handleTimeOut(currentWord) {
     this.combo = 0;
     this.wrongAnswers.push(currentWord);
+    StorageManager.updateWordMastery(currentWord.id, 'quiz_wrong');
     StorageManager.recordMistake(currentWord.id);
     SoundManager.playTone('wrong');
 

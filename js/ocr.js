@@ -425,9 +425,6 @@ export class OCRParser {
 
   static generateAudioUrl(word) {
     const clean = word.toLowerCase().trim();
-    if (!clean.includes(' ') && /^[a-z\-]+$/.test(clean)) {
-      return `https://ssl.gstatic.com/dictionary/static/sounds/20200429/${clean}--_us_1.mp3`;
-    }
     return `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(clean)}&type=2`;
   }
 

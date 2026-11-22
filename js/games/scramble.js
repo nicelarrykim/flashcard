@@ -29,7 +29,7 @@ export class ScrambleGame {
     const mgr = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getActiveDeck === 'function')
       ? StorageManager
       : (window.StorageManager || null);
-    const allWords = mgr?.getWords?.() || [];
+    const allWords = StorageManager.getStudyWords ? StorageManager.getStudyWords() : (mgr?.getWords?.() || []);
     const activeDeck = mgr?.getActiveDeck?.() || { name: '기본 단어장' };
     const canPlay = allWords.length >= 1;
 
@@ -61,7 +61,10 @@ export class ScrambleGame {
   }
 
   startGame() {
-    const allWords = StorageManager.getWords();
+    let allWords = StorageManager.getStudyWords ? StorageManager.getStudyWords() : StorageManager.getWords();
+    if (allWords.length === 0) {
+      allWords = StorageManager.getActiveWords ? StorageManager.getActiveWords() : StorageManager.getWords();
+    }
     if (allWords.length === 0) return;
 
     this.words = [...allWords].sort(() => Math.random() - 0.5);
@@ -212,6 +215,7 @@ export class ScrambleGame {
 
     const skipBtn = document.getElementById('scramble-skip-btn');
     if (skipBtn) skipBtn.addEventListener('click', () => {
+      StorageManager.updateWordMastery(this.currentWord.id, 'game_wrong');
       StorageManager.recordMistake(this.currentWord.id);
       this.streak = 0;
       this.currentIndex++;
@@ -288,6 +292,7 @@ export class ScrambleGame {
         this.streak++;
         const points = this.hintUsed ? 50 : (100 + (this.streak - 1) * 20);
         this.score += points;
+        StorageManager.updateWordMastery(this.currentWord.id, 'game_correct', { combo: this.streak });
         StorageManager.markMemorized(this.currentWord.id, true);
         SoundManager.playTone('correct');
         SoundManager.speak(this.currentWord.word, this.currentWord.audioUrl);

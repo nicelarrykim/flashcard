@@ -1,14 +1,15 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261122_05';
-import { SoundManager } from './tts.js?v=20261122_05';
-import { FlashcardGame } from './games/flashcard.js?v=20261122_05';
-import { QuizGame } from './games/quiz.js?v=20261122_05';
-import { MatchGame } from './games/match.js?v=20261122_05';
-import { ScrambleGame } from './games/scramble.js?v=20261122_05';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261122_05';
-import { WordManager } from './wordManager.js?v=20261122_05';
+import { StorageManager } from './storage.js?v=20261122_09';
+import { SoundManager } from './tts.js?v=20261122_09';
+import { FlashcardGame } from './games/flashcard.js?v=20261122_09';
+import { QuizGame } from './games/quiz.js?v=20261122_09';
+import { MatchGame } from './games/match.js?v=20261122_09';
+import { ScrambleGame } from './games/scramble.js?v=20261122_09';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261122_09';
+import { WordManager } from './wordManager.js?v=20261122_09';
+import { PerformanceView } from './performance.js?v=20261122_09';
 
 class App {
   constructor() {
@@ -19,9 +20,13 @@ class App {
     this.scrambleGame = new ScrambleGame('tab-scramble');
     this.speedDropGame = new SpeedDropGame('tab-speed-drop');
     this.wordManager = new WordManager('tab-manager');
+    this.performanceView = new PerformanceView('tab-performance');
   }
 
   init() {
+    // 왕실근위대 2일 초과 자동 강등 확인
+    StorageManager.checkRoyalGuardDemotions();
+
     this.bindHeader();
     this.bindGlobalDeckSelector();
     this.bindTabs();
@@ -193,6 +198,8 @@ class App {
       this.speedDropGame.init();
     } else if (tabName === 'manager') {
       this.wordManager.init();
+    } else if (tabName === 'performance') {
+      this.performanceView.init();
     }
   }
 

@@ -3,6 +3,7 @@
 
 import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261122_05';
 import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_05';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_05';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -52,6 +53,20 @@ export class StorageManager {
             if (word && word.imageUrl) {
               word.imageUrl = '';
               upgraded = true;
+            }
+            // 기존 단어의 audioUrl이 gstatic 404 링크이거나 대문자 포함 시 표준 유다오 소문자 원어민 MP3로 자동 보정
+            if (word && word.word) {
+              const cleanWord = word.word.toLowerCase().trim();
+              const standardAudio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`;
+              if (!word.audioUrl || word.audioUrl.includes('gstatic.com') || word.audioUrl.includes('Spring') || word.audioUrl !== standardAudio) {
+                if (word.audioUrl !== standardAudio) {
+                  word.audioUrl = standardAudio;
+                  upgraded = true;
+                }
+              }
+            }
+            if (word) {
+              MasteryManager.ensureMastery(word);
             }
           });
         });
@@ -123,18 +138,34 @@ export class StorageManager {
   }
 
   /**
-   * 현재 활성 단어장의 단어 목록 (플래시카드 및 게임에서 사용)
+   * 현재 활성 단어장의 단어 목록 (전체 단어 반환 - 관리/성과용)
    */
   static getActiveWords() {
     const deck = this.getActiveDeck();
     if (!deck || !Array.isArray(deck.words)) return [];
     const list = [...deck.words].filter(Boolean);
+    list.forEach(w => MasteryManager.ensureMastery(w));
     list.sort((a, b) => {
       const numA = (a && typeof a.number === 'number') ? a.number : 999999;
       const numB = (b && typeof b.number === 'number') ? b.number : 999999;
       return numA - numB;
     });
     return list;
+  }
+
+  /**
+   * 플래시카드 & 퀴즈/게임용 단어 목록 조회
+   * 규칙: 왕실근위대(2일 이내)와 마스터 등급 단어는 학습 대상에서 제외!
+   * @param {boolean} [includeGraduated=false] 졸업 단어 포함 여부
+   */
+  static getStudyWords(includeGraduated = false) {
+    // 자동 강등 확인
+    this.checkRoyalGuardDemotions();
+    const activeWords = this.getActiveWords();
+    if (includeGraduated) {
+      return activeWords;
+    }
+    return activeWords.filter(w => !MasteryManager.isExcludedFromStudy(w));
   }
 
   /**
@@ -206,7 +237,7 @@ export class StorageManager {
       example: wordData.example?.trim() || '',
       exampleMeaning: wordData.exampleMeaning?.trim() || '',
       imageUrl: wordData.imageUrl?.trim() || '',
-      audioUrl: wordData.audioUrl?.trim() || `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`,
+      audioUrl: wordData.audioUrl?.trim() || `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord.toLowerCase())}&type=2`,
       tags: wordData.tags || ['custom'],
       level: wordData.level || 'intermediate',
       memorized: false,
@@ -215,6 +246,7 @@ export class StorageManager {
     };
 
     deck.words.unshift(newWord);
+    MasteryManager.ensureMastery(newWord);
     // 번호가 있다면 번호순 정렬
     deck.words.sort((a, b) => {
       if (a.number && b.number) return a.number - b.number;
@@ -237,7 +269,7 @@ export class StorageManager {
     const createdList = (wordsArray || []).filter(Boolean).map((w, index) => {
       const cleanWord = (w && w.word) ? String(w.word).trim() : 'word';
       const cleanMeaning = (w && w.meaning) ? String(w.meaning).trim() : '';
-      return {
+      const item = {
         id: 'w_' + (w.number || (Date.now() + index)) + '_' + Math.random().toString(36).substr(2, 5),
         number: w.number ? parseInt(w.number, 10) : null,
         word: cleanWord,
@@ -247,13 +279,15 @@ export class StorageManager {
         example: w.example?.trim() || '',
         exampleMeaning: w.exampleMeaning?.trim() || '',
         imageUrl: w.imageUrl?.trim() || '',
-        audioUrl: w.audioUrl?.trim() || `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`,
+        audioUrl: w.audioUrl?.trim() || `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord.toLowerCase())}&type=2`,
         tags: w.tags || ['imported'],
         level: w.level || 'intermediate',
         memorized: false,
         wrongCount: 0,
         createdAt: Date.now()
       };
+      MasteryManager.ensureMastery(item);
+      return item;
     });
 
     deck.words = [...createdList, ...deck.words];
@@ -333,6 +367,111 @@ export class StorageManager {
         this.saveDecks(decks);
         return;
       }
+    }
+  }
+
+  /**
+   * 단어 숙련도 활동 반영
+   * @param {string} wordId 단어 ID
+   * @param {string} action 'fc_seen' | 'fc_know' | 'fc_confused' | 'fc_unknown' | 'quiz_correct' | 'quiz_wrong' | 'game_correct' | 'game_wrong' | 'reset'
+   * @param {Object} meta 부가 정보
+   */
+  static updateWordMastery(wordId, action, meta = {}) {
+    const decks = this.getDecks();
+    for (const deck of decks) {
+      const w = deck.words.find(item => item.id === wordId);
+      if (w) {
+        const result = MasteryManager.applyAction(w, action, meta);
+        // memorized 상태 동기화 (고급기사 이상 또는 80점 이상 시 memorized = true)
+        if (w.mastery.score >= 80) {
+          w.memorized = true;
+        } else if (action === 'fc_unknown' || action === 'quiz_wrong' || action === 'game_wrong') {
+          w.memorized = false;
+        }
+        this.saveDecks(decks);
+
+        // 승급 이벤트 발송
+        if (result.promotedToMaster || result.promotedToRoyalGuard) {
+          window.dispatchEvent(new CustomEvent('vocaquest_rank_promoted', {
+            detail: {
+              word: w,
+              toRank: result.newRank,
+              isMaster: result.promotedToMaster,
+              isRoyalGuard: result.promotedToRoyalGuard
+            }
+          }));
+        }
+
+        window.dispatchEvent(new CustomEvent('vocaquest_mastery_changed', {
+          detail: { wordId, action, ...result }
+        }));
+        return result;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * 특정 단어 숙련도 0점/초기 상태로 리셋
+   */
+  static resetWordMastery(wordId) {
+    const decks = this.getDecks();
+    for (const deck of decks) {
+      const w = deck.words.find(item => item.id === wordId);
+      if (w) {
+        MasteryManager.resetMastery(w);
+        w.memorized = false;
+        w.wrongCount = 0;
+        this.saveDecks(decks);
+        window.dispatchEvent(new CustomEvent('vocaquest_mastery_changed', {
+          detail: { wordId, action: 'reset' }
+        }));
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 특정 단어장 (또는 전체)의 모든 단어 숙련도 일괄 리셋
+   */
+  static resetAllWordsMastery(deckId = 'all') {
+    const decks = this.getDecks();
+    let count = 0;
+    decks.forEach(deck => {
+      if (deckId === 'all' || deck.id === deckId) {
+        if (Array.isArray(deck.words)) {
+          deck.words.forEach(w => {
+            MasteryManager.resetMastery(w);
+            w.memorized = false;
+            w.wrongCount = 0;
+            count++;
+          });
+        }
+      }
+    });
+    this.saveDecks(decks);
+    window.dispatchEvent(new CustomEvent('vocaquest_mastery_changed', {
+      detail: { deckId, action: 'reset_all', count }
+    }));
+    return count;
+  }
+
+  /**
+   * 2일 이상 경과된 왕실근위대를 고급기사로 자동 강등 검사
+   */
+  static checkRoyalGuardDemotions() {
+    try {
+      const decks = this.getDecks();
+      const demotedCount = MasteryManager.checkAndApplyDemotions(decks);
+      if (demotedCount > 0) {
+        this.saveDecks(decks);
+        console.log(`[VocaQuest] 왕실근위대 기간(2일) 만료로 ${demotedCount}개 단어가 고급기사로 강등되었습니다.`);
+      }
+      return demotedCount;
+    } catch (e) {
+      console.error('Demotion check error:', e);
+      return 0;
     }
   }
 

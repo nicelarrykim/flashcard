@@ -26,33 +26,46 @@ export class SoundManager {
     // 후보 음원 URL 목록 (모두 실제 사람/원어민 성우 녹음 MP3)
     const audioCandidates = [];
 
-    // 1. 단어 객체에 직접 지정된 URL (가장 확실함)
-    if (directAudioUrl) {
-      audioCandidates.push(directAudioUrl);
-    }
-
     const cleanSingle = rawText.toLowerCase().replace(/[^a-z\-]/g, '');
     const cleanPhrase = rawText.toLowerCase().replace(/[^a-z\-\s]/g, ' ').replace(/\s+/g, ' ').trim();
 
-    // 2. 단일 단어인 경우 Google 공식 사전 미국식 원어민 녹음 MP3
-    if (!cleanPhrase.includes(' ') && cleanSingle.length >= 2) {
-      audioCandidates.push(`https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanSingle}--_us_1.mp3`);
-      audioCandidates.push(`https://ssl.gstatic.com/dictionary/static/sounds/20200429/${cleanSingle}--_us_2.mp3`);
-      audioCandidates.push(`https://api.dictionaryapi.dev/media/pronunciations/en/${cleanSingle}-us.mp3`);
-    }
-
-    // 3. 글로벌 사전 표준 미국식 원어민 음성 스트림 (단어 및 'Lost and Found', 'get a move on' 같은 숙어/구동사 100% 지원)
+    // 1. 글로벌 사전 표준 미국식 원어민 음성 스트림 (https://dict.youdao.com/dictvoice - 44.1kHz 실제 원어민 녹음 MP3 최우선)
     if (cleanPhrase) {
       audioCandidates.push(`https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanPhrase)}&type=2`);
     }
 
-    // 순차 재생 시도 (첫 번째로 성공하는 고음질 원어민 음원 재생)
-    this.playCandidatesSequentially(audioCandidates, 0);
+    // 2. 단어 객체에 직접 지정된 URL (단, gstatic 404 링크 제외)
+    if (directAudioUrl && !directAudioUrl.includes('ssl.gstatic.com')) {
+      if (directAudioUrl.includes('dictvoice')) {
+        const normalized = directAudioUrl.replace(/audio=([^&]+)/i, (_, word) => {
+          return `audio=${encodeURIComponent(decodeURIComponent(word).toLowerCase())}&type=2`;
+        });
+        if (!audioCandidates.includes(normalized)) {
+          audioCandidates.push(normalized);
+        }
+      } else {
+        audioCandidates.push(directAudioUrl);
+      }
+    }
+
+    // 순차 재생 시도 (첫 번째로 성공하는 고음질 원어민 음원 재생, 모두 실패 시 Web Speech API)
+    this.playCandidatesSequentially(audioCandidates, 0, rawText);
   }
 
-  static playCandidatesSequentially(candidates, index) {
+  static playCandidatesSequentially(candidates, index, fallbackText = '') {
     if (index >= candidates.length) {
-      console.warn('모든 원어민 오디오 소스 재생 실패');
+      // 모든 원어민 MP3 소스 실패 시 브라우저 내장 네이티브 Web Speech API로 발음
+      if (fallbackText && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(fallbackText);
+          utterance.lang = 'en-US';
+          utterance.rate = 0.9;
+          window.speechSynthesis.speak(utterance);
+        } catch (e) {
+          console.warn('Web Speech API fallback error:', e);
+        }
+      }
       return;
     }
 
@@ -65,14 +78,13 @@ export class SoundManager {
     const playPromise = audio.play();
 
     if (playPromise !== undefined) {
-      playPromise.catch((err) => {
-        // 현재 음원이 로드 실패하면 즉시 다음 후보 음원 시도
-        this.playCandidatesSequentially(candidates, index + 1);
+      playPromise.catch(() => {
+        this.playCandidatesSequentially(candidates, index + 1, fallbackText);
       });
     }
 
     audio.onerror = () => {
-      this.playCandidatesSequentially(candidates, index + 1);
+      this.playCandidatesSequentially(candidates, index + 1, fallbackText);
     };
   }
 

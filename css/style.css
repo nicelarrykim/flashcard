@@ -79,3 +79,40 @@ button, input, select, textarea {
 .dark .bg-grid-pattern {
   background-image: radial-gradient(rgba(147, 197, 253, 0.08) 1px, transparent 1px);
 }
+
+/* 걷는 기사 캐릭터 애니메이션 */
+@keyframes walkingBob {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(1.5deg);
+  }
+  50% {
+    transform: translateY(-1px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-4px) rotate(-1.5deg);
+  }
+}
+
+.walking-hero {
+  animation: walkingBob 1.6s ease-in-out infinite;
+  transform-origin: bottom center;
+  transition: transform 0.2s ease;
+}
+
+.walking-hero:hover {
+  animation-duration: 0.9s;
+  transform: scale(1.1) translateY(-2px);
+}
+
+/* 마스터 및 왕실근위대 특별 발광 효과 */
+.rank-master {
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.45)) drop-shadow(0 0 18px rgba(16, 185, 129, 0.3));
+}
+
+.rank-royal {
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.45));
+}
+
