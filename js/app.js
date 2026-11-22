@@ -115,10 +115,35 @@ class App {
   }
 
   /**
-   * 번호 범위 학습 & 사진 표시 옵션 바인딩
+   * 번호 범위 학습 & 사진 표시 옵션 바인딩 (기본 접힘, 옵션 선택 후 자동 접기)
    */
   bindStudyControls() {
     this.syncStudyControlsUI();
+
+    const optToggleBtn = document.getElementById('global-study-opt-toggle');
+    const optPanel = document.getElementById('global-study-opt-panel');
+    const optArrow = document.getElementById('global-opt-arrow');
+
+    if (optToggleBtn && optPanel) {
+      optToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = optPanel.classList.contains('hidden');
+        if (isHidden) {
+          optPanel.classList.remove('hidden');
+          if (optArrow) optArrow.innerText = '▴';
+        } else {
+          optPanel.classList.add('hidden');
+          if (optArrow) optArrow.innerText = '▾';
+        }
+      });
+
+      optPanel.addEventListener('click', (e) => e.stopPropagation());
+      document.addEventListener('click', () => {
+        if (!optPanel.classList.contains('hidden')) {
+          this.closeOptionPanel();
+        }
+      });
+    }
 
     const rangeToggle = document.getElementById('global-range-toggle');
     const rangeInputs = document.getElementById('global-range-inputs');
@@ -140,6 +165,11 @@ class App {
         const s = parseInt(rangeStart ? rangeStart.value : 1, 10) || 1;
         const ee = parseInt(rangeEnd ? rangeEnd.value : 50, 10) || 50;
         StorageManager.setStudyRange(enabled, s, ee);
+        
+        // 체크를 끈 경우 즉시 패널 접기
+        if (!enabled) {
+          this.closeOptionPanel();
+        }
         this.reloadCurrentTab();
       });
     }
@@ -155,6 +185,9 @@ class App {
         StorageManager.setStudyRange(true, s, ee);
         if (rangeToggle) rangeToggle.checked = true;
         if (rangeInputs) rangeInputs.classList.remove('opacity-50', 'pointer-events-none');
+        
+        // 옵션 선택 후 즉시 접기
+        this.closeOptionPanel();
         this.reloadCurrentTab();
       });
     }
@@ -162,9 +195,23 @@ class App {
     if (photoSelect) {
       photoSelect.addEventListener('change', (e) => {
         StorageManager.setPhotoDisplayMode(e.target.value);
+        // 옵션 선택 후 즉시 접기
+        this.closeOptionPanel();
         this.reloadCurrentTab();
       });
     }
+  }
+
+  closeOptionPanel() {
+    const optPanel = document.getElementById('global-study-opt-panel');
+    const optArrow = document.getElementById('global-opt-arrow');
+    if (optPanel) {
+      optPanel.classList.add('hidden');
+    }
+    if (optArrow) {
+      optArrow.innerText = '▾';
+    }
+    this.syncStudyControlsUI();
   }
 
   syncStudyControlsUI() {
@@ -176,6 +223,7 @@ class App {
     const rangeStart = document.getElementById('global-range-start');
     const rangeEnd = document.getElementById('global-range-end');
     const photoSelect = document.getElementById('global-photo-mode-select');
+    const summaryBadge = document.getElementById('global-study-opt-summary');
 
     if (rangeToggle) {
       rangeToggle.checked = !!range.enabled;
@@ -190,6 +238,20 @@ class App {
     if (rangeStart) rangeStart.value = range.start || 1;
     if (rangeEnd) rangeEnd.value = range.end || 50;
     if (photoSelect) photoSelect.value = photoMode || 'auto';
+
+    // 옵션 요약 배지 업데이트
+    if (summaryBadge) {
+      const parts = [];
+      if (range.enabled) {
+        parts.push(`${range.start}~${range.end}번`);
+      }
+      if (photoMode === 'always_on') {
+        parts.push('사진ON');
+      } else if (photoMode === 'always_off') {
+        parts.push('사진OFF');
+      }
+      summaryBadge.innerText = parts.length > 0 ? parts.join('·') : '기본';
+    }
   }
 
   renderDeckSelector() {
