@@ -1,10 +1,10 @@
 // js/wordManager.js
 // 다중 단어장(Deck) CRUD 관리 및 다중 사진 일괄 OCR 스캐너 모듈
 
-import { StorageManager } from './storage.js?v=20261122_05';
-import { SoundManager } from './tts.js?v=20261122_05';
-import { OCRParser } from './ocr.js?v=20261122_05';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_05';
+import { StorageManager } from './storage.js?v=20261122_19';
+import { SoundManager } from './tts.js?v=20261122_19';
+import { OCRParser } from './ocr.js?v=20261122_19';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_19';
 
 export class WordManager {
   constructor(containerId) {
@@ -99,9 +99,20 @@ export class WordManager {
                     <h4 class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white line-clamp-1 mb-1">
                       ${deck.name}
                     </h4>
-                    <p class="text-[11px] text-slate-400 line-clamp-1 mb-3">
+                    <p class="text-[11px] text-slate-400 line-clamp-1 mb-2">
                       ${deck.description || '설명 없음'}
                     </p>
+
+                    <!-- 단어장별 그림 위치 설정 (기본: 뜻에 표시) -->
+                    <div class="mb-3 p-2 rounded-xl bg-slate-100/90 dark:bg-slate-700/60 border border-slate-200/60 dark:border-slate-600/60 flex items-center justify-between text-[11px]">
+                      <span class="text-slate-600 dark:text-slate-300 font-bold flex items-center gap-1">
+                        <span>📍</span> <span>그림 위치:</span>
+                      </span>
+                      <select class="deck-image-pos-select px-2 py-0.5 rounded-lg bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 font-bold border border-slate-200 dark:border-slate-600 text-[11px] focus:outline-none cursor-pointer" data-id="${deck.id}" title="이 단어장의 그림 위치 설정">
+                        <option value="meaning" ${(!deck.imagePosition || deck.imagePosition === 'meaning') ? 'selected' : ''}>뜻에 표시 (기본)</option>
+                        <option value="word" ${deck.imagePosition === 'word' ? 'selected' : ''}>영어단어에 표시</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div class="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-[11px]">
@@ -290,6 +301,16 @@ export class WordManager {
       btn.addEventListener('click', () => {
         StorageManager.setActiveDeckId(btn.dataset.id);
       });
+    });
+
+    // 단어장별 그림 위치 변경
+    document.querySelectorAll('.deck-image-pos-select').forEach(sel => {
+      sel.addEventListener('change', (e) => {
+        e.stopPropagation();
+        const deckId = sel.dataset.id;
+        StorageManager.setDeckImagePosition(deckId, sel.value);
+      });
+      sel.addEventListener('click', (e) => e.stopPropagation());
     });
 
     // 단어장 이름 수정

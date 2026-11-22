@@ -1,16 +1,16 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261122_18';
-import { SoundManager } from './tts.js?v=20261122_18';
-import { FlashcardGame } from './games/flashcard.js?v=20261122_18';
-import { QuizGame } from './games/quiz.js?v=20261122_18';
-import { MatchGame } from './games/match.js?v=20261122_18';
-import { ScrambleGame } from './games/scramble.js?v=20261122_18';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261122_18';
-import { WordManager } from './wordManager.js?v=20261122_18';
-import { PerformanceView } from './performance.js?v=20261122_18';
-import { AdminManager } from './admin.js?v=20261122_18';
+import { StorageManager } from './storage.js?v=20261122_19';
+import { SoundManager } from './tts.js?v=20261122_19';
+import { FlashcardGame } from './games/flashcard.js?v=20261122_19';
+import { QuizGame } from './games/quiz.js?v=20261122_19';
+import { MatchGame } from './games/match.js?v=20261122_19';
+import { ScrambleGame } from './games/scramble.js?v=20261122_19';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261122_19';
+import { WordManager } from './wordManager.js?v=20261122_19';
+import { PerformanceView } from './performance.js?v=20261122_19';
+import { AdminManager } from './admin.js?v=20261122_19';
 
 class App {
   constructor() {
@@ -57,6 +57,12 @@ class App {
       this.renderDeckSelector();
       this.syncStudyControlsUI();
       // 단어장이 바뀌면 현재 열려있는 게임/화면 즉시 재초기화
+      this.reloadCurrentTab();
+    });
+
+    // 단어장별 그림 위치 변경 감지
+    window.addEventListener('vocaquest_deck_image_pos_changed', () => {
+      this.syncStudyControlsUI();
       this.reloadCurrentTab();
     });
 
@@ -241,6 +247,17 @@ class App {
         this.reloadCurrentTab();
       });
     }
+
+    const imagePosSelect = document.getElementById('global-deck-image-pos-select');
+    if (imagePosSelect) {
+      imagePosSelect.addEventListener('change', (e) => {
+        const activeId = StorageManager.getActiveDeckId();
+        StorageManager.setDeckImagePosition(activeId, e.target.value);
+        // 옵션 선택 후 즉시 접기
+        this.closeOptionPanel();
+        this.reloadCurrentTab();
+      });
+    }
   }
 
   closeOptionPanel() {
@@ -258,12 +275,15 @@ class App {
   syncStudyControlsUI() {
     const range = StorageManager.getStudyRange();
     const photoMode = StorageManager.getPhotoDisplayMode();
+    const activeDeckId = StorageManager.getActiveDeckId();
+    const imagePos = StorageManager.getDeckImagePosition(activeDeckId);
 
     const rangeToggle = document.getElementById('global-range-toggle');
     const rangeInputs = document.getElementById('global-range-inputs');
     const rangeStart = document.getElementById('global-range-start');
     const rangeEnd = document.getElementById('global-range-end');
     const photoSelect = document.getElementById('global-photo-mode-select');
+    const imagePosSelect = document.getElementById('global-deck-image-pos-select');
     const summaryBadge = document.getElementById('global-study-opt-summary');
 
     if (rangeToggle) {
@@ -279,6 +299,7 @@ class App {
     if (rangeStart) rangeStart.value = range.start || 1;
     if (rangeEnd) rangeEnd.value = range.end || 50;
     if (photoSelect) photoSelect.value = photoMode || 'auto';
+    if (imagePosSelect) imagePosSelect.value = imagePos || 'meaning';
 
     // 옵션 요약 배지 업데이트
     if (summaryBadge) {
@@ -290,6 +311,9 @@ class App {
         parts.push('사진ON');
       } else if (photoMode === 'always_off') {
         parts.push('사진OFF');
+      }
+      if (imagePos === 'word') {
+        parts.push('그림:단어');
       }
       summaryBadge.innerText = parts.length > 0 ? parts.join('·') : '기본';
     }

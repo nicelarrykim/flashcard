@@ -250,6 +250,10 @@ export class StorageManager {
             deck.words = [];
             upgraded = true;
           }
+          if (!deck.imagePosition) {
+            deck.imagePosition = 'meaning'; // 기본값: 뜻에 그림이 붙어서 보임
+            upgraded = true;
+          }
           deck.words = deck.words.filter(Boolean);
           deck.words.forEach(word => {
             if (word && typeof word.imageUrl !== 'string') {
@@ -475,15 +479,45 @@ export class StorageManager {
   }
 
   /**
+   * 단어장별 그림 위치 조회 ('meaning' | 'word')
+   * 기본설정: 'meaning' (뜻에 그림이 붙어서 보임)
+   */
+  static getDeckImagePosition(deckId = null) {
+    const targetId = deckId || this.getActiveDeckId();
+    if (targetId === 'all') return 'meaning';
+    const decks = this.getDecks();
+    const deck = decks.find(d => d.id === targetId);
+    return (deck && deck.imagePosition) ? deck.imagePosition : 'meaning';
+  }
+
+  /**
+   * 단어장별 그림 위치 저장
+   */
+  static setDeckImagePosition(deckId, position) {
+    const validPos = position === 'word' ? 'word' : 'meaning';
+    const targetId = deckId || this.getActiveDeckId();
+    const decks = this.getDecks();
+    const deck = decks.find(d => d.id === targetId);
+    if (deck) {
+      deck.imagePosition = validPos;
+      this.saveDecks(decks);
+      window.dispatchEvent(new CustomEvent('vocaquest_deck_image_pos_changed', {
+        detail: { deckId: targetId, imagePosition: validPos }
+      }));
+    }
+  }
+
+  /**
    * 새 단어장 생성
    */
-  static createDeck(name, description = '', initialWords = []) {
+  static createDeck(name, description = '', initialWords = [], imagePosition = 'meaning') {
     const decks = this.getDecks();
     const newDeck = {
       id: 'deck_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
       name: name.trim() || '새 단어장',
       description: description.trim() || '',
       createdAt: Date.now(),
+      imagePosition: imagePosition === 'word' ? 'word' : 'meaning', // 기본값: 뜻에 그림이 붙어서 보임
       words: initialWords
     };
     decks.push(newDeck);
@@ -493,14 +527,15 @@ export class StorageManager {
   }
 
   /**
-   * 단어장 이름 및 설명 수정
+   * 단어장 이름, 설명 및 그림 위치 수정
    */
-  static updateDeck(deckId, { name, description }) {
+  static updateDeck(deckId, { name, description, imagePosition }) {
     const decks = this.getDecks();
     const deck = decks.find(d => d.id === deckId);
     if (deck) {
       if (name !== undefined) deck.name = name.trim();
       if (description !== undefined) deck.description = description.trim();
+      if (imagePosition !== undefined) deck.imagePosition = (imagePosition === 'word' ? 'word' : 'meaning');
       this.saveDecks(decks);
       return deck;
     }

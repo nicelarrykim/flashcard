@@ -181,16 +181,30 @@
           </div>
         </div>
 
-        <!-- 2. 단어 사진 옵션 -->
-        <div class="flex items-center gap-1.5 ml-auto">
-          <span class="text-slate-600 dark:text-slate-300 font-bold shrink-0 flex items-center gap-1 text-[11px] sm:text-xs">
-            <span>🖼️</span> <span>사진:</span>
-          </span>
-          <select id="global-photo-mode-select" class="px-2 py-1 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer">
-            <option value="auto">자동 (근위대 이상 숨김)</option>
-            <option value="always_on">항상 켜기</option>
-            <option value="always_off">항상 끄기</option>
-          </select>
+        <!-- 2. 단어 사진 옵션 & 단어장별 그림 위치 설정 -->
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap ml-auto">
+          <!-- 단어장별 그림 위치 (기본: 뜻에 표시) -->
+          <div class="flex items-center gap-1 bg-slate-50 dark:bg-slate-700/80 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-600">
+            <span class="text-slate-600 dark:text-slate-300 font-bold shrink-0 flex items-center gap-1 text-[11px] sm:text-xs">
+              <span>📍</span> <span>그림 위치:</span>
+            </span>
+            <select id="global-deck-image-pos-select" class="bg-transparent border-0 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer" title="현재 단어장의 그림 위치 설정">
+              <option value="meaning">뜻에 표시 (기본)</option>
+              <option value="word">영어단어에 표시</option>
+            </select>
+          </div>
+
+          <!-- 사진 표시 모드 (자동 / 항상켜기 / 항상끄기) -->
+          <div class="flex items-center gap-1 bg-slate-50 dark:bg-slate-700/80 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-600">
+            <span class="text-slate-600 dark:text-slate-300 font-bold shrink-0 flex items-center gap-1 text-[11px] sm:text-xs">
+              <span>🖼️</span> <span>사진:</span>
+            </span>
+            <select id="global-photo-mode-select" class="bg-transparent border-0 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer">
+              <option value="auto">자동 (근위대 이상 숨김)</option>
+              <option value="always_on">항상 켜기</option>
+              <option value="always_off">항상 끄기</option>
+            </select>
+          </div>
         </div>
 
       </div>
@@ -277,6 +291,6 @@
   </footer>
 
   <!-- 앱 메인 스크립트 (ES Module - 캐시 방지 버전 파라미터 적용) -->
-  <script type="module" src="js/app.js?v=20261122_18"></script>
+  <script type="module" src="js/app.js?v=20261122_19"></script>
 </body>
 </html>

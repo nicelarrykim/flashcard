@@ -1,9 +1,9 @@
 // js/games/flashcard.js
 // 3D 플립 플래시카드 & 라이트너 암기 시스템 모듈
 
-import { StorageManager } from '../storage.js?v=20261122_05';
-import { SoundManager } from '../tts.js?v=20261122_05';
-import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261122_05';
+import { StorageManager } from '../storage.js?v=20261122_19';
+import { SoundManager } from '../tts.js?v=20261122_19';
+import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261122_19';
 
 export class FlashcardGame {
   constructor(containerId) {
@@ -102,16 +102,21 @@ export class FlashcardGame {
     const scoreVal = word.mastery ? word.mastery.score : 0;
 
     // 사진 표시 옵션 판정:
-    // auto: 왕실근위대부터는 사진 숨김, always_on: 항상 켬, always_off: 항상 끔
+    // 1. auto: 왕실근위대부터는 사진 숨김, always_on: 항상 켬, always_off: 항상 끔
     const photoMode = StorageManager.getPhotoDisplayMode ? StorageManager.getPhotoDisplayMode() : 'auto';
-    let showPhoto = false;
+    let allowPhoto = false;
     if (word.imageUrl && word.imageUrl.trim()) {
       if (photoMode === 'always_on') {
-        showPhoto = true;
+        allowPhoto = true;
       } else if (photoMode === 'auto') {
-        showPhoto = (wordRank !== RANK_TYPES.ROYAL_GUARD && wordRank !== RANK_TYPES.MASTER);
+        allowPhoto = (wordRank !== RANK_TYPES.ROYAL_GUARD && wordRank !== RANK_TYPES.MASTER);
       }
     }
+
+    // 2. 단어장별 그림 위치 옵션 ('meaning' | 'word', 기본값: 'meaning')
+    const imagePos = (activeDeck && activeDeck.imagePosition) ? activeDeck.imagePosition : 'meaning';
+    const showPhotoOnWord = allowPhoto && (imagePos === 'word');
+    const showPhotoOnMeaning = allowPhoto && (imagePos === 'meaning');
 
     this.container.innerHTML = `
       <div class="max-w-xl mx-auto flex flex-col items-center">
@@ -178,7 +183,7 @@ export class FlashcardGame {
               </div>
 
               <div class="my-auto flex flex-col items-center max-w-full">
-                ${showPhoto ? `
+                ${showPhotoOnWord ? `
                   <div class="mb-2 shrink-0">
                     <img src="${word.imageUrl}" alt="${word.word}" onerror="this.parentElement.style.display='none'" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-indigo-100 dark:border-indigo-800 shadow-md">
                   </div>
@@ -226,7 +231,7 @@ export class FlashcardGame {
               </div>
 
               <div class="relative z-10 my-auto flex flex-col items-center max-w-lg w-full">
-                ${showPhoto ? `
+                ${showPhotoOnMeaning ? `
                   <div class="mb-2 shrink-0">
                     <img src="${word.imageUrl}" alt="${word.word}" onerror="this.parentElement.style.display='none'" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-purple-400/50 shadow-md opacity-90">
                   </div>
