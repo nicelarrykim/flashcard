@@ -86,6 +86,164 @@ export class ServerSyncManager {
   }
 
   /**
+   * ⭐ 현재 활성 프로필로 선택된 사용자의 성과만 서버로 올리기
+   */
+  static async uploadActiveProfileToServer(storageManager, targetUrl = null) {
+    const url = (targetUrl && targetUrl.trim()) ? targetUrl.trim().replace(/\/+$/, '') : this.getServerUrl();
+    const activeProf = storageManager.getActiveProfile();
+    if (!activeProf) {
+      return { success: false, error: '현재 선택된 활성 프로필이 없습니다.' };
+    }
+
+    const profileData = storageManager.getProfileData(activeProf.id) || {};
+    const wordCount = Object.keys(profileData).length;
+
+    console.log(`[ServerSync] 현재 활성 프로필 (${activeProf.name}) 성과 서버 업로드 시작: ${url}`, activeProf, wordCount);
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+      // 1. 프로필 정보 서버 업로드 (POST /api/profiles)
+      const profRes = await fetch(`${url}/api/profiles`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify([activeProf]),
+        signal: controller.signal
+      });
+
+      if (!profRes.ok) {
+        throw new Error(`프로필 저장 실패: HTTP ${profRes.status}`);
+      }
+
+      // 2. 해당 프로필의 단어별 성취도 업로드 (POST /api/profiles/<id>/data)
+      const dataRes = await fetch(`${url}/api/profiles/${encodeURIComponent(activeProf.id)}/data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!dataRes.ok) {
+        throw new Error(`성취도 저장 실패: HTTP ${dataRes.status}`);
+      }
+
+      this.isServerConnected = true;
+      this.serverUrl = url;
+      localStorage.setItem(SERVER_URL_KEY, url);
+      this.dispatchStatus({ status: 'online' });
+
+      return {
+        success: true,
+        profile: activeProf,
+        wordCount
+      };
+    } catch (e) {
+      console.warn('[ServerSync] 활성 프로필 업로드 실패:', e);
+      return { success: false, error: e.message || '네트워크 연결 실패' };
+    }
+  }
+
+  /**
+   * ⭐ 서버에 저장되어 있는 모든 프로필 목록 조회
+   */
+  static async fetchServerProfiles(targetUrl = null) {
+    const url = (targetUrl && targetUrl.trim()) ? targetUrl.trim().replace(/\/+$/, '') : this.getServerUrl();
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+      const res = await fetch(`${url}/api/profiles`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const list = await res.json();
+      return { success: true, profiles: Array.isArray(list) ? list : [] };
+    } catch (e) {
+      console.warn('[ServerSync] 서버 프로필 목록 조회 실패:', e);
+      return { success: false, error: e.message || '서버 응답 없음', profiles: [] };
+    }
+  }
+
+  /**
+   * ⭐ 서버에서 특정 선택된 프로필의 성과를 내려받아 로컬에 반영 및 활성화
+   */
+  static async downloadSpecificProfileFromServer(storageManager, profileId, targetUrl = null) {
+    if (!profileId) {
+      return { success: false, error: '가져올 프로필 ID가 지정되지 않았습니다.' };
+    }
+
+    const url = (targetUrl && targetUrl.trim()) ? targetUrl.trim().replace(/\/+$/, '') : this.getServerUrl();
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+      // 1. 서버 프로필 목록 조회하여 대상 프로필 정보 확인
+      const profsRes = await fetch(`${url}/api/profiles`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal: controller.signal
+      });
+      if (!profsRes.ok) throw new Error(`프로필 조회 실패: HTTP ${profsRes.status}`);
+      const serverProfiles = await profsRes.json();
+      const targetProf = (serverProfiles || []).find(p => p.id === profileId);
+
+      if (!targetProf) {
+        throw new Error('서버에서 해당 프로필 정보를 찾을 수 없습니다.');
+      }
+
+      // 2. 대상 프로필의 단어별 성취도 데이터 조회 (GET /api/profiles/<id>/data)
+      const dataRes = await fetch(`${url}/api/profiles/${encodeURIComponent(profileId)}/data`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!dataRes.ok) throw new Error(`성취도 조회 실패: HTTP ${dataRes.status}`);
+      const serverData = await dataRes.json();
+
+      // 3. 로컬 프로필 목록에 추가 또는 갱신
+      const localProfiles = storageManager.getProfiles();
+      const existingIdx = localProfiles.findIndex(p => p.id === profileId);
+      if (existingIdx >= 0) {
+        localProfiles[existingIdx] = { ...localProfiles[existingIdx], ...targetProf };
+      } else {
+        localProfiles.push(targetProf);
+      }
+      storageManager.saveProfiles(localProfiles);
+
+      // 4. 로컬 성취도 데이터 갱신
+      storageManager.saveProfileData(serverData || {}, profileId);
+
+      // 5. 해당 프로필을 활성 프로필로 즉시 전환!
+      storageManager.setActiveProfileId(profileId);
+
+      this.isServerConnected = true;
+      this.serverUrl = url;
+      localStorage.setItem(SERVER_URL_KEY, url);
+      this.dispatchStatus({ status: 'online' });
+      window.dispatchEvent(new CustomEvent('vocaquest_sync_completed'));
+
+      return {
+        success: true,
+        profile: targetProf,
+        wordCount: Object.keys(serverData || {}).length
+      };
+    } catch (e) {
+      console.warn('[ServerSync] 프로필 개별 다운로드 실패:', e);
+      return { success: false, error: e.message || '네트워크 연결 실패' };
+    }
+  }
+
+  /**
    * 로컬의 모든 학습 데이터(프로필 + 모든 단어 성취도)를 서버로 강제 업로드
    */
   static async uploadAllLocalToServer(storageManager, targetUrl = null) {

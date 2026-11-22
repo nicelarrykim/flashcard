@@ -1,11 +1,11 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261122_31';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_31';
-import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261122_31';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_31';
-import { ServerSyncManager } from './serverSync.js?v=20261122_31';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261122_32';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_32';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261122_32';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_32';
+import { ServerSyncManager } from './serverSync.js?v=20261122_32';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';

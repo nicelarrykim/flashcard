@@ -1,10 +1,10 @@
 // js/admin.js
 // 관리자 인증(암호 2217) 및 다중 학습자 프로필 관리 모듈
 
-import { StorageManager } from './storage.js?v=20261122_31';
-import { KingdomManager } from './kingdom.js?v=20261122_31';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_31';
-import { ServerSyncManager } from './serverSync.js?v=20261122_31';
+import { StorageManager } from './storage.js?v=20261122_32';
+import { KingdomManager } from './kingdom.js?v=20261122_32';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_32';
+import { ServerSyncManager } from './serverSync.js?v=20261122_32';
 
 export const ADMIN_PASSWORD = '2217';
 
@@ -125,11 +125,11 @@ export class AdminManager {
               </div>
             </div>
             <div class="flex items-center gap-1.5 ml-auto flex-wrap">
-              <button id="admin-banner-upload-btn" class="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="이 기기의 학습 성과를 서버로 저장">
-                <span>📤</span> <span>서버로 올리기</span>
+              <button id="admin-banner-upload-btn" class="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="현재 선택된 프로필의 학습 성과를 서버로 저장">
+                <span>📤</span> <span>현재 프로필 올리기</span>
               </button>
-              <button id="admin-banner-download-btn" class="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="서버의 성과 데이터를 이 기기로 받기">
-                <span>📥</span> <span>서버에서 받기</span>
+              <button id="admin-banner-download-btn" class="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="서버에 저장된 프로필 중 선택하여 받기">
+                <span>📥</span> <span>프로필 선택하여 받기</span>
               </button>
               <button id="admin-server-setup-btn" class="px-2.5 py-1 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1 shadow-sm">
                 <span>⚙️</span> <span>설정</span>
@@ -280,18 +280,22 @@ export class AdminManager {
     if (closeBtn) closeBtn.onclick = () => this.close();
     if (doneBtn) doneBtn.onclick = () => this.close();
 
-    // 배너 1. 내 로컬 성과를 서버로 올리기 (업로드)
+    // 배너 1. 현재 선택된 사용자의 성과만 서버로 올리기 (업로드)
     const bannerUploadBtn = document.getElementById('admin-banner-upload-btn');
     if (bannerUploadBtn) {
       bannerUploadBtn.onclick = async () => {
+        const activeProf = StorageManager.getActiveProfile();
+        if (!confirm(`현재 선택된 학습자 프로필 [${activeProf.avatar} ${activeProf.name}]의 성과를 서버로 올리시겠습니까?`)) {
+          return;
+        }
         bannerUploadBtn.disabled = true;
         bannerUploadBtn.innerText = '올리는 중...';
-        const res = await ServerSyncManager.uploadAllLocalToServer(StorageManager);
+        const res = await ServerSyncManager.uploadActiveProfileToServer(StorageManager);
         bannerUploadBtn.disabled = false;
-        bannerUploadBtn.innerHTML = '<span>📤</span> <span>서버로 올리기</span>';
+        bannerUploadBtn.innerHTML = '<span>📤</span> <span>현재 프로필 올리기</span>';
 
         if (res.success) {
-          alert('🎉 현재 기기의 모든 학습 성과(프로필, 단어 암기 상태, 오답, 기사단 등급, 왕국 발전도)가 서버로 완벽히 저장되었습니다!\n\n이제 스마트폰이나 다른 기기에서 열면 이 성과가 그대로 나타납니다.');
+          alert(`🎉 [${res.profile.name}] 학습자의 성과(단어 ${res.wordCount}개)가 서버에 성공적으로 저장되었습니다!\n\n이제 다른 기기에서 [프로필 선택하여 받기]로 가져갈 수 있습니다.`);
           this.openAdminPanel();
         } else {
           alert(`❌ 서버 업로드 실패: ${res.error}\n\n서버 설정에서 서버 주소가 http://192.168.0.110:8000 등으로 올바르게 지정되었는지 확인하세요.`);
@@ -299,23 +303,22 @@ export class AdminManager {
       };
     }
 
-    // 배너 2. 서버 성과를 이 기기로 받기 (다운로드)
+    // 배너 2. 서버에서 어느 프로필을 받을지 선택하여 받기 (다운로드)
     const bannerDownloadBtn = document.getElementById('admin-banner-download-btn');
     if (bannerDownloadBtn) {
       bannerDownloadBtn.onclick = async () => {
-        if (!confirm('⚠️ 서버에 저장된 학습 데이터로 이 기기의 데이터를 덮어쓰시겠습니까?')) return;
         bannerDownloadBtn.disabled = true;
-        bannerDownloadBtn.innerText = '받는 중...';
-        const res = await ServerSyncManager.downloadFromServerToLocal(StorageManager);
+        bannerDownloadBtn.innerText = '목록 조회중...';
+        const res = await ServerSyncManager.fetchServerProfiles();
         bannerDownloadBtn.disabled = false;
-        bannerDownloadBtn.innerHTML = '<span>📥</span> <span>서버에서 받기</span>';
+        bannerDownloadBtn.innerHTML = '<span>📥</span> <span>프로필 선택하여 받기</span>';
 
-        if (res.success) {
-          alert('✅ 서버의 최신 학습 데이터를 성공적으로 이 기기로 가져왔습니다!');
-          this.openAdminPanel();
-        } else {
-          alert(`❌ 서버 데이터 가져오기 실패: ${res.error}`);
+        if (!res.success || !res.profiles || res.profiles.length === 0) {
+          alert(`서버에 저장된 프로필이 없거나 서버에 연결할 수 없습니다: ${res.error || '목록 없음'}`);
+          return;
         }
+
+        this.openServerProfilePickerModal(res.profiles);
       };
     }
 
@@ -391,6 +394,7 @@ export class AdminManager {
     this.init();
     const currentUrl = ServerSyncManager.getServerUrl();
     const isConnected = ServerSyncManager.isServerConnected;
+    const activeProf = StorageManager.getActiveProfile();
 
     this.container.innerHTML = `
       <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
@@ -437,15 +441,17 @@ export class AdminManager {
 
             <!-- 양방향 수동 동기화 제어 카드 -->
             <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 space-y-2">
-              <span class="block font-bold text-slate-800 dark:text-slate-200">데이터 동기화 방향 선택:</span>
+              <span class="block font-bold text-slate-800 dark:text-slate-200">
+                데이터 동기화 (현재 프로필: <span class="text-indigo-600 dark:text-indigo-400 font-black">${activeProf ? activeProf.avatar + ' ' + activeProf.name : '선택 안 됨'}</span>):
+              </span>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button type="button" id="server-cfg-upload-btn" class="p-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-md transition flex flex-col items-center text-center gap-1">
-                  <span class="text-sm">📤 내 로컬 성과 ➔ 서버로 올리기</span>
-                  <span class="text-[10px] font-normal opacity-90">이 기기에서 공부한 성과를 서버에 저장</span>
+                  <span class="text-xs sm:text-sm">📤 [${activeProf ? activeProf.name : '현재 프로필'}] 성과 ➔ 서버로 올리기</span>
+                  <span class="text-[10px] font-normal opacity-90">현재 선택된 학습자의 성과만 서버로 저장</span>
                 </button>
                 <button type="button" id="server-cfg-download-btn" class="p-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xs shadow-md transition flex flex-col items-center text-center gap-1">
-                  <span class="text-sm">📥 서버 성과 ➔ 이 기기로 받기</span>
-                  <span class="text-[10px] font-normal opacity-90">서버의 최신 성과로 이 기기 덮어쓰기</span>
+                  <span class="text-xs sm:text-sm">📥 서버 프로필 선택 ➔ 이 기기로 받기</span>
+                  <span class="text-[10px] font-normal opacity-90">서버의 프로필 중 하나를 골라 가져오기</span>
                 </button>
               </div>
             </div>
@@ -490,18 +496,20 @@ export class AdminManager {
     const uploadBtn = document.getElementById('server-cfg-upload-btn');
     const downloadBtn = document.getElementById('server-cfg-download-btn');
 
-    // 1. 내 로컬 성과를 서버로 올리기 (업로드)
+    // 1. 현재 선택된 사용자의 성과만 서버로 올리기 (업로드)
     if (uploadBtn) {
       uploadBtn.onclick = async () => {
+        const activeProf = StorageManager.getActiveProfile();
+        if (!confirm(`현재 선택된 [${activeProf.avatar} ${activeProf.name}] 학습자의 성과를 서버로 올리시겠습니까?`)) return;
         const val = urlInput ? urlInput.value.trim() : '';
         uploadBtn.disabled = true;
         uploadBtn.innerText = '서버로 올리는 중...';
-        const res = await ServerSyncManager.uploadAllLocalToServer(StorageManager, val);
+        const res = await ServerSyncManager.uploadActiveProfileToServer(StorageManager, val);
         uploadBtn.disabled = false;
-        uploadBtn.innerText = '📤 내 로컬 성과 ➔ 서버로 올리기';
+        uploadBtn.innerHTML = `<span>📤 [${activeProf.name}] 성과 ➔ 서버로 올리기</span>`;
 
         if (res.success) {
-          alert('🎉 현재 기기의 모든 학습 성과(프로필, 단어 외움/오답, 기사단 등급, 왕국 발전도)가 서버로 완벽히 저장되었습니다!\n\n이제 스마트폰이나 다른 기기에서 열면 이 성과가 그대로 나타납니다.');
+          alert(`🎉 [${res.profile.name}] 학습자의 성과(단어 ${res.wordCount}개)가 서버에 성공적으로 저장되었습니다!\n\n이제 다른 기기에서 [서버 프로필 선택하여 받기]로 가져갈 수 있습니다.`);
           this.close();
         } else {
           alert(`❌ 서버 업로드 실패: ${res.error}\n\n서버 주소가 맞는지, 리눅스에서 server.py가 실행 중인지 확인하세요.`);
@@ -509,23 +517,22 @@ export class AdminManager {
       };
     }
 
-    // 2. 서버 성과를 이 기기로 내려받기 (다운로드)
+    // 2. 서버에서 어느 프로필을 받을지 선택하여 받기 (다운로드)
     if (downloadBtn) {
       downloadBtn.onclick = async () => {
-        if (!confirm('⚠️ 서버에 저장된 학습 데이터로 이 기기의 데이터를 덮어쓰시겠습니까?')) return;
         const val = urlInput ? urlInput.value.trim() : '';
         downloadBtn.disabled = true;
-        downloadBtn.innerText = '서버에서 받는 중...';
-        const res = await ServerSyncManager.downloadFromServerToLocal(StorageManager, val);
+        downloadBtn.innerText = '서버 목록 조회중...';
+        const res = await ServerSyncManager.fetchServerProfiles(val);
         downloadBtn.disabled = false;
-        downloadBtn.innerText = '📥 서버 성과 ➔ 이 기기로 받기';
+        downloadBtn.innerHTML = '<span>📥 서버 프로필 선택 ➔ 이 기기로 받기</span>';
 
-        if (res.success) {
-          alert('✅ 서버의 최신 학습 데이터를 성공적으로 이 기기로 가져왔습니다!');
-          this.close();
-        } else {
-          alert(`❌ 서버 데이터 가져오기 실패: ${res.error}`);
+        if (!res.success || !res.profiles || res.profiles.length === 0) {
+          alert(`서버에 저장된 프로필이 없거나 연결할 수 없습니다: ${res.error || '목록 없음'}`);
+          return;
         }
+
+        this.openServerProfilePickerModal(res.profiles, val);
       };
     }
 
@@ -555,6 +562,92 @@ export class AdminManager {
         }
       };
     }
+  }
+
+  /**
+   * 서버에 저장된 프로필 중 내려받을 프로필 선택 모달
+   */
+  static openServerProfilePickerModal(serverProfiles, targetUrl = null) {
+    this.init();
+    const activeProfId = StorageManager.getActiveProfileId();
+
+    this.container.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[85vh] flex flex-col">
+          
+          <div class="flex items-start justify-between pb-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
+            <div>
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[11px] font-black mb-1">
+                <span>📥</span> <span>서버 프로필 선택 받기</span>
+              </div>
+              <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">내려받을 학습자 프로필 선택</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">서버에 보관된 프로필 중 현재 기기로 가져올 학습자를 선택하세요.</p>
+            </div>
+            <button id="picker-close-btn" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">
+              ✕
+            </button>
+          </div>
+
+          <div class="flex-1 overflow-y-auto py-3 space-y-2.5">
+            ${serverProfiles.map(prof => {
+              const isCurrentLocal = prof.id === activeProfId;
+              return `
+                <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 hover:border-indigo-400 transition flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="text-2xl shrink-0 p-1 rounded-xl bg-white dark:bg-slate-800 shadow-sm">${prof.avatar || '🛡️'}</span>
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-1.5">
+                        <span class="font-black text-sm text-slate-900 dark:text-white truncate">${prof.name}</span>
+                        ${isCurrentLocal ? `<span class="text-[9px] px-1.5 py-0.2 bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 rounded-md font-bold">현재 기기 사용중</span>` : ''}
+                      </div>
+                      <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${prof.description || '서버에 저장된 학습 프로필'}</p>
+                    </div>
+                  </div>
+                  <button data-id="${prof.id}" data-name="${prof.name}" class="picker-download-btn shrink-0 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1">
+                    <span>📥</span> <span>가져오기</span>
+                  </button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end shrink-0">
+            <button id="picker-cancel-btn" class="px-4 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition">
+              닫기
+            </button>
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    const closeBtn = document.getElementById('picker-close-btn');
+    const cancelBtn = document.getElementById('picker-cancel-btn');
+    if (closeBtn) closeBtn.onclick = () => this.openServerConfigModal();
+    if (cancelBtn) cancelBtn.onclick = () => this.openServerConfigModal();
+
+    this.container.querySelectorAll('.picker-download-btn').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+        if (!confirm(`서버에서 '${name}' 학습자의 성과(단어 외움, 오답, 기사단 등급)를 내려받아 현재 기기에 적용하시겠습니까?`)) {
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = '가져오는 중...';
+        const res = await ServerSyncManager.downloadSpecificProfileFromServer(StorageManager, id, targetUrl);
+
+        if (res.success) {
+          alert(`🎉 '${name}' 학습자의 성과(단어 ${res.wordCount}개)를 성공적으로 가져와 현재 학습자로 설정했습니다!`);
+          this.close();
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = '<span>📥</span> <span>가져오기</span>';
+          alert(`❌ 프로필 성과 가져오기 실패: ${res.error}`);
+        }
+      };
+    });
   }
 
   static close() {

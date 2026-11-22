@@ -1,9 +1,9 @@
 // js/games/flashcard.js
 // 3D 플립 플래시카드 & 라이트너 암기 시스템 모듈
 
-import { StorageManager } from '../storage.js?v=20261122_31';
-import { SoundManager } from '../tts.js?v=20261122_31';
-import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261122_31';
+import { StorageManager } from '../storage.js?v=20261122_32';
+import { SoundManager } from '../tts.js?v=20261122_32';
+import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261122_32';
 
 export class FlashcardGame {
   constructor(containerId) {
