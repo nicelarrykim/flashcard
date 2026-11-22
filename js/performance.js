@@ -1,10 +1,11 @@
 // js/performance.js
 // 단어별 학습 성과 대시보드 및 나의 왕국(영지 발전 & 기사단 승급) 모듈
 
-import { StorageManager } from './storage.js?v=20261122_35';
-import { SoundManager } from './tts.js?v=20261122_35';
-import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261122_35';
-import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261122_35';
+import { StorageManager } from './storage.js?v=20261122_36';
+import { SoundManager } from './tts.js?v=20261122_36';
+import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261122_36';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261122_36';
+import { SiegeGame, SiegeManager } from './games/siege.js?v=20261122_36';
 
 export class PerformanceView {
   constructor(containerId) {
@@ -58,6 +59,10 @@ export class PerformanceView {
     const overallStats = this.calculateStats(allWords);
     const deckStats = this.calculateStats(currentDeckWords);
 
+    // 공성전 기록 및 남은 횟수
+    const siegeRecord = SiegeManager.getRecord();
+    const canPlaySiege = SiegeManager.canPlay();
+
     // 왕국 발전도 계산 (선택 단어장 기준)
     const kingdomPower = KingdomManager.calculateKingdomPower(currentDeckWords);
 
@@ -100,6 +105,40 @@ export class PerformanceView {
 
           <!-- 배경 장식용 은은한 오라 -->
           <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        </div>
+
+        <!-- ⚔️ 성채 공성전 (Siege Defense) 출정 배너 카드 -->
+        <div class="bg-gradient-to-r from-amber-950/80 via-slate-900 to-indigo-950/80 text-white rounded-3xl p-5 sm:p-6 shadow-xl border-2 border-amber-500/40 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1.5 relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-black border border-amber-500/30">
+              <span>⚔️</span> <span>일일 2회 출정 한정 디펜스</span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-black text-amber-400 flex items-center gap-2 tracking-tight">
+              <span>🏰 성채 수호 공성전</span>
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-bold ${canPlaySiege ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}">
+                ${canPlaySiege ? `오늘 남은 출정: ${2 - siegeRecord.playCount}/2회` : '오늘 출정 완료 (0/2회)'}
+              </span>
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
+              단어장에서 훈련된 기사단으로 <strong>4×6 골짜기 전장</strong>에서 몰려오는 <strong>100웨이브 마물 군단</strong>을 막아내세요!<br class="hidden sm:inline">
+              매일 <strong>새벽 12시(00:00) 초기화</strong>되며, 10웨이브마다 지형이 바뀌고 전사자의 50%가 부활합니다.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3 shrink-0 relative z-10">
+            <div class="bg-black/40 backdrop-blur-sm rounded-2xl px-4 py-2.5 border border-white/10 text-center">
+              <div class="text-[10px] text-slate-400 font-bold">역대 최고 방어</div>
+              <div class="text-lg font-black text-amber-300 font-mono">${siegeRecord.bestWave > 0 ? `Wave ${siegeRecord.bestWave}` : '기록 없음'}</div>
+            </div>
+            <button id="perf-open-siege-btn" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black text-sm shadow-lg shadow-amber-500/30 transition transform hover:scale-105 active:scale-95 flex items-center gap-2">
+              <span>⚔️</span> <span>공성전 출정</span>
+            </button>
+          </div>
+
+          <!-- 배경 장식 아이콘 -->
+          <div class="absolute -right-6 -bottom-6 text-8xl opacity-10 pointer-events-none">
+            🛡️
+          </div>
         </div>
 
         <!-- 🏰 현재 영지 발전도 카드 (성채 일러스트 & 발전 게이지) -->
@@ -554,10 +593,22 @@ export class PerformanceView {
     window.addEventListener('vocaquest_words_updated', () => {
       this.render();
     });
+    window.addEventListener('vocaquest_siege_completed', () => {
+      this.render();
+    });
   }
 
   bindDynamicEvents() {
     if (!this.container) return;
+
+    // 성채 수호 공성전 출정 버튼
+    const openSiegeBtn = document.getElementById('perf-open-siege-btn');
+    if (openSiegeBtn) {
+      openSiegeBtn.addEventListener('click', () => {
+        const siege = new SiegeGame();
+        siege.open();
+      });
+    }
 
     // 단어장 탭 버튼
     this.container.querySelectorAll('.deck-filter-btn').forEach(btn => {
