@@ -5,6 +5,7 @@ import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261122_05';
 import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261122_05';
 import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261122_20';
 import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_05';
+import { ServerSyncManager } from './serverSync.js?v=20261122_25';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -57,6 +58,7 @@ export class StorageManager {
     try {
       localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
       window.dispatchEvent(new CustomEvent('vocaquest_profiles_updated', { detail: profiles }));
+      ServerSyncManager.uploadProfiles(profiles);
     } catch (e) {
       console.error(e);
     }
@@ -145,6 +147,7 @@ export class StorageManager {
     }
     profiles = profiles.filter(p => p.id !== profileId);
     this.saveProfiles(profiles);
+    ServerSyncManager.deleteProfile(profileId);
 
     // 해당 프로필 성취도 데이터 삭제
     try {
@@ -177,9 +180,17 @@ export class StorageManager {
     const targetId = profileId || this.getActiveProfileId();
     try {
       localStorage.setItem(PROFILE_DATA_PREFIX + targetId, JSON.stringify(data || {}));
+      ServerSyncManager.scheduleProfileDataSave(targetId, data);
     } catch (e) {
       console.error(e);
     }
+  }
+
+  /**
+   * 서버와의 전체 프로필 및 성취도 동기화 초기화
+   */
+  static async initServerSync() {
+    return await ServerSyncManager.initSync(this);
   }
 
   /**

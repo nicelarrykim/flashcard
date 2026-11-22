@@ -4,6 +4,7 @@
 import { StorageManager } from './storage.js?v=20261122_17';
 import { KingdomManager } from './kingdom.js?v=20261122_17';
 import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_17';
+import { ServerSyncManager } from './serverSync.js?v=20261122_25';
 
 export const ADMIN_PASSWORD = '2217';
 
@@ -108,6 +109,29 @@ export class AdminManager {
             <button id="admin-close-btn" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold">
               ✕
             </button>
+          </div>
+
+          <!-- 서버 실시간 동기화 상태 배너 -->
+          <div class="mt-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 flex flex-wrap items-center justify-between gap-2 shrink-0">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full ${ServerSyncManager.isServerConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
+              <div>
+                <span class="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                  <span>${ServerSyncManager.isServerConnected ? '🌐 서버 연동 활성 (다중 기기 동기화)' : '💻 단독 로컬 모드 (서버 미연결)'}</span>
+                </span>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                  ${ServerSyncManager.getServerUrl()}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 ml-auto">
+              <button id="admin-manual-sync-btn" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                <span>🔄</span> <span>즉시 동기화</span>
+              </button>
+              <button id="admin-server-setup-btn" class="px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                <span>⚙️</span> <span>서버 설정</span>
+              </button>
+            </div>
           </div>
 
           <!-- 프로필 추가 버튼 바 -->
@@ -253,6 +277,26 @@ export class AdminManager {
     if (closeBtn) closeBtn.onclick = () => this.close();
     if (doneBtn) doneBtn.onclick = () => this.close();
 
+    // 서버 수동 동기화 버튼
+    const syncBtn = document.getElementById('admin-manual-sync-btn');
+    if (syncBtn) {
+      syncBtn.onclick = async () => {
+        syncBtn.disabled = true;
+        syncBtn.innerText = '동기화 중...';
+        await StorageManager.initServerSync();
+        alert('서버와의 프로필 및 성취도 동기화가 완료되었습니다!');
+        this.openAdminPanel();
+      };
+    }
+
+    // 서버 설정 모달 열기 버튼
+    const setupBtn = document.getElementById('admin-server-setup-btn');
+    if (setupBtn) {
+      setupBtn.onclick = () => {
+        this.openServerConfigModal();
+      };
+    }
+
     // 새 프로필 추가 버튼
     const addBtn = document.getElementById('admin-add-profile-btn');
     if (addBtn) {
@@ -308,6 +352,138 @@ export class AdminManager {
         }
       };
     });
+  }
+
+  /**
+   * 서버 설정 및 다중 기기 연동 안내 모달
+   */
+  static openServerConfigModal() {
+    this.init();
+    const currentUrl = ServerSyncManager.getServerUrl();
+    const isConnected = ServerSyncManager.isServerConnected;
+
+    this.container.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-700">
+          
+          <div class="flex items-start justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 text-xs font-black mb-1">
+                <span>🌐</span> <span>다중 기기 서버 동기화</span>
+              </div>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">서버 연결 및 기기 연동 설정</h3>
+            </div>
+            <button id="server-cfg-close-btn" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold">
+              ✕
+            </button>
+          </div>
+
+          <div class="py-4 space-y-4 text-xs">
+            <!-- 현재 연결 상태 -->
+            <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600">
+              <span class="font-bold text-slate-700 dark:text-slate-300">현재 연결 상태:</span>
+              <span class="font-black px-2.5 py-1 rounded-xl text-xs flex items-center gap-1.5 ${isConnected ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300' : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300'}">
+                <span class="w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
+                <span>${isConnected ? '서버 연결 완료 (온라인)' : '서버 미연결 (로컬 모드)'}</span>
+              </span>
+            </div>
+
+            <!-- 서버 URL 입력 폼 -->
+            <div>
+              <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                동기화 서버 주소 (API URL):
+              </label>
+              <div class="flex items-center gap-2">
+                <input type="text" id="server-cfg-url-input" value="${currentUrl}" placeholder="http://localhost:8000 또는 http://192.168.0.x:8000"
+                  class="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 font-mono text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                <button type="button" id="server-cfg-test-btn" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-sm shrink-0">
+                  연결 확인
+                </button>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">
+                기본값은 비워두면 현재 웹 접속 주소를 사용합니다.
+              </p>
+            </div>
+
+            <!-- 다중 기기 학습 안내 카드 -->
+            <div class="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 text-indigo-900 dark:text-indigo-200 space-y-1.5 leading-relaxed">
+              <h4 class="font-black text-xs flex items-center gap-1.5 text-indigo-800 dark:text-indigo-300">
+                <span>📱</span> <span>스마트폰/태블릿 등 서로 다른 기기에서 연동하기</span>
+              </h4>
+              <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                <li>컴퓨터 터미널에서 <code>python3 server.py</code>를 실행합니다.</li>
+                <li>같은 Wi-Fi(공유기)에 연결된 스마트폰 또는 태블릿의 웹 브라우저를 엽니다.</li>
+                <li>서버 실행 시 출력된 주소(예: <code>http://192.168.x.x:8000</code>)로 접속합니다.</li>
+                <li><strong>모든 사용자 프로필과 단어별 숙련도/왕국 발전도가 실시간으로 서버에 저장되어 그대로 연동</strong>됩니다!</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <button type="button" id="server-cfg-reset-btn" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-medium">
+              기본 주소로 초기화
+            </button>
+            <div class="flex items-center gap-2">
+              <button type="button" id="server-cfg-close-bottom" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition">
+                닫기
+              </button>
+              <button type="button" id="server-cfg-sync-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-indigo-600 hover:from-emerald-600 hover:to-indigo-700 text-white text-xs font-bold shadow-md transition">
+                지금 서버와 동기화
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    const close = () => this.close();
+    const closeBtn = document.getElementById('server-cfg-close-btn');
+    const closeBottom = document.getElementById('server-cfg-close-bottom');
+    if (closeBtn) closeBtn.onclick = close;
+    if (closeBottom) closeBottom.onclick = close;
+
+    const urlInput = document.getElementById('server-cfg-url-input');
+    const testBtn = document.getElementById('server-cfg-test-btn');
+    const resetBtn = document.getElementById('server-cfg-reset-btn');
+    const syncBtn = document.getElementById('server-cfg-sync-btn');
+
+    if (resetBtn) {
+      resetBtn.onclick = async () => {
+        ServerSyncManager.setCustomServerUrl('');
+        if (urlInput) urlInput.value = ServerSyncManager.getServerUrl();
+        await ServerSyncManager.checkConnection(true);
+        this.openServerConfigModal();
+      };
+    }
+
+    if (testBtn) {
+      testBtn.onclick = async () => {
+        const val = urlInput ? urlInput.value.trim() : '';
+        testBtn.disabled = true;
+        testBtn.innerText = '확인 중...';
+        ServerSyncManager.setCustomServerUrl(val);
+        const { connected } = await ServerSyncManager.checkConnection(true);
+        testBtn.disabled = false;
+        testBtn.innerText = '연결 확인';
+        if (connected) {
+          alert('✅ 서버 연결 성공! 실시간 동기화가 활성화되었습니다.');
+          this.openServerConfigModal();
+        } else {
+          alert('❌ 서버에 연결할 수 없습니다. server.py가 실행 중인지 확인하세요.');
+        }
+      };
+    }
+
+    if (syncBtn) {
+      syncBtn.onclick = async () => {
+        syncBtn.disabled = true;
+        syncBtn.innerText = '동기화 중...';
+        await StorageManager.initServerSync();
+        alert('서버와 동기화가 완료되었습니다!');
+        this.close();
+      };
+    }
   }
 
   static close() {

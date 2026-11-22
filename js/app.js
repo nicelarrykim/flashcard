@@ -1,16 +1,16 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261122_22';
-import { SoundManager } from './tts.js?v=20261122_22';
-import { FlashcardGame } from './games/flashcard.js?v=20261122_22';
-import { QuizGame } from './games/quiz.js?v=20261122_22';
-import { MatchGame } from './games/match.js?v=20261122_22';
-import { ScrambleGame } from './games/scramble.js?v=20261122_22';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261122_22';
-import { WordManager } from './wordManager.js?v=20261122_22';
-import { PerformanceView } from './performance.js?v=20261122_22';
-import { AdminManager } from './admin.js?v=20261122_22';
+import { StorageManager } from './storage.js?v=20261122_26';
+import { SoundManager } from './tts.js?v=20261122_26';
+import { FlashcardGame } from './games/flashcard.js?v=20261122_26';
+import { QuizGame } from './games/quiz.js?v=20261122_26';
+import { MatchGame } from './games/match.js?v=20261122_26';
+import { ScrambleGame } from './games/scramble.js?v=20261122_26';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261122_26';
+import { WordManager } from './wordManager.js?v=20261122_26';
+import { PerformanceView } from './performance.js?v=20261122_26';
+import { AdminManager } from './admin.js?v=20261122_26';
 
 class App {
   constructor() {
@@ -39,11 +39,27 @@ class App {
     // 초기 탭 렌더링
     this.switchTab('flashcard');
 
+    // 서버 동기화 초기화 (비동기)
+    StorageManager.initServerSync();
+
     // 단어 또는 단어장 데이터 변경 감지
     window.addEventListener('vocaquest_words_updated', () => {
       this.updateStats();
       this.renderDeckSelector();
       this.syncStudyControlsUI();
+    });
+
+    // 서버 동기화 완료 시 전체 상태 반영
+    window.addEventListener('vocaquest_sync_completed', () => {
+      this.updateActiveProfileBadge();
+      this.updateStats();
+      this.renderDeckSelector();
+      this.reloadCurrentTab();
+    });
+
+    // 서버 연결 상태 변경 감지
+    window.addEventListener('vocaquest_server_status_changed', (e) => {
+      this.updateServerBadge(e.detail);
     });
 
     window.addEventListener('vocaquest_decks_updated', () => {
@@ -108,7 +124,34 @@ class App {
     if (avatarEl && prof) avatarEl.innerText = prof.avatar || '🛡️';
   }
 
+  updateServerBadge(detail) {
+    const badge = document.getElementById('header-server-badge');
+    const dot = document.getElementById('server-status-dot');
+    const text = document.getElementById('server-status-text');
+    if (!badge || !dot || !text) return;
+
+    if (detail && detail.connected) {
+      dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+      text.innerText = '서버 연동';
+      text.className = 'hidden xs:inline text-emerald-700 dark:text-emerald-300 font-bold';
+      badge.title = `서버(${detail.serverUrl})와 실시간 동기화 중 (클릭 시 설정)`;
+    } else {
+      dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+      text.innerText = '로컬';
+      text.className = 'hidden xs:inline text-slate-500 dark:text-slate-400';
+      badge.title = '단독 로컬 모드 (클릭하여 서버 주소 연결)';
+    }
+  }
+
   bindHeader() {
+    // 서버 연동 뱃지 클릭 시 서버 설정 모달
+    const serverBadge = document.getElementById('header-server-badge');
+    if (serverBadge) {
+      serverBadge.addEventListener('click', () => {
+        AdminManager.openServerConfigModal();
+      });
+    }
+
     // 음소거 토글
     const soundBtn = document.getElementById('header-sound-btn');
     if (soundBtn) {

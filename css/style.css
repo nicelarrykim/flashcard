@@ -129,22 +129,42 @@ button, input, select, textarea {
   filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.45));
 }
 
+/* 네비게이션 탭 바 가로 스크롤 및 좌측 짤림 원천 차단 */
+nav {
+  position: relative;
+  width: 100%;
+}
+
+nav .overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-padding-left: 12px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* 모바일 전용 UX 및 가로 스크롤 완전 차단 최적화 */
 @media (max-width: 640px) {
   /* 모바일 화면에서 모든 카드와 박스가 부모 너비를 넘지 않도록 강제 */
-  .tab-content, main, header, nav {
+  .tab-content, main, header {
     max-width: 100vw;
     overflow-x: hidden;
   }
 
+  nav {
+    max-width: 100vw;
+  }
+
   /* 네비게이션 탭 바만 터치로 부드럽게 가로 스크롤 가능 */
-  nav > div {
+  nav .overflow-x-auto {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  nav > div::-webkit-scrollbar {
-    display: none;
   }
 
   /* 터치 타겟 최소 높이 보장 및 폰트 렌더링 최적화 */
