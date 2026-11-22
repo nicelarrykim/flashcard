@@ -21,19 +21,28 @@ export class MatchGame {
     this.combo = 0;
     this.maxCombo = 0;
     this.matchedCount = 0;
-    this.targetCount = 8;        // 필드 유지 개수 (8:8)
+    this.isMobile = this.checkIsMobile();
+    this.targetCount = this.isMobile ? 6 : 8;        // 모바일은 6:6, PC는 8:8
     this.isProcessing = false;   // 판정 중 클릭 방지
     this.timer = null;
     this.seconds = 0;
     this.isPlaying = false;
   }
 
+  checkIsMobile() {
+    return window.innerWidth < 640 || /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
   init() {
+    this.isMobile = this.checkIsMobile();
+    this.targetCount = this.isMobile ? 6 : 8;
     this.container = this.container || document.getElementById(this.containerId);
     this.renderStartScreen();
   }
 
   renderStartScreen() {
+    this.isMobile = this.checkIsMobile();
+    this.targetCount = this.isMobile ? 6 : 8;
     this.container = this.container || document.getElementById(this.containerId);
     if (!this.container) return;
 
@@ -43,28 +52,32 @@ export class MatchGame {
     const studyWords = StorageManager.getStudyWords ? StorageManager.getStudyWords() : (mgr?.getWords?.() || []);
     const activeDeck = mgr?.getActiveDeck?.() || { name: '기본 단어장' };
     const canPlay = studyWords.length >= this.targetCount || (mgr?.getWords?.() || []).length >= this.targetCount;
+    const modeTitle = `${this.targetCount}:${this.targetCount}`;
 
     this.container.innerHTML = `
-      <div class="max-w-md mx-auto text-center py-10 px-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
-        <div class="text-6xl mb-4">⚔️🛡️</div>
+      <div class="max-w-md mx-auto text-center py-8 sm:py-10 px-4 sm:px-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">
+        <div class="text-5xl sm:text-6xl mb-3 sm:mb-4">⚔️🛡️</div>
         <div class="inline-block px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-black mb-3">
           📖 단어장: ${activeDeck?.name || '기본 단어장'} (${studyWords.length}단어)
         </div>
-        <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">칼 & 방패 짝맞추기</h2>
-        <p class="text-slate-500 dark:text-slate-400 mb-6 text-sm leading-relaxed">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mb-2">칼 & 방패 짝맞추기</h2>
+        <div class="inline-block px-2.5 py-0.5 rounded-full ${this.isMobile ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300' : 'bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300'} text-[11px] font-bold mb-3">
+          ${this.isMobile ? '📱 모바일 최적화 6:6 모드' : '💻 PC 와이드 8:8 모드'}
+        </div>
+        <p class="text-slate-500 dark:text-slate-400 mb-6 text-xs sm:text-sm leading-relaxed">
           카드는 <strong>모두 오픈</strong>되어 있습니다!<br>
-          <strong>좌측 칼(영단어) 8개</strong>와 <strong>우측 방패(뜻) 8개</strong>를 매칭하세요.<br>
+          <strong>좌측 칼(영단어) ${this.targetCount}개</strong>와 <strong>우측 방패(뜻) ${this.targetCount}개</strong>를 매칭하세요.<br>
           맞추면 방어 효과와 함께 새 단어가 보충되며 <strong>랜덤 재배치</strong>됩니다.<br>
           <span class="text-rose-500 font-bold">오답 시 하트가 1개씩 줄어듭니다!</span>
         </p>
 
         ${!canPlay ? `
-          <div class="p-4 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 rounded-2xl text-sm mb-4">
-            8:8 배틀을 진행하려면 최소 ${this.targetCount}개 이상의 단어가 필요합니다. 단어장에서 단어를 추가해주세요.
+          <div class="p-4 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 rounded-2xl text-xs sm:text-sm mb-4">
+            ${modeTitle} 배틀을 진행하려면 최소 ${this.targetCount}개 이상의 단어가 필요합니다. 단어장에서 단어를 추가해주세요.
           </div>
         ` : `
-          <button id="match-start-btn" class="w-full py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-rose-600 hover:from-indigo-700 hover:to-rose-700 text-white font-black text-lg rounded-2xl shadow-lg shadow-indigo-500/30 transition transform hover:-translate-y-0.5 active:translate-y-0">
-            8:8 짝맞추기 시작 ⚔️🛡️
+          <button id="match-start-btn" class="w-full py-3.5 sm:py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-rose-600 hover:from-indigo-700 hover:to-rose-700 text-white font-black text-base sm:text-lg rounded-2xl shadow-lg shadow-indigo-500/30 transition transform hover:-translate-y-0.5 active:translate-y-0">
+            ${modeTitle} 짝맞추기 시작 ⚔️🛡️
           </button>
         `}
       </div>
@@ -75,6 +88,9 @@ export class MatchGame {
   }
 
   startGame() {
+    this.isMobile = this.checkIsMobile();
+    this.targetCount = this.isMobile ? 6 : 8;
+
     let pool = StorageManager.getStudyWords ? StorageManager.getStudyWords() : StorageManager.getWords();
     if (pool.length < this.targetCount) {
       pool = StorageManager.getActiveWords ? StorageManager.getActiveWords() : StorageManager.getWords();
@@ -84,7 +100,7 @@ export class MatchGame {
     this.allPool = [...pool].sort(() => Math.random() - 0.5);
     this.remainingPool = [...this.allPool];
 
-    // 초기 8개 단어 추출
+    // 초기 targetCount개 단어 추출
     this.activeWords = this.remainingPool.splice(0, this.targetCount);
     this.buildDecks();
 
@@ -140,108 +156,108 @@ export class MatchGame {
 
   renderBoard() {
     this.container.innerHTML = `
-      <div class="max-w-4xl mx-auto flex flex-col items-center select-none">
+      <div class="max-w-4xl mx-auto flex flex-col items-center select-none w-full px-0.5 sm:px-0">
         
-        <!-- 상단 헤더: 하트, 점수, 콤보, 타이머 -->
-        <div class="w-full flex items-center justify-between mb-4 px-4 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1 text-xl" id="match-lives">
+        <!-- 상단 헤더: 하트, 점수, 콤보, 타이머 (모바일에서 줄바꿈 대응 및 가로스크롤 방지) -->
+        <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-3 sm:mb-4 px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 text-xs sm:text-sm">
+          <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex items-center gap-0.5 sm:gap-1 text-base sm:text-xl" id="match-lives">
               ${'❤️'.repeat(this.lives)}${'🖤'.repeat(3 - this.lives)}
             </div>
-            <div id="match-combo-badge" class="${this.combo > 1 ? '' : 'hidden'} px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-xs animate-bounce shadow">
+            <div id="match-combo-badge" class="${this.combo > 1 ? '' : 'hidden'} px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px] sm:text-xs animate-bounce shadow">
               🔥 <span id="match-combo-num">${this.combo}</span> 콤보!
             </div>
           </div>
 
-          <div class="flex items-center gap-4">
-            <div class="text-xs font-bold text-slate-500 dark:text-slate-400">
-              격파: <strong class="text-emerald-600 font-mono text-sm" id="match-count">${this.matchedCount}</strong>개
-              <span class="text-slate-400 font-normal">/ 남은 대기: ${this.remainingPool.length}개</span>
+          <div class="flex items-center gap-2.5 sm:gap-4">
+            <div class="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400">
+              격파: <strong class="text-emerald-600 font-mono text-xs sm:text-sm" id="match-count">${this.matchedCount}</strong>개
+              <span class="text-slate-400 font-normal">/ 대기 ${this.remainingPool.length}</span>
             </div>
-            <div class="text-lg font-black text-indigo-600 dark:text-indigo-400 font-mono" id="match-score">
+            <div class="text-sm sm:text-lg font-black text-indigo-600 dark:text-indigo-400 font-mono" id="match-score">
               ${this.score} 점
             </div>
-            <span class="text-xs font-mono font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
+            <span class="text-[11px] sm:text-xs font-mono font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
               <span>⏱️</span> <span id="match-timer">00:00</span>
             </span>
-            <button id="match-restart-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition" title="다시 시작">
+            <button id="match-restart-btn" class="p-1 sm:p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition" title="다시 시작">
               🔄
             </button>
           </div>
         </div>
 
-        <!-- 8:8 배틀 필드 (좌측 칼 ⚔️ vs 우측 방패 🛡️) -->
-        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 relative" id="match-battlefield">
+        <!-- ${this.targetCount}:${this.targetCount} 배틀 필드 (좌측 칼 ⚔️ vs 우측 방패 🛡️) -->
+        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-4 relative" id="match-battlefield">
           
-          <!-- 좌측 컬럼: 공격측 칼 (영단어 8개) -->
-          <div class="bg-gradient-to-b from-rose-50/50 to-orange-50/30 dark:from-rose-950/20 dark:to-slate-900/40 p-3 sm:p-4 rounded-3xl border-2 border-rose-200 dark:border-rose-900/40 shadow-md">
-            <div class="flex items-center justify-between mb-3 px-1">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500 text-white text-xs font-black shadow-sm">
+          <!-- 좌측 컬럼: 공격측 칼 (영단어 ${this.targetCount}개) -->
+          <div class="bg-gradient-to-b from-rose-50/50 to-orange-50/30 dark:from-rose-950/20 dark:to-slate-900/40 p-2 sm:p-4 rounded-2xl sm:rounded-3xl border-2 border-rose-200 dark:border-rose-900/40 shadow-sm sm:shadow-md">
+            <div class="flex items-center justify-between mb-2 sm:mb-3 px-1">
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:py-1 rounded-full bg-rose-500 text-white text-[11px] sm:text-xs font-black shadow-sm">
                 <span>⚔️</span> <span>공격측 (영어 단어)</span>
               </span>
-              <span class="text-xs text-rose-600 dark:text-rose-400 font-bold">${this.leftDeck.length} / 8</span>
+              <span class="text-[11px] sm:text-xs text-rose-600 dark:text-rose-400 font-bold">${this.leftDeck.length} / ${this.targetCount}</span>
             </div>
 
-            <!-- 좌측 2x4 카드 그리드 -->
-            <div class="grid grid-cols-2 gap-2.5" id="match-left-grid">
+            <!-- 좌측 2x${this.targetCount/2} 카드 그리드 -->
+            <div class="grid grid-cols-2 gap-1.5 sm:gap-2.5" id="match-left-grid">
               ${this.leftDeck.map((card, idx) => {
                 const isSelected = this.selectedLeft && this.selectedLeft.id === card.id;
                 return `
-                  <button data-card-id="${card.id}" data-type="word" data-idx="${idx}" class="match-card-btn group relative w-full h-20 sm:h-24 p-2.5 rounded-2xl text-left border-2 transition-all transform hover:-translate-y-0.5 active:scale-95 shadow-sm flex flex-col justify-between overflow-hidden ${isSelected ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/70 ring-4 ring-rose-400/50 scale-105 z-20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-rose-300 dark:hover:border-rose-700'}">
+                  <button data-card-id="${card.id}" data-type="word" data-idx="${idx}" class="match-card-btn group relative w-full h-16 sm:h-24 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl text-left border-2 transition-all transform hover:-translate-y-0.5 active:scale-95 shadow-sm flex flex-col justify-between overflow-hidden ${isSelected ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/70 ring-4 ring-rose-400/50 scale-105 z-20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-rose-300 dark:hover:border-rose-700'}">
                     
                     <div class="flex items-center justify-between w-full">
-                      <span class="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300">
+                      <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300">
                         ⚔️ 칼
                       </span>
-                      <span class="text-[10px] font-mono text-slate-400">${card.subtext}</span>
+                      <span class="text-[9px] sm:text-[10px] font-mono text-slate-400">${card.subtext}</span>
                     </div>
 
                     <div class="my-auto w-full">
-                      <div class="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
+                      <div class="font-black text-xs sm:text-base text-slate-900 dark:text-white truncate">
                         ${card.text}
                       </div>
-                      ${card.phonetic ? `<div class="text-[10px] font-mono text-slate-400 truncate">${card.phonetic}</div>` : ''}
+                      ${card.phonetic ? `<div class="text-[9px] font-mono text-slate-400 truncate hidden sm:block">${card.phonetic}</div>` : ''}
                     </div>
 
                     <!-- 밑줄 포인트 -->
-                    <div class="w-full h-1 bg-gradient-to-r from-rose-500 to-amber-500 rounded-full opacity-60"></div>
+                    <div class="w-full h-0.5 sm:h-1 bg-gradient-to-r from-rose-500 to-amber-500 rounded-full opacity-60"></div>
                   </button>
                 `;
               }).join('')}
             </div>
           </div>
 
-          <!-- 우측 컬럼: 방어측 방패 (한국어 뜻 8개) -->
-          <div class="bg-gradient-to-b from-sky-50/50 to-indigo-50/30 dark:from-sky-950/20 dark:to-slate-900/40 p-3 sm:p-4 rounded-3xl border-2 border-sky-200 dark:border-sky-900/40 shadow-md">
-            <div class="flex items-center justify-between mb-3 px-1">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-600 text-white text-xs font-black shadow-sm">
+          <!-- 우측 컬럼: 방어측 방패 (한국어 뜻 ${this.targetCount}개) -->
+          <div class="bg-gradient-to-b from-sky-50/50 to-indigo-50/30 dark:from-sky-950/20 dark:to-slate-900/40 p-2 sm:p-4 rounded-2xl sm:rounded-3xl border-2 border-sky-200 dark:border-sky-900/40 shadow-sm sm:shadow-md">
+            <div class="flex items-center justify-between mb-2 sm:mb-3 px-1">
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 sm:py-1 rounded-full bg-sky-600 text-white text-[11px] sm:text-xs font-black shadow-sm">
                 <span>🛡️</span> <span>방어측 (단어 뜻)</span>
               </span>
-              <span class="text-xs text-sky-600 dark:text-sky-400 font-bold">${this.rightDeck.length} / 8</span>
+              <span class="text-[11px] sm:text-xs text-sky-600 dark:text-sky-400 font-bold">${this.rightDeck.length} / ${this.targetCount}</span>
             </div>
 
-            <!-- 우측 2x4 카드 그리드 -->
-            <div class="grid grid-cols-2 gap-2.5" id="match-right-grid">
+            <!-- 우측 2x${this.targetCount/2} 카드 그리드 -->
+            <div class="grid grid-cols-2 gap-1.5 sm:gap-2.5" id="match-right-grid">
               ${this.rightDeck.map((card, idx) => {
                 const isSelected = this.selectedRight && this.selectedRight.id === card.id;
                 return `
-                  <button data-card-id="${card.id}" data-type="meaning" data-idx="${idx}" class="match-card-btn group relative w-full h-20 sm:h-24 p-2.5 rounded-2xl text-left border-2 transition-all transform hover:-translate-y-0.5 active:scale-95 shadow-sm flex flex-col justify-between overflow-hidden ${isSelected ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/70 ring-4 ring-sky-400/50 scale-105 z-20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-sky-300 dark:hover:border-sky-700'}">
+                  <button data-card-id="${card.id}" data-type="meaning" data-idx="${idx}" class="match-card-btn group relative w-full h-16 sm:h-24 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl text-left border-2 transition-all transform hover:-translate-y-0.5 active:scale-95 shadow-sm flex flex-col justify-between overflow-hidden ${isSelected ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/70 ring-4 ring-sky-400/50 scale-105 z-20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-sky-300 dark:hover:border-sky-700'}">
                     
                     <div class="flex items-center justify-between w-full">
-                      <span class="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300">
+                      <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300">
                         🛡️ 방패
                       </span>
-                      <span class="text-[10px] font-semibold text-slate-400">의미</span>
+                      <span class="text-[9px] sm:text-[10px] font-semibold text-slate-400">의미</span>
                     </div>
 
                     <div class="my-auto w-full">
-                      <div class="font-extrabold text-xs sm:text-sm text-slate-800 dark:text-slate-100 line-clamp-2 break-keep leading-snug">
+                      <div class="font-extrabold text-[11px] sm:text-sm text-slate-800 dark:text-slate-100 line-clamp-2 break-keep leading-tight sm:leading-snug">
                         ${card.text}
                       </div>
                     </div>
 
                     <!-- 밑줄 포인트 -->
-                    <div class="w-full h-1 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full opacity-60"></div>
+                    <div class="w-full h-0.5 sm:h-1 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full opacity-60"></div>
                   </button>
                 `;
               }).join('')}

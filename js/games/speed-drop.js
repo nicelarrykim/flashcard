@@ -16,11 +16,11 @@ export class SpeedDropGame {
     this.score = 0;
     this.combo = 0;
     this.maxCombo = 0;
-    this.dropBaseSpeed = 0.22; // 기본 낙하 속도 (%/frame)
+    this.dropBaseSpeed = 0.14; // 기본 낙하 속도 (%/frame) - 속도 완화 적용
     this.animationFrame = null;
     this.isPlaying = false;
     this.lastSpawnTime = 0;
-    this.spawnInterval = 3200; // ms 단위로 2번째 단어 스폰 간격
+    this.spawnInterval = 3800; // ms 단위로 2번째 단어 스폰 간격 (여유 있는 템포)
     this.draggingWord = null;  // 현재 드래그 중인 단어 객체
     this.selectedWord = null;  // 클릭 선택된 단어 객체 (원클릭 조작 편의용)
     this.dragOffset = { x: 0, y: 0 };
@@ -125,7 +125,7 @@ export class SpeedDropGame {
       }
     }
 
-    const currentSpeed = Math.min(0.55, this.dropBaseSpeed + (this.score / 2500) * 0.12);
+    const currentSpeed = Math.min(0.38, this.dropBaseSpeed + (this.score / 3500) * 0.08);
 
     const fallingItem = {
       id: 'drop_' + (this.nextId++),

@@ -2,7 +2,7 @@
 <html lang="ko" class="h-full">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -25,8 +25,8 @@
     }
   </script>
 
-  <!-- 커스텀 스타일 (3D 플립 등) -->
-  <link rel="stylesheet" href="css/style.css?v=20261122_06">
+  <!-- 커스텀 스타일 (3D 플립 & 모바일 가로스크롤 방지 등) -->
+  <link rel="stylesheet" href="css/style.css?v=20261122_16">
 
   <!-- Tesseract.js OCR 라이브러리 CDN -->
   <!-- Tesseract.js OCR 라이브러리 CDN -->
@@ -81,18 +81,18 @@
   </script>
 
   <!-- 상단 네비게이션 헤더 -->
-  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
+    <div class="max-w-6xl mx-auto px-2.5 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
       
       <!-- 로고 및 서비스명 -->
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-500/30 font-black">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white text-base sm:text-xl shadow-lg shadow-indigo-500/30 font-black shrink-0">
           VQ
         </div>
         <div>
-          <h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+          <h1 class="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
             <span>VocaQuest</span>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400">
+            <span class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.2 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400">
               Web App
             </span>
           </h1>
@@ -100,24 +100,24 @@
         </div>
       </div>
 
-      <!-- 중앙/우측 학습 요약 뱃지 -->
-      <div class="flex items-center gap-2 sm:gap-4">
+      <!-- 중앙/우측 학습 요약 뱃지 (모바일 가로스크롤 방지 슬림 패딩) -->
+      <div class="flex items-center gap-1.5 sm:gap-3">
         <!-- 단어 통계 pill -->
-        <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 rounded-2xl text-xs font-semibold border border-slate-200/50 dark:border-slate-700/50">
+        <div class="flex items-center gap-1 sm:gap-2 bg-slate-100 dark:bg-slate-800/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-semibold border border-slate-200/50 dark:border-slate-700/50">
           <span class="text-slate-500 dark:text-slate-400">단어 <strong id="stat-total-words" class="text-indigo-600 dark:text-indigo-400">0</strong></span>
-          <span class="text-slate-300 dark:text-slate-600">|</span>
+          <span class="text-slate-300 dark:text-slate-600 hidden xs:inline">|</span>
           <span class="text-emerald-600 dark:text-emerald-400">외움 <strong id="stat-memorized-words">0</strong></span>
-          <span class="text-slate-300 dark:text-slate-600">|</span>
+          <span class="text-slate-300 dark:text-slate-600 hidden xs:inline">|</span>
           <span class="text-rose-500 dark:text-rose-400">오답 <strong id="stat-wrong-words">0</strong></span>
         </div>
 
         <!-- 효과음 토글 -->
-        <button id="header-sound-btn" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition" title="효과음 켜짐">
+        <button id="header-sound-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition text-sm sm:text-base shrink-0" title="효과음 켜짐">
           🔊
         </button>
 
         <!-- 다크모드 토글 -->
-        <button id="header-theme-btn" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition" title="다크 모드 전환">
+        <button id="header-theme-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition text-sm sm:text-base shrink-0" title="다크 모드 전환">
           🌙
         </button>
       </div>
@@ -125,48 +125,48 @@
     </div>
   </header>
 
-  <!-- 전역 단어장(Deck) 및 학습 옵션 선택 바 -->
-  <div class="bg-indigo-50/80 dark:bg-indigo-950/50 border-b border-indigo-100 dark:border-indigo-900/60 px-3 sm:px-6 py-2.5">
-    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5">
+  <!-- 전역 단어장(Deck) 및 학습 옵션 선택 바 (모바일 가로 스크롤 방지) -->
+  <div class="bg-indigo-50/80 dark:bg-indigo-950/50 border-b border-indigo-100 dark:border-indigo-900/60 px-2.5 sm:px-6 py-2 overflow-x-hidden">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
       
       <!-- 좌측: 단어장 선택 -->
-      <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap">
         <span class="text-xs font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center gap-1 shrink-0">
           <span>📖</span> <span>단어장:</span>
         </span>
-        <select id="global-deck-select" class="flex-1 sm:w-56 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 text-xs font-bold text-slate-900 dark:text-white shadow-sm focus:outline-none focus:border-indigo-500 cursor-pointer">
+        <select id="global-deck-select" class="flex-1 sm:w-56 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 text-xs font-bold text-slate-900 dark:text-white shadow-sm focus:outline-none focus:border-indigo-500 cursor-pointer">
         </select>
-        <button id="global-create-deck-btn" class="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-indigo-50 text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-200 dark:border-indigo-800 shadow-sm transition shrink-0" title="새 단어장 만들기">
+        <button id="global-create-deck-btn" class="px-2 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-indigo-50 text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-200 dark:border-indigo-800 shadow-sm transition shrink-0" title="새 단어장 만들기">
           + 새 단어장
         </button>
       </div>
 
       <!-- 우측: 번호 범위 학습 & 사진 표시 옵션 -->
-      <div class="flex items-center gap-2.5 flex-wrap lg:justify-end text-xs">
+      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-wrap sm:justify-end text-xs">
         
         <!-- 1. 단어 번호 범위 분할 공부 -->
-        <div class="flex items-center gap-1.5 bg-white dark:bg-slate-800 px-2.5 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 shadow-sm">
-          <label class="flex items-center gap-1 cursor-pointer font-bold text-slate-700 dark:text-slate-300 select-none">
+        <div class="flex items-center gap-1 sm:gap-1.5 bg-white dark:bg-slate-800 px-2 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800 shadow-sm">
+          <label class="flex items-center gap-1 cursor-pointer font-bold text-slate-700 dark:text-slate-300 select-none text-[11px] sm:text-xs">
             <input type="checkbox" id="global-range-toggle" class="rounded text-indigo-600 focus:ring-0 cursor-pointer">
-            <span>범위 공부</span>
+            <span>범위</span>
           </label>
-          <div id="global-range-inputs" class="flex items-center gap-1 opacity-50 pointer-events-none transition">
-            <input type="number" id="global-range-start" min="1" placeholder="1" class="w-14 px-2 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-center font-bold text-slate-900 dark:text-white">
+          <div id="global-range-inputs" class="flex items-center gap-0.5 sm:gap-1 opacity-50 pointer-events-none transition">
+            <input type="number" id="global-range-start" min="1" placeholder="1" class="w-11 sm:w-14 px-1 sm:px-2 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-center font-bold text-slate-900 dark:text-white text-xs">
             <span class="text-slate-400">~</span>
-            <input type="number" id="global-range-end" min="1" placeholder="50" class="w-14 px-2 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-center font-bold text-slate-900 dark:text-white">
-            <span class="text-slate-500 dark:text-slate-400 text-[11px]">번</span>
-            <button id="global-range-apply-btn" class="ml-1 px-2 py-0.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition shadow-sm">
+            <input type="number" id="global-range-end" min="1" placeholder="50" class="w-11 sm:w-14 px-1 sm:px-2 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-center font-bold text-slate-900 dark:text-white text-xs">
+            <span class="text-slate-500 dark:text-slate-400 text-[10px] sm:text-[11px]">번</span>
+            <button id="global-range-apply-btn" class="ml-0.5 px-1.5 sm:px-2 py-0.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] sm:text-[11px] transition shadow-sm">
               적용
             </button>
           </div>
         </div>
 
         <!-- 2. 단어 사진 옵션 -->
-        <div class="flex items-center gap-1.5 bg-white dark:bg-slate-800 px-2.5 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 shadow-sm">
-          <span class="text-slate-600 dark:text-slate-300 font-bold shrink-0 flex items-center gap-1">
-            <span>🖼️</span> <span>사진:</span>
+        <div class="flex items-center gap-1 sm:gap-1.5 bg-white dark:bg-slate-800 px-2 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800 shadow-sm">
+          <span class="text-slate-600 dark:text-slate-300 font-bold shrink-0 flex items-center gap-1 text-[11px] sm:text-xs">
+            <span>🖼️</span> <span class="hidden xs:inline">사진:</span>
           </span>
-          <select id="global-photo-mode-select" class="bg-transparent border-0 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer">
+          <select id="global-photo-mode-select" class="bg-transparent border-0 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer">
             <option value="auto">자동 (근위대 이상 숨김)</option>
             <option value="always_on">항상 켜기</option>
             <option value="always_off">항상 끄기</option>
@@ -211,35 +211,35 @@
     </div>
   </nav>
 
-  <!-- 메인 콘텐츠 영역 -->
-  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 md:p-8">
+  <!-- 메인 콘텐츠 영역 (모바일 가로스크롤 방지 슬림 패딩) -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-2 sm:p-6 md:p-8 overflow-x-hidden">
     
     <!-- 0. 개인 학습 성과 및 기사단 승급 탭 -->
-    <section id="tab-performance" class="tab-content hidden"></section>
+    <section id="tab-performance" class="tab-content hidden w-full max-w-full overflow-hidden"></section>
 
     <!-- 1. 플래시카드 탭 -->
-    <section id="tab-flashcard" class="tab-content"></section>
+    <section id="tab-flashcard" class="tab-content w-full max-w-full overflow-hidden"></section>
 
     <!-- 2. 스피드 사지선다 퀴즈 탭 -->
-    <section id="tab-quiz" class="tab-content hidden"></section>
+    <section id="tab-quiz" class="tab-content hidden w-full max-w-full overflow-hidden"></section>
 
     <!-- 3. 카드 짝맞추기 탭 -->
-    <section id="tab-match" class="tab-content hidden"></section>
+    <section id="tab-match" class="tab-content hidden w-full max-w-full overflow-hidden"></section>
 
     <!-- 4. 스펠링 맞추기 (스크램블) 탭 -->
-    <section id="tab-scramble" class="tab-content hidden"></section>
+    <section id="tab-scramble" class="tab-content hidden w-full max-w-full overflow-hidden"></section>
 
     <!-- 5. 단어 낙하 디펜스 탭 -->
-    <section id="tab-speed-drop" class="tab-content hidden"></section>
+    <section id="tab-speed-drop" class="tab-content hidden w-full max-w-full overflow-hidden"></section>
 
     <!-- 6. 단어장 관리 및 OCR 탭 -->
-    <section id="tab-manager" class="tab-content hidden"></section>
+    <section id="tab-manager" class="tab-content hidden w-full max-w-full overflow-hidden"></section>
 
   </main>
 
   <!-- 푸터 -->
-  <footer class="mt-auto py-6 border-t border-slate-200/80 dark:border-slate-800/80 text-center text-xs text-slate-400">
-    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+  <footer class="mt-auto py-5 sm:py-6 border-t border-slate-200/80 dark:border-slate-800/80 text-center text-xs text-slate-400 px-3">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
       <p>💡 <strong>VocaQuest</strong> - 영어 단어 이미지 인식 플래시카드 & 맞추기 게임</p>
       <p class="flex items-center gap-2">
         <span>배포: GitHub Pages</span>
@@ -250,6 +250,6 @@
   </footer>
 
   <!-- 앱 메인 스크립트 (ES Module - 캐시 방지 버전 파라미터 적용) -->
-  <script type="module" src="js/app.js?v=20261122_15"></script>
+  <script type="module" src="js/app.js?v=20261122_16"></script>
 </body>
 </html>
