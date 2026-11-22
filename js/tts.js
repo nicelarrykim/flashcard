@@ -137,6 +137,76 @@ export class SoundManager {
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
         osc.start(now);
         osc.stop(now + 0.55);
+      } else if (type === 'clash') {
+        // 검과 방패, 철제 무기 충돌 금속음 (챙강!)
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1800, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.12);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+
+        // 추가 쇳소리 배음
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(3200, now);
+        osc2.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+        gain2.gain.setValueAtTime(0.15, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now);
+        osc2.stop(now + 0.08);
+      } else if (type === 'slash') {
+        // 칼로 베는 묵직한 베기 타격음 (슉-팍!)
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.15);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'hit_damage') {
+        // 병사 피격음 (둔탁한 타격)
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(240, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.14);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      } else if (type === 'explosion') {
+        // 성채 피격 콰광! 폭발음
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.45);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      } else if (type === 'war_horn') {
+        // 전투 개시 웅장한 전쟁 나팔 (뿌우우-)
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(261.63, now); // C4
+        osc.frequency.setValueAtTime(329.63, now + 0.15); // E4
+        osc.frequency.setValueAtTime(392.00, now + 0.3); // G4
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.setValueAtTime(0.22, now + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc.start(now);
+        osc.stop(now + 0.8);
+      } else if (type === 'wave_clear') {
+        // 웨이브 클리어 승리 팡파레
+        osc.type = 'triangle';
+        [392.0, 523.25, 659.25, 783.99].forEach((freq, idx) => {
+          osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+        });
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc.start(now);
+        osc.stop(now + 0.6);
       }
     } catch (e) {
       console.warn('Tone play error:', e);

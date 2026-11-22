@@ -3,9 +3,9 @@
 // 4x6 골짜기 미로 전장, 단어장 실제 인원수(1:1) 기반 10명 단위 원클릭&드래그 증원 배치,
 // 100웨이브 판타지 몹 대군단 스웜 디펜스, 10웨이브 단위 맵 변경 & 50% 부활, 성 함락 화염 연출
 
-import { StorageManager } from '../storage.js?v=20261123_02';
-import { SoundManager } from '../tts.js?v=20261123_02';
-import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261123_02';
+import { StorageManager } from '../storage.js?v=20261123_03';
+import { SoundManager } from '../tts.js?v=20261123_03';
+import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261123_03';
 
 export class SiegeManager {
   static STORAGE_KEY = 'vocaquest_siege_record_v2';
@@ -317,6 +317,8 @@ export class SiegeGame {
     this.spawnTimer = null;
     this.animFrameId = null;
     this.lastLoopTime = 0;
+    this.lastClashSoundTime = 0;
+    this.lastDamageSoundTime = 0;
 
     // 드래그 상태
     this.draggedRank = null;
@@ -603,10 +605,27 @@ export class SiegeGame {
           50% { transform: translate(var(--jx), calc(var(--jy) - 3px)) rotate(5deg) scale(1.05); }
           100% { transform: translate(var(--jx), var(--jy)) rotate(-5deg) scale(0.95); }
         }
-        @keyframes attack-slash-fx {
-          0% { opacity: 0; transform: scale(0.5) rotate(-25deg); }
-          50% { opacity: 1; transform: scale(1.3) rotate(15deg); }
-          100% { opacity: 0; transform: scale(1.5) rotate(35deg); }
+        @keyframes battle-tile-shake {
+          0% { transform: translate(0, 0); }
+          20% { transform: translate(-2px, 1.5px); }
+          40% { transform: translate(2px, -1.5px); }
+          60% { transform: translate(-1.5px, -1px); }
+          80% { transform: translate(1.5px, 1px); }
+          100% { transform: translate(0, 0); }
+        }
+        @keyframes clash-sparks {
+          0% { transform: scale(0.7) rotate(-15deg); opacity: 0.4; }
+          50% { transform: scale(1.4) rotate(15deg); opacity: 1; filter: drop-shadow(0 0 10px #f59e0b); }
+          100% { transform: scale(0.9) rotate(-5deg); opacity: 0.6; }
+        }
+        @keyframes soldier-thrust {
+          0%, 100% { transform: scale(1) translateY(0); }
+          50% { transform: scale(1.15) translateY(-4px); }
+        }
+        @keyframes float-damage {
+          0% { opacity: 1; transform: translateY(0) scale(0.8); }
+          40% { opacity: 1; transform: translateY(-16px) scale(1.2); }
+          100% { opacity: 0; transform: translateY(-32px) scale(0.9); }
         }
       </style>
 
@@ -684,7 +703,7 @@ export class SiegeGame {
 
                         <!-- 배치된 병사 표시 -->
                         ${placed ? `
-                          <div class="relative z-20 flex flex-col items-center justify-center pointer-events-none animate-in zoom-in-75 duration-100">
+                          <div class="tile-soldier-unit relative z-20 flex flex-col items-center justify-center pointer-events-none transition-transform duration-150">
                             <span class="text-xl sm:text-2xl">${SOLDIER_SPECS[placed.rankType].icon}</span>
                             <div class="flex items-center gap-1 mt-0.5">
                               <span class="text-[10px] font-black px-1.5 py-0.2 rounded-full bg-slate-900/90 text-amber-300 font-mono border border-amber-500/40">
@@ -700,10 +719,15 @@ export class SiegeGame {
                           <span class="text-[9px] text-amber-500/50 font-bold pointer-events-none">클릭 증원</span>
                         ` : ''}
 
+                        <!-- 교전 중 중앙 칼부림 & 불꽃 스파크 레이어 -->
+                        <div class="tile-clash-layer absolute inset-0 z-35 pointer-events-none flex items-center justify-center hidden">
+                          <div class="clash-icon text-2xl drop-shadow-lg" style="animation: clash-sparks 0.3s infinite alternate;">⚔️💥</div>
+                        </div>
+
                         <!-- 몬스터 스웜 레이어 (바글바글 떼지어 내려오는 레이아웃) -->
                         <div class="tile-monsters-layer absolute inset-0 z-30 pointer-events-none flex items-center justify-center overflow-visible"></div>
 
-                        <!-- 타격 효과 오버레이 -->
+                        <!-- 타격 효과 및 부유 데미지 오버레이 -->
                         <div class="tile-fx-overlay absolute inset-0 z-40 pointer-events-none hidden"></div>
                       </div>
                     `;
@@ -1038,6 +1062,22 @@ export class SiegeGame {
     return 18 + Math.floor(wave * 3.5);
   }
 
+  playBattleClashSound() {
+    const now = performance.now();
+    if (!this.lastClashSoundTime || now - this.lastClashSoundTime > 160) {
+      this.lastClashSoundTime = now;
+      SoundManager.playTone('clash');
+    }
+  }
+
+  playDamageSound() {
+    const now = performance.now();
+    if (!this.lastDamageSoundTime || now - this.lastDamageSoundTime > 220) {
+      this.lastDamageSoundTime = now;
+      SoundManager.playTone('hit_damage');
+    }
+  }
+
   /**
    * 웨이브 전투 개시
    */
@@ -1048,6 +1088,9 @@ export class SiegeGame {
       alert('전장에 배치된 병사가 없습니다! 골짜기에 병사를 10명 이상 배치한 후 시작하세요.');
       return;
     }
+
+    // 전쟁 나팔 사운드 울림!
+    SoundManager.playTone('war_horn');
 
     this.state = 'BATTLE';
     this.renderBattleArena();
@@ -1184,7 +1227,7 @@ export class SiegeGame {
   }
 
   /**
-   * 화면 프레임 렌더링 (몬스터 스웜 및 체력 바 DOM 업데이트)
+   * 화면 프레임 렌더링 (몬스터 스웜, 실시간 교전 애니메이션 및 체력 바 DOM 업데이트)
    */
   renderBattleFrame() {
     const hpEl = document.getElementById('siege-castle-hp');
@@ -1198,6 +1241,8 @@ export class SiegeGame {
       const c = parseInt(tile.dataset.c, 10);
       const layer = tile.querySelector('.tile-monsters-layer');
       const hpBar = tile.querySelector('.tile-hp-bar');
+      const clashLayer = tile.querySelector('.tile-clash-layer');
+      const soldierUnit = tile.querySelector('.tile-soldier-unit');
       const key = `${r}_${c}`;
       const placed = this.placements[key];
 
@@ -1205,12 +1250,25 @@ export class SiegeGame {
         hpBar.style.width = `${Math.max(0, (placed.currentHp / placed.maxHp) * 100)}%`;
       }
 
-      if (layer) {
-        const mobsOnTile = this.monsters.filter(m => {
-          const coord = this.pathCoords[m.pathIndex];
-          return coord && coord[0] === r && coord[1] === c;
-        });
+      const mobsOnTile = this.monsters.filter(m => {
+        const coord = this.pathCoords[m.pathIndex];
+        return coord && coord[0] === r && coord[1] === c;
+      });
 
+      // 딱 몹과 부딪혔을 때: 교전 중 효과 애니메이션 활성화!
+      const isClashing = placed && placed.count > 0 && mobsOnTile.length > 0;
+
+      if (isClashing) {
+        tile.classList.add('battle-tile-shake', 'border-rose-500', 'shadow-lg', 'shadow-rose-500/50');
+        if (clashLayer) clashLayer.classList.remove('hidden');
+        if (soldierUnit) soldierUnit.style.animation = 'soldier-thrust 0.35s infinite ease-in-out';
+      } else {
+        tile.classList.remove('battle-tile-shake', 'border-rose-500', 'shadow-lg', 'shadow-rose-500/50');
+        if (clashLayer) clashLayer.classList.add('hidden');
+        if (soldierUnit) soldierUnit.style.animation = '';
+      }
+
+      if (layer) {
         if (mobsOnTile.length > 0) {
           // 바글바글하게 떼를 지어 흔들거리며 내려오는 몬스터 캐릭터 그래픽
           layer.innerHTML = mobsOnTile.map(m => `
@@ -1236,17 +1294,32 @@ export class SiegeGame {
     if (!fx) return;
 
     if (type === 'attack') {
-      fx.innerHTML = `<span class="text-xs font-black text-amber-300 animate-ping">💥</span>`;
+      this.playBattleClashSound();
+      fx.innerHTML = `
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span class="text-xs sm:text-sm font-black text-amber-300 font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style="animation: float-damage 0.45s ease-out forwards;">💥-${val}</span>
+        </div>
+      `;
     } else if (type === 'damage') {
-      fx.innerHTML = `<span class="text-xs font-black text-rose-500 animate-bounce">🩸-${val}</span>`;
+      this.playDamageSound();
+      fx.innerHTML = `
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span class="text-xs sm:text-sm font-black text-rose-500 font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style="animation: float-damage 0.45s ease-out forwards;">🩸-${val}</span>
+        </div>
+      `;
     } else if (type === 'castle_hit') {
-      fx.innerHTML = `<span class="text-sm font-black text-red-500 animate-pulse">🔥-${val}</span>`;
+      SoundManager.playTone('explosion');
+      fx.innerHTML = `
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span class="text-sm sm:text-base font-black text-red-500 font-mono drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]" style="animation: float-damage 0.6s ease-out forwards;">🔥 성채 피격! -${val}</span>
+        </div>
+      `;
     }
 
     fx.classList.remove('hidden');
     setTimeout(() => {
       if (fx) fx.classList.add('hidden');
-    }, 280);
+    }, 450);
   }
 
   /**
@@ -1254,6 +1327,9 @@ export class SiegeGame {
    */
   handleWaveClear() {
     this.stopBattleLoop();
+
+    // 웨이브 클리어 팡파레 사운드 울림!
+    SoundManager.playTone('wave_clear');
 
     if (this.wave >= this.maxWave) {
       this.triggerVictory();
