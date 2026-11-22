@@ -101,6 +101,18 @@ export class FlashcardGame {
     const knightSvg = MasteryManager.getWalkingKnightIcon(wordRank, 36);
     const scoreVal = word.mastery ? word.mastery.score : 0;
 
+    // 사진 표시 옵션 판정:
+    // auto: 왕실근위대부터는 사진 숨김, always_on: 항상 켬, always_off: 항상 끔
+    const photoMode = StorageManager.getPhotoDisplayMode ? StorageManager.getPhotoDisplayMode() : 'auto';
+    let showPhoto = false;
+    if (word.imageUrl && word.imageUrl.trim()) {
+      if (photoMode === 'always_on') {
+        showPhoto = true;
+      } else if (photoMode === 'auto') {
+        showPhoto = (wordRank !== RANK_TYPES.ROYAL_GUARD && wordRank !== RANK_TYPES.MASTER);
+      }
+    }
+
     this.container.innerHTML = `
       <div class="max-w-xl mx-auto flex flex-col items-center">
         <!-- 상단 컨트롤 & 상태 바 -->
@@ -142,12 +154,12 @@ export class FlashcardGame {
           <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
         </div>
 
-        <!-- 3D 플립 카드 컨테이너 -->
+        <!-- 3D 플립 카드 컨테이너 (고정 높이로 카드 크기 유지) -->
         <div class="w-full h-[400px] perspective-1000 cursor-pointer select-none group" id="flashcard-card-wrapper">
           <div class="relative w-full h-full duration-500 transform-style-preserve-3d rounded-3xl shadow-2xl transition-transform ${this.isFlipped ? 'rotate-y-180' : ''}" id="flashcard-inner">
             
-            <!-- 앞면 (Front: 영단어 + 발음기호 + TTS 버튼) -->
-            <div class="absolute inset-0 w-full h-full backface-hidden bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-8 flex flex-col justify-between items-center text-center border-2 border-indigo-100 dark:border-indigo-900/50 shadow-xl">
+            <!-- 앞면 (Front: 영단어 + 발음기호 + TTS 버튼 + 사진) -->
+            <div class="absolute inset-0 w-full h-full backface-hidden bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-6 sm:p-8 flex flex-col justify-between items-center text-center border-2 border-indigo-100 dark:border-indigo-900/50 shadow-xl overflow-hidden">
               <div class="w-full flex justify-between items-center">
                 <div class="flex items-center gap-2">
                   ${word.number ? `
@@ -165,20 +177,26 @@ export class FlashcardGame {
                 </div>
               </div>
 
-              <div class="my-auto flex flex-col items-center">
-                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
+              <div class="my-auto flex flex-col items-center max-w-full">
+                ${showPhoto ? `
+                  <div class="mb-2 shrink-0">
+                    <img src="${word.imageUrl}" alt="${word.word}" onerror="this.parentElement.style.display='none'" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-indigo-100 dark:border-indigo-800 shadow-md">
+                  </div>
+                ` : ''}
+
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
                   ${word.word}
                 </h2>
                 ${word.phonetic ? `
-                  <p class="text-lg text-slate-500 dark:text-slate-400 font-mono mb-4">
+                  <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-mono mb-3">
                     ${word.phonetic}
                   </p>
                 ` : ''}
 
                 <!-- 발음 재생 버튼 바 -->
-                <div class="flex items-center gap-2 mt-2">
-                  <button id="fc-tts-btn" class="flex items-center gap-2 px-6 py-3 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 font-bold transition transform hover:scale-105 active:scale-95 shadow-sm">
-                    <span class="text-xl">🔊</span>
+                <div class="flex items-center gap-2 mt-1">
+                  <button id="fc-tts-btn" class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 font-bold transition transform hover:scale-105 active:scale-95 shadow-sm text-sm">
+                    <span class="text-lg">🔊</span>
                     <span>발음 듣기</span>
                   </button>
                 </div>
@@ -189,8 +207,8 @@ export class FlashcardGame {
               </div>
             </div>
 
-            <!-- 뒷면 (Back: 한국어 뜻 + 예문) -->
-            <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-8 flex flex-col justify-between items-center text-center border-2 border-purple-500/40 shadow-2xl overflow-hidden">
+            <!-- 뒷면 (Back: 한국어 뜻 + 예문 + 사진) -->
+            <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 flex flex-col justify-between items-center text-center border-2 border-purple-500/40 shadow-2xl overflow-hidden">
               <div class="relative z-10 w-full flex justify-between items-center">
                 <div class="flex items-center gap-2">
                   ${word.number ? `
@@ -208,17 +226,23 @@ export class FlashcardGame {
               </div>
 
               <div class="relative z-10 my-auto flex flex-col items-center max-w-lg w-full">
-                <h3 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-200 to-indigo-200 mb-6 tracking-tight">
+                ${showPhoto ? `
+                  <div class="mb-2 shrink-0">
+                    <img src="${word.imageUrl}" alt="${word.word}" onerror="this.parentElement.style.display='none'" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-purple-400/50 shadow-md opacity-90">
+                  </div>
+                ` : ''}
+
+                <h3 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-200 to-indigo-200 mb-4 tracking-tight">
                   ${word.meaning}
                 </h3>
 
                 ${word.example ? `
-                  <div class="bg-black/30 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-left w-full my-2 shadow-inner">
-                    <p class="text-sm sm:text-base font-medium text-slate-200 mb-1 leading-relaxed">
+                  <div class="bg-black/30 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-white/10 text-left w-full my-1 shadow-inner">
+                    <p class="text-xs sm:text-sm font-medium text-slate-200 mb-0.5 leading-relaxed">
                       "${word.example}"
                     </p>
                     ${word.exampleMeaning ? `
-                      <p class="text-xs sm:text-sm text-slate-400">
+                      <p class="text-[11px] sm:text-xs text-slate-400">
                         ${word.exampleMeaning}
                       </p>
                     ` : ''}

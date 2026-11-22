@@ -1,9 +1,10 @@
 // js/performance.js
-// 단어별 학습 성과 대시보드 및 기사단 승급 현황 관리 페이지 모듈
+// 단어별 학습 성과 대시보드 및 나의 왕국(영지 발전 & 기사단 승급) 모듈
 
-import { StorageManager } from './storage.js?v=20261122_05';
-import { SoundManager } from './tts.js?v=20261122_05';
-import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261122_05';
+import { StorageManager } from './storage.js?v=20261122_12';
+import { SoundManager } from './tts.js?v=20261122_12';
+import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261122_12';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261122_12';
 
 export class PerformanceView {
   constructor(containerId) {
@@ -57,25 +58,28 @@ export class PerformanceView {
     const overallStats = this.calculateStats(allWords);
     const deckStats = this.calculateStats(currentDeckWords);
 
+    // 왕국 발전도 계산 (선택 단어장 기준)
+    const kingdomPower = KingdomManager.calculateKingdomPower(currentDeckWords);
+
     // 필터링 및 정렬된 단어 목록
     const filteredWords = this.getFilteredAndSortedWords(currentDeckWords);
 
     this.container.innerHTML = `
       <div class="max-w-5xl mx-auto space-y-6 pb-12">
         
-        <!-- 페이지 헤더 -->
+        <!-- 페이지 헤더: 나의 왕국 대시보드 -->
         <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-indigo-900/50">
           <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold border border-indigo-400/30 mb-3">
-                <span>🛡️</span> <span>기사단 성장 & 단어 숙련도 시스템</span>
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-400/30 mb-3">
+                <span>🏰</span> <span>나의 왕국 & 기사단 영지 발전 시스템</span>
               </div>
               <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
-                <span>개인 학습 성과 대시보드</span>
+                <span>🏰 나의 왕국 대시보드</span>
               </h2>
               <p class="text-slate-300 text-xs sm:text-sm mt-1.5 max-w-xl leading-relaxed">
-                단어마다 숙련도(0~100점)를 쌓아 <strong>훈련병부터 전설의 마스터</strong>까지 기사단을 승급시키세요.<br class="hidden sm:inline">
-                고급기사 상태에서 퀴즈를 2회 연속 맞추면 <strong>왕실근위대</strong>가 되며 2일간 학습에서 면제됩니다.
+                단어 숙련도를 높여 기사들을 육성하고, 기사들의 수와 충성도에 비례해 <strong>왕국의 성채를 업그레이드</strong>하세요!<br class="hidden sm:inline">
+                훈련병부터 전설의 마스터까지, 획득한 기사단이 영지를 위대한 제국으로 발전시킵니다.
               </p>
             </div>
 
@@ -96,6 +100,123 @@ export class PerformanceView {
 
           <!-- 배경 장식용 은은한 오라 -->
           <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        </div>
+
+        <!-- 🏰 현재 영지 발전도 카드 (성채 일러스트 & 발전 게이지) -->
+        <div class="bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/20 dark:from-slate-800 dark:via-slate-800/80 dark:to-indigo-950/30 rounded-3xl p-6 sm:p-7 shadow-lg border-2 border-indigo-200/60 dark:border-indigo-800/60">
+          <div class="flex flex-col md:flex-row items-center gap-6">
+            
+            <!-- 좌측: 왕국 성채 SVG 일러스트 -->
+            <div class="w-full md:w-64 shrink-0 flex flex-col items-center">
+              <div class="w-48 h-36 rounded-2xl overflow-hidden shadow-md border border-indigo-100 dark:border-indigo-900 bg-slate-900/10 dark:bg-slate-900/60 flex items-center justify-center p-1">
+                ${KingdomManager.getKingdomIllustrationSVG(kingdomPower.tier.level)}
+              </div>
+              <div class="mt-2 text-center">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-black ${kingdomPower.tier.badgeColor}">
+                  ${kingdomPower.tier.badge}
+                </span>
+              </div>
+            </div>
+
+            <!-- 우측: 왕국 상태 설명 및 발전도 진행률 -->
+            <div class="flex-1 w-full space-y-3.5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div class="text-xs text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">
+                    영지: ${currentDeckName}
+                  </div>
+                  <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>${kingdomPower.tier.name}</span>
+                    <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">(Tier ${kingdomPower.tier.level})</span>
+                  </h3>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-slate-400">기사단 총 전투력</div>
+                  <div class="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono">
+                    ${kingdomPower.totalPoints.toLocaleString()} <span class="text-xs font-normal">pts</span>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                ${kingdomPower.tier.description}
+              </p>
+
+              <!-- 발전도 프로그레스 바 -->
+              <div class="space-y-1.5 pt-1">
+                <div class="flex items-center justify-between text-xs font-bold">
+                  <span class="text-slate-700 dark:text-slate-300">다음 영지 승급 진행도</span>
+                  <span class="text-indigo-600 dark:text-indigo-400 font-mono">${kingdomPower.progressPercent}%</span>
+                </div>
+                <div class="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shadow-inner">
+                  <div class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-400 rounded-full transition-all duration-500" style="width: ${kingdomPower.progressPercent}%"></div>
+                </div>
+                <div class="flex justify-between text-[11px] text-slate-400">
+                  <span>현 등급: ${kingdomPower.tier.name}</span>
+                  <span>다음 등급: ${kingdomPower.nextTier ? kingdomPower.nextTier.name : '최고 등급 도달!'}</span>
+                </div>
+              </div>
+
+              <!-- 요약 기사단 수 -->
+              <div class="flex flex-wrap items-center gap-3 pt-2 text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-700/60">
+                <span>⚔️ 총 기사 단원: <strong class="text-slate-800 dark:text-slate-200">${kingdomPower.totalWords}명</strong></span>
+                <span>•</span>
+                <span>🛡️ 고위 기사(중급 이상): <strong class="text-indigo-600 dark:text-indigo-400">${kingdomPower.advancedKnightCount}명</strong></span>
+                <span>•</span>
+                <span>👑 수호 기사(근위대/마스터): <strong class="text-amber-500 dark:text-amber-400">${kingdomPower.royalGuardCount + kingdomPower.masterCount}명</strong></span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 🗺️ 단어장별 왕국 발전도 한눈에 보기 (갤러리 그리드) -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <h3 class="text-sm font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+              <span>🗺️</span> <span>단어장별 영지 발전 현황 비교</span>
+            </h3>
+            <span class="text-xs text-slate-400">카드를 클릭하여 해당 단어장 선택</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            ${decks.map(deck => {
+              const dWords = (deck.words || []).filter(Boolean);
+              dWords.forEach(w => MasteryManager.ensureMastery(w));
+              const dPower = KingdomManager.calculateKingdomPower(dWords);
+              const isSelected = this.selectedDeckId === deck.id;
+
+              return `
+                <div data-deck-id="${deck.id}" class="deck-filter-btn cursor-pointer p-4 rounded-2xl border-2 transition-all transform hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between ${isSelected ? 'border-indigo-600 ring-2 ring-indigo-500/30 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-md' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300'}">
+                  <div class="flex items-center gap-3 mb-2.5">
+                    <div class="w-16 h-12 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 bg-slate-900/10 dark:bg-slate-900/60 flex items-center justify-center">
+                      ${KingdomManager.getKingdomIllustrationSVG(dPower.tier.level)}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between gap-1 mb-0.5">
+                        <span class="text-xs font-black text-slate-900 dark:text-white truncate">${deck.name}</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${dPower.tier.badgeColor}">T${dPower.tier.level}</span>
+                      </div>
+                      <div class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold truncate">
+                        ${dPower.tier.name}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 단어수 및 기사단 포인트 -->
+                  <div class="space-y-1 mt-auto">
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                      <span>단어 ${dPower.totalWords}개 / 기사단</span>
+                      <span class="font-bold text-slate-700 dark:text-slate-300 font-mono">${dPower.totalPoints} pts</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                      <div class="h-full bg-indigo-500 rounded-full" style="width: ${dPower.progressPercent}%"></div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
         </div>
 
         <!-- 단어장 선택 네비게이션 탭 & 일괄 초기화 버튼 -->

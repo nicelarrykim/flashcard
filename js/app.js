@@ -1,15 +1,15 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261122_10';
-import { SoundManager } from './tts.js?v=20261122_10';
-import { FlashcardGame } from './games/flashcard.js?v=20261122_10';
-import { QuizGame } from './games/quiz.js?v=20261122_10';
-import { MatchGame } from './games/match.js?v=20261122_10';
-import { ScrambleGame } from './games/scramble.js?v=20261122_10';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261122_10';
-import { WordManager } from './wordManager.js?v=20261122_10';
-import { PerformanceView } from './performance.js?v=20261122_10';
+import { StorageManager } from './storage.js?v=20261122_12';
+import { SoundManager } from './tts.js?v=20261122_12';
+import { FlashcardGame } from './games/flashcard.js?v=20261122_12';
+import { QuizGame } from './games/quiz.js?v=20261122_12';
+import { MatchGame } from './games/match.js?v=20261122_12';
+import { ScrambleGame } from './games/scramble.js?v=20261122_12';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261122_12';
+import { WordManager } from './wordManager.js?v=20261122_12';
+import { PerformanceView } from './performance.js?v=20261122_12';
 
 class App {
   constructor() {
@@ -29,6 +29,7 @@ class App {
 
     this.bindHeader();
     this.bindGlobalDeckSelector();
+    this.bindStudyControls();
     this.bindTabs();
     this.updateStats();
 
@@ -39,16 +40,19 @@ class App {
     window.addEventListener('vocaquest_words_updated', () => {
       this.updateStats();
       this.renderDeckSelector();
+      this.syncStudyControlsUI();
     });
 
     window.addEventListener('vocaquest_decks_updated', () => {
       this.updateStats();
       this.renderDeckSelector();
+      this.syncStudyControlsUI();
     });
 
     window.addEventListener('vocaquest_deck_changed', () => {
       this.updateStats();
       this.renderDeckSelector();
+      this.syncStudyControlsUI();
       // 단어장이 바뀌면 현재 열려있는 게임/화면 즉시 재초기화
       this.reloadCurrentTab();
     });
@@ -108,6 +112,84 @@ class App {
         this.openCreateDeckPrompt();
       });
     }
+  }
+
+  /**
+   * 번호 범위 학습 & 사진 표시 옵션 바인딩
+   */
+  bindStudyControls() {
+    this.syncStudyControlsUI();
+
+    const rangeToggle = document.getElementById('global-range-toggle');
+    const rangeInputs = document.getElementById('global-range-inputs');
+    const rangeStart = document.getElementById('global-range-start');
+    const rangeEnd = document.getElementById('global-range-end');
+    const rangeApplyBtn = document.getElementById('global-range-apply-btn');
+    const photoSelect = document.getElementById('global-photo-mode-select');
+
+    if (rangeToggle) {
+      rangeToggle.addEventListener('change', (e) => {
+        const enabled = e.target.checked;
+        if (rangeInputs) {
+          if (enabled) {
+            rangeInputs.classList.remove('opacity-50', 'pointer-events-none');
+          } else {
+            rangeInputs.classList.add('opacity-50', 'pointer-events-none');
+          }
+        }
+        const s = parseInt(rangeStart ? rangeStart.value : 1, 10) || 1;
+        const ee = parseInt(rangeEnd ? rangeEnd.value : 50, 10) || 50;
+        StorageManager.setStudyRange(enabled, s, ee);
+        this.reloadCurrentTab();
+      });
+    }
+
+    if (rangeApplyBtn) {
+      rangeApplyBtn.addEventListener('click', () => {
+        const s = parseInt(rangeStart ? rangeStart.value : 1, 10) || 1;
+        const ee = parseInt(rangeEnd ? rangeEnd.value : 50, 10) || 50;
+        if (s > ee) {
+          alert('시작 번호는 끝 번호보다 작거나 같아야 합니다.');
+          return;
+        }
+        StorageManager.setStudyRange(true, s, ee);
+        if (rangeToggle) rangeToggle.checked = true;
+        if (rangeInputs) rangeInputs.classList.remove('opacity-50', 'pointer-events-none');
+        this.reloadCurrentTab();
+      });
+    }
+
+    if (photoSelect) {
+      photoSelect.addEventListener('change', (e) => {
+        StorageManager.setPhotoDisplayMode(e.target.value);
+        this.reloadCurrentTab();
+      });
+    }
+  }
+
+  syncStudyControlsUI() {
+    const range = StorageManager.getStudyRange();
+    const photoMode = StorageManager.getPhotoDisplayMode();
+
+    const rangeToggle = document.getElementById('global-range-toggle');
+    const rangeInputs = document.getElementById('global-range-inputs');
+    const rangeStart = document.getElementById('global-range-start');
+    const rangeEnd = document.getElementById('global-range-end');
+    const photoSelect = document.getElementById('global-photo-mode-select');
+
+    if (rangeToggle) {
+      rangeToggle.checked = !!range.enabled;
+    }
+    if (rangeInputs) {
+      if (range.enabled) {
+        rangeInputs.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        rangeInputs.classList.add('opacity-50', 'pointer-events-none');
+      }
+    }
+    if (rangeStart) rangeStart.value = range.start || 1;
+    if (rangeEnd) rangeEnd.value = range.end || 50;
+    if (photoSelect) photoSelect.value = photoMode || 'auto';
   }
 
   renderDeckSelector() {

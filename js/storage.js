@@ -8,6 +8,8 @@ import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261122_05';
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
 const SETTINGS_KEY = 'vocaquest_settings_v1';
+const STUDY_RANGE_KEY = 'vocaquest_study_range_v1';
+const PHOTO_MODE_KEY = 'vocaquest_photo_mode_v1';
 
 export class StorageManager {
   /**
@@ -50,7 +52,7 @@ export class StorageManager {
           }
           deck.words = deck.words.filter(Boolean);
           deck.words.forEach(word => {
-            if (word && word.imageUrl) {
+            if (word && typeof word.imageUrl !== 'string') {
               word.imageUrl = '';
               upgraded = true;
             }
@@ -155,17 +157,101 @@ export class StorageManager {
 
   /**
    * 플래시카드 & 퀴즈/게임용 단어 목록 조회
-   * 규칙: 왕실근위대(2일 이내)와 마스터 등급 단어는 학습 대상에서 제외!
+   * 1. 지정된 번호 범위 필터 (예: 1~50번) 적용 (학습에만 적용, 성과는 전체 유지)
+   * 2. 왕실근위대(2일 이내)와 마스터 등급 단어는 학습 대상에서 제외!
    * @param {boolean} [includeGraduated=false] 졸업 단어 포함 여부
    */
   static getStudyWords(includeGraduated = false) {
     // 자동 강등 확인
     this.checkRoyalGuardDemotions();
     const activeWords = this.getActiveWords();
-    if (includeGraduated) {
-      return activeWords;
+
+    // 학습 범위 필터 적용 (예: 1~50번)
+    let filtered = activeWords;
+    const range = this.getStudyRange();
+    if (range && range.enabled) {
+      const start = parseInt(range.start, 10);
+      const end = parseInt(range.end, 10);
+      if (!isNaN(start) && !isNaN(end) && start <= end) {
+        filtered = filtered.filter((w, idx) => {
+          const num = (w && typeof w.number === 'number' && !isNaN(w.number)) ? w.number : (idx + 1);
+          return num >= start && num <= end;
+        });
+      }
     }
-    return activeWords.filter(w => !MasteryManager.isExcludedFromStudy(w));
+
+    if (includeGraduated) {
+      return filtered;
+    }
+    return filtered.filter(w => !MasteryManager.isExcludedFromStudy(w));
+  }
+
+  /**
+   * 학습할 번호 범위 조회 (미설정 시 기본 전체: enabled: false)
+   */
+  static getStudyRange() {
+    try {
+      const saved = sessionStorage.getItem(STUDY_RANGE_KEY) || localStorage.getItem(STUDY_RANGE_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {}
+    return { enabled: false, start: 1, end: 50 };
+  }
+
+  /**
+   * 학습할 번호 범위 저장 (다음번 접속 전까지 유지)
+   */
+  static setStudyRange(enabledOrObj, startNum = 1, endNum = 50) {
+    try {
+      let range = {};
+      if (typeof enabledOrObj === 'object' && enabledOrObj !== null) {
+        range = {
+          enabled: !!enabledOrObj.enabled,
+          start: parseInt(enabledOrObj.start, 10) || 1,
+          end: parseInt(enabledOrObj.end, 10) || 50
+        };
+      } else {
+        range = {
+          enabled: !!enabledOrObj,
+          start: parseInt(startNum, 10) || 1,
+          end: parseInt(endNum, 10) || 50
+        };
+      }
+      const data = JSON.stringify(range);
+      sessionStorage.setItem(STUDY_RANGE_KEY, data);
+      localStorage.setItem(STUDY_RANGE_KEY, data);
+      window.dispatchEvent(new CustomEvent('vocaquest_range_changed', { detail: range }));
+      window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  /**
+   * 사진 표시 옵션 조회 ('auto' | 'always_on' | 'always_off')
+   * 기본: auto (왕실근위대부터는 사진 안 나옴)
+   */
+  static getPhotoDisplayMode() {
+    try {
+      const mode = localStorage.getItem(PHOTO_MODE_KEY);
+      if (mode && ['auto', 'always_on', 'always_off'].includes(mode)) {
+        return mode;
+      }
+    } catch (e) {}
+    return 'auto';
+  }
+
+  /**
+   * 사진 표시 옵션 저장
+   */
+  static setPhotoDisplayMode(mode) {
+    try {
+      localStorage.setItem(PHOTO_MODE_KEY, mode);
+      window.dispatchEvent(new CustomEvent('vocaquest_photo_mode_changed', { detail: { mode } }));
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   /**

@@ -990,15 +990,63 @@ export class WordManager {
     }, 300);
   }
 
+  /**
+   * 100KB 이하로 이미지를 캔버스를 통해 자동 리사이징 및 압축
+   */
+  compressImageUnder100KB(file) {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) {
+        return reject(new Error('유효한 이미지 파일이 아닙니다.'));
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 450;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // 100KB (102400 bytes) 이하로 점진적 압축
+          let quality = 0.8;
+          let dataUrl = canvas.toDataURL('image/jpeg', quality);
+          while (dataUrl.length * 0.75 > 100 * 1024 && quality > 0.2) {
+            quality -= 0.15;
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+          resolve(dataUrl);
+        };
+        img.onerror = () => reject(new Error('이미지 로드에 실패했습니다.'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('파일 읽기 실패'));
+      reader.readAsDataURL(file);
+    });
+  }
+
   openAddModal() {
     const modalContainer = document.getElementById('mgr-modal-container');
     if (!modalContainer) return;
 
     const activeDeck = StorageManager.getActiveDeck();
+    let currentUploadedImage = '';
 
     modalContainer.innerHTML = `
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h3 class="text-xl font-bold text-slate-900 dark:text-white">➕ 새 단어 직접 추가</h3>
@@ -1032,6 +1080,23 @@ export class WordManager {
               </div>
             </div>
 
+            <!-- 사진 업로드 (100KB 이하 제한) -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">🖼️ 단어 연상 사진 (선택, 100KB 이하 자동 최적화)</label>
+                <span id="add-img-size-badge" class="text-[10px] text-slate-400">최대 100KB</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div id="add-img-preview-box" class="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center overflow-hidden shrink-0">
+                  <span class="text-2xl text-slate-400">📷</span>
+                </div>
+                <div class="flex-1 flex flex-col gap-1.5">
+                  <input type="file" id="modal-image-input" accept="image/*" class="text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                  <button type="button" id="modal-image-clear-btn" class="hidden text-left text-[11px] text-rose-500 hover:underline">✕ 사진 지우기</button>
+                </div>
+              </div>
+            </div>
+
             <div class="flex items-center justify-end gap-2.5 mt-4 pt-2 border-t border-slate-100 dark:border-slate-700">
               <button type="button" id="modal-cancel-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600">
                 취소
@@ -1048,6 +1113,42 @@ export class WordManager {
     document.getElementById('modal-close-btn').onclick = () => modalContainer.innerHTML = '';
     document.getElementById('modal-cancel-btn').onclick = () => modalContainer.innerHTML = '';
 
+    const imgInput = document.getElementById('modal-image-input');
+    const imgPreviewBox = document.getElementById('add-img-preview-box');
+    const imgSizeBadge = document.getElementById('add-img-size-badge');
+    const imgClearBtn = document.getElementById('modal-image-clear-btn');
+
+    if (imgInput) {
+      imgInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          imgSizeBadge.textContent = '사진 최적화 중...';
+          const compressed = await this.compressImageUnder100KB(file);
+          currentUploadedImage = compressed;
+          const sizeKb = Math.round(compressed.length * 0.75 / 1024);
+          imgSizeBadge.textContent = `${sizeKb} KB (최적화 완료)`;
+          imgSizeBadge.className = 'text-[10px] text-emerald-600 font-bold';
+          imgPreviewBox.innerHTML = `<img src="${compressed}" class="w-full h-full object-cover">`;
+          imgClearBtn.classList.remove('hidden');
+        } catch (err) {
+          alert('사진 처리 오류: ' + err.message);
+          imgSizeBadge.textContent = '최대 100KB';
+        }
+      };
+    }
+
+    if (imgClearBtn) {
+      imgClearBtn.onclick = () => {
+        currentUploadedImage = '';
+        imgInput.value = '';
+        imgPreviewBox.innerHTML = '<span class="text-2xl text-slate-400">📷</span>';
+        imgSizeBadge.textContent = '최대 100KB';
+        imgSizeBadge.className = 'text-[10px] text-slate-400';
+        imgClearBtn.classList.add('hidden');
+      };
+    }
+
     const form = document.getElementById('word-add-form');
     form.onsubmit = async (e) => {
       e.preventDefault();
@@ -1059,7 +1160,7 @@ export class WordManager {
         word,
         meaning,
         partOfSpeech,
-        imageUrl: '',
+        imageUrl: currentUploadedImage || '',
         audioUrl: OCRParser.generateAudioUrl(word)
       });
       modalContainer.innerHTML = '';
@@ -1071,9 +1172,11 @@ export class WordManager {
     const modalContainer = document.getElementById('mgr-modal-container');
     if (!modalContainer) return;
 
+    let currentUploadedImage = word.imageUrl || '';
+
     modalContainer.innerHTML = `
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
           <div class="flex items-center justify-between mb-5">
             <h3 class="text-xl font-bold text-slate-900 dark:text-white">✏️ 단어 수정</h3>
             <button id="modal-close-btn" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg">✕</button>
@@ -1104,6 +1207,25 @@ export class WordManager {
               </div>
             </div>
 
+            <!-- 사진 수정/업로드 (100KB 이하 제한) -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">🖼️ 단어 연상 사진 (100KB 이하 자동 최적화)</label>
+                <span id="edit-img-size-badge" class="text-[10px] text-slate-400">
+                  ${currentUploadedImage ? '사진 등록됨' : '사진 없음'}
+                </span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div id="edit-img-preview-box" class="w-16 h-16 rounded-xl bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center overflow-hidden shrink-0">
+                  ${currentUploadedImage ? `<img src="${currentUploadedImage}" class="w-full h-full object-cover">` : '<span class="text-2xl text-slate-400">📷</span>'}
+                </div>
+                <div class="flex-1 flex flex-col gap-1.5">
+                  <input type="file" id="edit-image-input" accept="image/*" class="text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                  <button type="button" id="edit-image-clear-btn" class="${currentUploadedImage ? '' : 'hidden'} text-left text-[11px] text-rose-500 hover:underline">✕ 사진 삭제</button>
+                </div>
+              </div>
+            </div>
+
             <div class="flex items-center justify-end gap-2.5 mt-4 pt-2 border-t border-slate-100 dark:border-slate-700">
               <button type="button" id="modal-cancel-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600">
                 취소
@@ -1120,6 +1242,42 @@ export class WordManager {
     document.getElementById('modal-close-btn').onclick = () => modalContainer.innerHTML = '';
     document.getElementById('modal-cancel-btn').onclick = () => modalContainer.innerHTML = '';
 
+    const imgInput = document.getElementById('edit-image-input');
+    const imgPreviewBox = document.getElementById('edit-img-preview-box');
+    const imgSizeBadge = document.getElementById('edit-img-size-badge');
+    const imgClearBtn = document.getElementById('edit-image-clear-btn');
+
+    if (imgInput) {
+      imgInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          imgSizeBadge.textContent = '사진 최적화 중...';
+          const compressed = await this.compressImageUnder100KB(file);
+          currentUploadedImage = compressed;
+          const sizeKb = Math.round(compressed.length * 0.75 / 1024);
+          imgSizeBadge.textContent = `${sizeKb} KB (최적화 완료)`;
+          imgSizeBadge.className = 'text-[10px] text-emerald-600 font-bold';
+          imgPreviewBox.innerHTML = `<img src="${compressed}" class="w-full h-full object-cover">`;
+          imgClearBtn.classList.remove('hidden');
+        } catch (err) {
+          alert('사진 처리 오류: ' + err.message);
+          imgSizeBadge.textContent = '최대 100KB';
+        }
+      };
+    }
+
+    if (imgClearBtn) {
+      imgClearBtn.onclick = () => {
+        currentUploadedImage = '';
+        imgInput.value = '';
+        imgPreviewBox.innerHTML = '<span class="text-2xl text-slate-400">📷</span>';
+        imgSizeBadge.textContent = '사진 삭제됨';
+        imgSizeBadge.className = 'text-[10px] text-slate-400';
+        imgClearBtn.classList.add('hidden');
+      };
+    }
+
     const form = document.getElementById('word-edit-form');
     form.onsubmit = (e) => {
       e.preventDefault();
@@ -1128,7 +1286,7 @@ export class WordManager {
         word: updatedWord,
         meaning: document.getElementById('edit-meaning-input').value.trim(),
         partOfSpeech: document.getElementById('edit-pos-select').value,
-        imageUrl: '',
+        imageUrl: currentUploadedImage || '',
         audioUrl: OCRParser.generateAudioUrl(updatedWord)
       });
       modalContainer.innerHTML = '';
