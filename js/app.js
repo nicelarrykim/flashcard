@@ -1,17 +1,18 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261122_36';
-import { ServerSyncManager } from './serverSync.js?v=20261122_36';
-import { SoundManager } from './tts.js?v=20261122_36';
-import { FlashcardGame } from './games/flashcard.js?v=20261122_36';
-import { QuizGame } from './games/quiz.js?v=20261122_36';
-import { MatchGame } from './games/match.js?v=20261122_36';
-import { ScrambleGame } from './games/scramble.js?v=20261122_36';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261122_36';
-import { WordManager } from './wordManager.js?v=20261122_36';
-import { PerformanceView } from './performance.js?v=20261122_36';
-import { AdminManager } from './admin.js?v=20261122_36';
+import { StorageManager } from './storage.js?v=20261123_01';
+import { ServerSyncManager } from './serverSync.js?v=20261123_01';
+import { SoundManager } from './tts.js?v=20261123_01';
+import { FlashcardGame } from './games/flashcard.js?v=20261123_01';
+import { QuizGame } from './games/quiz.js?v=20261123_01';
+import { MatchGame } from './games/match.js?v=20261123_01';
+import { ScrambleGame } from './games/scramble.js?v=20261123_01';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261123_01';
+import { WordManager } from './wordManager.js?v=20261123_01';
+import { PerformanceView } from './performance.js?v=20261123_01';
+import { AdminManager } from './admin.js?v=20261123_01';
+import { SiegeGame } from './games/siege.js?v=20261123_01';
 
 class App {
   constructor() {
@@ -414,6 +415,21 @@ class App {
         this.switchTab(tab);
       });
     });
+
+    // 상단 네비게이션 공성전 버튼
+    const navSiegeBtn = document.getElementById('nav-siege-btn');
+    if (navSiegeBtn) {
+      navSiegeBtn.addEventListener('click', () => {
+        const siege = new SiegeGame();
+        siege.open();
+      });
+    }
+
+    // 전역 바로가기 함수
+    window.openSiegeGame = () => {
+      const siege = new SiegeGame();
+      siege.open();
+    };
   }
 
   switchTab(tabName) {

@@ -3,9 +3,9 @@
 // 4x6 골짜기 미로 타일 맵, 단어장 기사단 기반 10명 단위 드래그&더블클릭 배치,
 // 100웨이브 판타지 몹 디펜스, 10웨이브 단위 맵 변경 & 50% 부활, 성 함락 애니메이션
 
-import { StorageManager } from '../storage.js?v=20261122_36';
-import { SoundManager } from '../tts.js?v=20261122_36';
-import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261122_36';
+import { StorageManager } from '../storage.js?v=20261123_01';
+import { SoundManager } from '../tts.js?v=20261123_01';
+import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261123_01';
 
 export class SiegeManager {
   static STORAGE_KEY = 'vocaquest_siege_record_v2';
