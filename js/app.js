@@ -398,33 +398,71 @@ class App {
     if (!selectEl) return;
 
     const decks = StorageManager.getDecks();
+    const activeProf = StorageManager.getActiveProfile();
     const activeId = StorageManager.getActiveDeckId();
     const activeDeck = StorageManager.getActiveDeck();
 
-    selectEl.innerHTML = `
-      ${decks.map(d => `
-        <option value="${d.id}" ${d.id === activeId ? 'selected' : ''}>
-          📁 ${d.name || '단어장'} (${(d.words || []).length}단어)
-        </option>
-      `).join('')}
-      <option value="all" ${activeId === 'all' ? 'selected' : ''}>
-        🌐 전체 단어장 통합 (${decks.reduce((sum, d) => sum + ((d && d.words) ? d.words.length : 0), 0)}단어)
-      </option>
-    `;
+    const publicDecks = decks.filter(d => d.isPublic === true || !d.profileId);
+    const privateDecks = decks.filter(d => d.isPublic !== true && d.profileId);
+
+    let html = '';
+    if (publicDecks.length > 0) {
+      html += `<optgroup label="🌐 공용 단어장 (공통)">`;
+      publicDecks.forEach(d => {
+        html += `<option value="${d.id}" ${d.id === activeId ? 'selected' : ''}>
+          🌐 ${d.name || '단어장'} (${(d.words || []).length}단어)
+        </option>`;
+      });
+      html += `</optgroup>`;
+    }
+
+    if (privateDecks.length > 0) {
+      const profName = activeProf ? activeProf.name : '학습자';
+      html += `<optgroup label="👤 ${profName}의 개인 단어장">`;
+      privateDecks.forEach(d => {
+        html += `<option value="${d.id}" ${d.id === activeId ? 'selected' : ''}>
+          ⭐ ${d.name || '단어장'} (${(d.words || []).length}단어)
+        </option>`;
+      });
+      html += `</optgroup>`;
+    }
+
+    html += `<option value="all" ${activeId === 'all' ? 'selected' : ''}>
+      ✨ 전체 단어장 통합 (${decks.reduce((sum, d) => sum + ((d && d.words) ? d.words.length : 0), 0)}단어)
+    </option>`;
+
+    selectEl.innerHTML = html;
 
     if (descEl && activeDeck) {
-      descEl.innerHTML = `<span>ℹ️</span> <span>${activeDeck.description || activeDeck.name || '단어장'}</span>`;
+      const isPublic = StorageManager.isDeckPublic(activeDeck.id);
+      const badge = isPublic ? '🌐 공용' : '👤 개인';
+      descEl.innerHTML = `<span class="px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-950 text-[10px] font-bold text-indigo-700 dark:text-indigo-300 mr-1">${badge}</span><span>${activeDeck.description || activeDeck.name || '단어장'}</span>`;
     }
   }
 
   openCreateDeckPrompt() {
     const name = prompt('새로 만들 단어장 이름을 입력해주세요 (예: Day 2 필수 단어장):');
-    if (name && name.trim()) {
-      const desc = prompt('단어장 간단 설명을 입력해주세요 (선택):') || '';
-      const newDeck = StorageManager.createDeck(name.trim(), desc.trim());
-      alert(`'${newDeck.name}' 단어장이 생성되었습니다! 이제 이 단어장에 단어를 추가하거나 사진을 스캔해보세요.`);
-      this.switchTab('manager');
+    if (!name || !name.trim()) return;
+
+    const desc = prompt('단어장 간단 설명을 입력해주세요 (선택):') || '';
+    const activeProf = StorageManager.getActiveProfile();
+    const profName = activeProf ? activeProf.name : '현재 학습자';
+
+    let isPublic = false;
+    const makePublic = confirm(`이 단어장을 모든 학습자가 함께 보는 [🌐 공용 단어장]으로 생성하시겠습니까?\n\n- [확인]: 관리자 공용 단어장 (암호 2217 필요)\n- [취소]: [${profName}] 전용 개인 단어장`);
+    if (makePublic) {
+      const pw = prompt('공용 단어장 생성을 위해 관리자 암호를 입력하세요:');
+      if (pw === '2217') {
+        isPublic = true;
+      } else {
+        alert('암호가 올바르지 않습니다. [개인 단어장]으로 생성됩니다.');
+      }
     }
+
+    const newDeck = StorageManager.createDeck(name.trim(), desc.trim(), [], 'meaning', isPublic);
+    const typeLabel = isPublic ? '🌐 공용 단어장' : `👤 [${profName}] 개인 단어장`;
+    alert(`🎉 '${newDeck.name}' (${typeLabel})이(가) 생성되었습니다!\n이제 이 단어장에 단어를 추가하거나 사진을 스캔해보세요.`);
+    this.switchTab('manager');
   }
 
   bindTabs() {

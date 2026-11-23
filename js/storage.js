@@ -227,7 +227,10 @@ export class StorageManager {
    * (단어장은 모든 프로필 공통, 성취도는 프로필별 분리 머지)
    * ==========================================
    */
-  static getDecks() {
+  /**
+   * 로컬에 저장된 모든 단어장(공용 + 모든 프로필의 개인 단어장) 원본 목록 조회
+   */
+  static getAllDecks() {
     try {
       const data = localStorage.getItem(DECKS_KEY);
       let decks = null;
@@ -235,13 +238,15 @@ export class StorageManager {
       if (!data) {
         // 초기 기본 단어장 생성
         decks = [
-          JSON.parse(JSON.stringify(CENKLE_VOCA_KING_DECK)),
-          JSON.parse(JSON.stringify(ELEMENTARY_WORDS_50_DECK)),
+          { ...JSON.parse(JSON.stringify(CENKLE_VOCA_KING_DECK)), isPublic: true, profileId: null },
+          { ...JSON.parse(JSON.stringify(ELEMENTARY_WORDS_50_DECK)), isPublic: true, profileId: null },
           {
             id: 'deck_default',
             name: '기본 추천 단어장',
             description: '필수 기초 및 중급 영단어 15개',
             createdAt: Date.now() - 10000,
+            isPublic: true,
+            profileId: null,
             words: DEFAULT_WORDS
           },
           {
@@ -249,28 +254,28 @@ export class StorageManager {
             name: '교재 사진 단어장 (177~236)',
             description: '첨부된 책 사진에서 추출한 60개 단어 및 숙어',
             createdAt: Date.now() - 5000,
+            isPublic: true,
+            profileId: null,
             words: TEXTBOOK_WORDS
           }
         ];
         this.saveDecks(decks);
       } else {
         decks = JSON.parse(data);
-        // 센클보카킹 단어장이 아직 없으면 자동으로 목록 맨 위에 추가
         if (Array.isArray(decks) && !decks.some(d => d.id === CENKLE_VOCA_KING_DECK.id || d.name === CENKLE_VOCA_KING_DECK.name)) {
-          decks.unshift(JSON.parse(JSON.stringify(CENKLE_VOCA_KING_DECK)));
+          decks.unshift({ ...JSON.parse(JSON.stringify(CENKLE_VOCA_KING_DECK)), isPublic: true, profileId: null });
           this.saveDecks(decks);
         }
-        // 초급단어50 단어장이 아직 없으면 자동으로 목록에 추가
         if (Array.isArray(decks) && !decks.some(d => d.id === ELEMENTARY_WORDS_50_DECK.id || d.name === ELEMENTARY_WORDS_50_DECK.name)) {
           const cenkleIdx = decks.findIndex(d => d.id === CENKLE_VOCA_KING_DECK.id || d.name === CENKLE_VOCA_KING_DECK.name);
+          const elemDeck = { ...JSON.parse(JSON.stringify(ELEMENTARY_WORDS_50_DECK)), isPublic: true, profileId: null };
           if (cenkleIdx >= 0) {
-            decks.splice(cenkleIdx + 1, 0, JSON.parse(JSON.stringify(ELEMENTARY_WORDS_50_DECK)));
+            decks.splice(cenkleIdx + 1, 0, elemDeck);
           } else {
-            decks.unshift(JSON.parse(JSON.stringify(ELEMENTARY_WORDS_50_DECK)));
+            decks.unshift(elemDeck);
           }
           this.saveDecks(decks);
         } else if (Array.isArray(decks)) {
-          // 이미 존재하는 초급단어50 덱에 신규 확장 단어(200개) 자동 동기화
           const elemDeck = decks.find(d => d.id === ELEMENTARY_WORDS_50_DECK.id || d.name === ELEMENTARY_WORDS_50_DECK.name);
           if (elemDeck && Array.isArray(elemDeck.words) && elemDeck.words.length < ELEMENTARY_WORDS_50_DECK.words.length) {
             const existingIds = new Set(elemDeck.words.map(w => w.id || w.word));
@@ -291,17 +296,21 @@ export class StorageManager {
 
       if (Array.isArray(decks) && decks.length > 0) {
         let upgraded = false;
-        // 현재 활성 프로필의 성취도 데이터 로드
         const profData = this.getProfileData();
 
         decks.forEach(deck => {
           if (!deck) return;
+          if (deck.isPublic === undefined && !deck.profileId) {
+            deck.isPublic = true;
+            deck.profileId = null;
+            upgraded = true;
+          }
           if (!Array.isArray(deck.words)) {
             deck.words = [];
             upgraded = true;
           }
           if (!deck.imagePosition) {
-            deck.imagePosition = 'meaning'; // 기본값: 뜻에 그림이 붙어서 보임
+            deck.imagePosition = 'meaning';
             upgraded = true;
           }
           deck.words = deck.words.filter(Boolean);
@@ -312,7 +321,7 @@ export class StorageManager {
             }
             if (word && word.word) {
               const cleanWord = word.word.toLowerCase().trim();
-              const standardAudio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`;
+              const standardAudio = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(cleanWord) + '&type=2';
               if (!word.audioUrl || word.audioUrl.includes('gstatic.com') || word.audioUrl.includes('Spring') || word.audioUrl !== standardAudio) {
                 if (word.audioUrl !== standardAudio) {
                   word.audioUrl = standardAudio;
@@ -321,14 +330,12 @@ export class StorageManager {
               }
             }
 
-            // ⭐ 프로필별 성취도 데이터 동적 주입 (프로필 분리 핵심)
             const pData = profData[word.id];
             if (pData) {
               word.memorized = !!pData.memorized;
-              word.wrongCount = typeof pData.wrongCount === 'number' ? pData.wrongCount : 0;
+              word.wrongCount = typeof pData.wrongCount === 'number' ? word.wrongCount : 0;
               word.mastery = pData.mastery ? JSON.parse(JSON.stringify(pData.mastery)) : null;
             } else if (word.mastery) {
-              // 기존에 단어에 직접 저장되어 있던 성취도가 있고 프로필 데이터가 없으면 최초 1회 마이그레이션
               profData[word.id] = {
                 memorized: !!word.memorized,
                 wrongCount: typeof word.wrongCount === 'number' ? word.wrongCount : 0,
@@ -347,7 +354,6 @@ export class StorageManager {
         if (upgraded) {
           localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
         }
-        // 마이그레이션된 성취도 영구 보존
         this.saveProfileData(profData);
         return decks;
       }
@@ -358,20 +364,54 @@ export class StorageManager {
     }
   }
 
+  /**
+   * 단어장 목록 조회
+   * @param {boolean} filterByProfile - true면 공용 단어장 + 현재 활성 프로필의 개인 단어장만 반환, false면 전체 반환
+   */
+  static getDecks(filterByProfile = true) {
+    const all = this.getAllDecks();
+    if (!filterByProfile) return all;
+    const currentPid = this.getActiveProfileId();
+    return all.filter(d => d.isPublic === true || !d.profileId || d.profileId === currentPid);
+  }
+
+  /**
+   * 특정 단어장이 공용 단어장인지 확인
+   */
+  static isDeckPublic(deckId) {
+    const deck = this.getAllDecks().find(d => d.id === deckId);
+    return !deck || deck.isPublic === true || !deck.profileId;
+  }
+
+  /**
+   * 특정 단어장을 현재 사용자가 수정/삭제할 수 있는지 여부
+   */
+  static isDeckEditable(deckId, isAdmin = false) {
+    const deck = this.getAllDecks().find(d => d.id === deckId);
+    if (!deck) return false;
+    if (deck.isPublic === true || !deck.profileId) {
+      return isAdmin; // 공용 단어장은 관리자만 수정 가능
+    }
+    return deck.profileId === this.getActiveProfileId(); // 개인 단어장은 본인 프로필만 수정 가능
+  }
+
   static saveDecks(decks) {
     try {
-      localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
-      window.dispatchEvent(new CustomEvent('vocaquest_decks_updated', { detail: decks }));
+      const currentAll = this.getAllDecks();
+      const deckMap = new Map();
+      currentAll.forEach(d => deckMap.set(d.id, d));
+      decks.forEach(d => deckMap.set(d.id, d));
+      const fullList = Array.from(deckMap.values());
+
+      localStorage.setItem(DECKS_KEY, JSON.stringify(fullList));
+      window.dispatchEvent(new CustomEvent('vocaquest_decks_updated', { detail: fullList }));
       window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
-      FirebaseSyncManager.saveDecks(decks);
+      FirebaseSyncManager.saveDecks(fullList);
     } catch (e) {
       console.error('Failed to save decks:', e);
     }
   }
 
-  /**
-   * 현재 선택된 활성 단어장 ID (전체 단어장 보기: 'all')
-   */
   static getActiveDeckId() {
     try {
       const activeId = localStorage.getItem(ACTIVE_DECK_KEY);
@@ -578,18 +618,21 @@ export class StorageManager {
   /**
    * 새 단어장 생성
    */
-  static createDeck(name, description = '', initialWords = [], imagePosition = 'meaning') {
-    const decks = this.getDecks();
+  static createDeck(name, description = '', initialWords = [], imagePosition = 'meaning', isPublic = false, profileId = null) {
+    const all = this.getAllDecks();
+    const activePid = this.getActiveProfileId();
     const newDeck = {
       id: 'deck_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
       name: name.trim() || '새 단어장',
       description: description.trim() || '',
       createdAt: Date.now(),
-      imagePosition: imagePosition === 'word' ? 'word' : 'meaning', // 기본값: 뜻에 그림이 붙어서 보임
+      isPublic: Boolean(isPublic),
+      profileId: isPublic ? null : (profileId || activePid),
+      imagePosition: imagePosition === 'word' ? 'word' : 'meaning',
       words: initialWords
     };
-    decks.push(newDeck);
-    this.saveDecks(decks);
+    all.push(newDeck);
+    this.saveDecks(all);
     this.setActiveDeckId(newDeck.id);
     return newDeck;
   }

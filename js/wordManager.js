@@ -74,6 +74,7 @@ export class WordManager {
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5" id="deck-cards-grid">
             ${decks.map(deck => {
               const isSelected = deck.id === activeDeckId;
+              const isPublic = StorageManager.isDeckPublic(deck.id);
               const memorizedCount = deck.words.filter(w => w.memorized).length;
               const wrongCount = deck.words.filter(w => (w.wrongCount || 0) > 0).length;
 
@@ -81,15 +82,20 @@ export class WordManager {
                 <div class="relative p-4 rounded-2xl border-2 transition ${isSelected ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-md' : 'border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-750/50 hover:border-indigo-300'} flex flex-col justify-between">
                   <div>
                     <div class="flex items-center justify-between mb-1.5">
-                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
-                        ${isSelected ? '현재 학습 중 ✓' : `${deck.words.length}단어`}
-                      </span>
+                      <div class="flex items-center gap-1.5">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isPublic ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300' : 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300'}">
+                          ${isPublic ? '🌐 공용' : '👤 개인'}
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
+                          ${isSelected ? '학습 중 ✓' : `${deck.words.length}단어`}
+                        </span>
+                      </div>
                       <div class="flex items-center gap-1">
-                        <button type="button" class="deck-edit-btn p-1 text-slate-400 hover:text-indigo-600 text-xs" data-id="${deck.id}" title="단어장 이름 수정">
+                        <button type="button" class="deck-edit-btn p-1 text-slate-400 hover:text-indigo-600 text-xs" data-id="${deck.id}" title="${isPublic ? '단어장 이름 수정 (관리자)' : '단어장 이름 수정'}">
                           ✏️
                         </button>
                         ${decks.length > 1 ? `
-                          <button type="button" class="deck-del-btn p-1 text-slate-400 hover:text-rose-600 text-xs" data-id="${deck.id}" title="단어장 삭제">
+                          <button type="button" class="deck-del-btn p-1 text-slate-400 hover:text-rose-600 text-xs" data-id="${deck.id}" title="${isPublic ? '단어장 삭제 (관리자)' : '단어장 삭제'}">
                             🗑️
                           </button>
                         ` : ''}
@@ -321,8 +327,16 @@ export class WordManager {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const deckId = btn.dataset.id;
-        const deck = StorageManager.getDecks().find(d => d.id === deckId);
+        const deck = StorageManager.getAllDecks().find(d => d.id === deckId);
         if (deck) {
+          const isPublic = StorageManager.isDeckPublic(deckId);
+          if (isPublic) {
+            const pw = prompt('공용 단어장 이름을 수정하려면 관리자 암호를 입력하세요:');
+            if (pw !== '2217') {
+              alert('관리자 암호가 올바르지 않습니다.');
+              return;
+            }
+          }
           const newName = prompt('단어장 이름을 수정하세요:', deck.name);
           if (newName && newName.trim()) {
             StorageManager.updateDeck(deckId, { name: newName.trim() });
@@ -337,6 +351,14 @@ export class WordManager {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const deckId = btn.dataset.id;
+        const isPublic = StorageManager.isDeckPublic(deckId);
+        if (isPublic) {
+          const pw = prompt('공용 단어장을 삭제하려면 관리자 암호를 입력하세요:');
+          if (pw !== '2217') {
+            alert('관리자 암호가 올바르지 않습니다. 공용 단어장은 관리자만 삭제할 수 있습니다.');
+            return;
+          }
+        }
         if (confirm('이 단어장과 포함된 모든 단어를 완전히 삭제하시겠습니까?')) {
           try {
             StorageManager.deleteDeck(deckId);
@@ -353,11 +375,26 @@ export class WordManager {
     if (createDeckBtn) {
       createDeckBtn.addEventListener('click', () => {
         const name = prompt('새 단어장 이름을 입력해주세요 (예: 수능 필수 Day 3):');
-        if (name && name.trim()) {
-          const desc = prompt('단어장 간단 설명을 입력해주세요 (선택):') || '';
-          StorageManager.createDeck(name.trim(), desc.trim());
-          this.render();
+        if (!name || !name.trim()) return;
+
+        const desc = prompt('단어장 간단 설명을 입력해주세요 (선택):') || '';
+        const activeProf = StorageManager.getActiveProfile();
+        const profName = activeProf ? activeProf.name : '현재 학습자';
+
+        let isPublic = false;
+        const makePublic = confirm(`이 단어장을 모든 학습자가 함께 보는 [🌐 공용 단어장]으로 생성하시겠습니까?\n\n- [확인]: 관리자 공용 단어장 (암호 2217 필요)\n- [취소]: [${profName}] 전용 개인 단어장`);
+        if (makePublic) {
+          const pw = prompt('공용 단어장 생성을 위해 관리자 암호를 입력하세요:');
+          if (pw === '2217') {
+            isPublic = true;
+          } else {
+            alert('암호가 올바르지 않아 [개인 단어장]으로 생성됩니다.');
+          }
         }
+
+        const newDeck = StorageManager.createDeck(name.trim(), desc.trim(), [], 'meaning', isPublic);
+        alert(`🎉 '${newDeck.name}' (${isPublic ? '🌐 공용' : '👤 개인'}) 단어장이 생성되었습니다!`);
+        this.render();
       });
     }
 
