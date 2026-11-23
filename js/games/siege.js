@@ -3,9 +3,9 @@
 // 4x6 골짜기 미로 전장, 단어장 실제 인원수(1:1) 기반 10명 단위 원클릭&드래그 증원 배치,
 // 100웨이브 판타지 몹 대군단 스웜 디펜스, 10웨이브 단위 맵 변경 & 50% 부활, 성 함락 화염 연출
 
-import { StorageManager } from '../storage.js?v=20261123_19';
-import { SoundManager } from '../tts.js?v=20261123_19';
-import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261123_19';
+import { StorageManager } from '../storage.js?v=20261124_01';
+import { SoundManager } from '../tts.js?v=20261124_01';
+import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261124_01';
 
 export class SiegeManager {
   static getStorageKey() {
@@ -21,10 +21,21 @@ export class SiegeManager {
   }
 
   /**
+   * 로컬 날짜(YYYY-MM-DD) 반환 (UTC 시차 오류 방지, 현지 시간 기준 자정 리셋)
+   */
+  static getLocalDateStr() {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
    * 오늘 공성전 기록 및 남은 횟수 조회 (새벽 12시 자동 리셋, 프로필별 독립 2회)
    */
   static getRecord() {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = this.getLocalDateStr();
     const key = this.getStorageKey();
     try {
       let data = localStorage.getItem(key);
@@ -63,6 +74,16 @@ export class SiegeManager {
 
   static canPlay() {
     return this.getRecord().playCount < 2;
+  }
+
+  /**
+   * 출정 횟수 즉시 초기화 (테스트 및 자유 연습 지원)
+   */
+  static resetPlayCount() {
+    const rec = this.getRecord();
+    rec.playCount = 0;
+    this.saveRecord(rec);
+    return rec;
   }
 
   static saveRecord(rec) {
@@ -458,10 +479,15 @@ export class SiegeGame {
             <div class="p-4 rounded-2xl bg-gradient-to-r ${canPlay ? 'from-amber-950/60 to-indigo-950/60 border border-amber-500/30' : 'from-slate-800/80 to-slate-800/80 border border-slate-700'} flex items-center justify-between">
               <div>
                 <span class="text-xs font-bold text-slate-300">오늘 출정 가능 횟수</span>
-                <div class="text-xl font-black ${canPlay ? 'text-amber-400' : 'text-rose-400'} mt-0.5">
-                  ${canPlay ? `${2 - record.playCount} / 2 회 남음` : '오늘 출정 횟수 소진 (0 / 2회)'}
+                <div class="flex items-center gap-2.5 mt-0.5">
+                  <div class="text-xl font-black ${canPlay ? 'text-amber-400' : 'text-rose-400'}">
+                    ${canPlay ? `${2 - record.playCount} / 2 회 남음` : '오늘 출정 횟수 소진 (0 / 2회)'}
+                  </div>
+                  <button id="siege-reset-count-btn" class="px-2.5 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-[11px] font-bold transition flex items-center gap-1 active:scale-95 cursor-pointer" title="출정 횟수를 즉시 2회로 초기화합니다">
+                    <span>🔄</span> <span>횟수 충전</span>
+                  </button>
                 </div>
-                <p class="text-[10px] text-slate-400 mt-0.5">매일 새벽 12시(00:00)에 2회로 자동 초기화됩니다.</p>
+                <p class="text-[10px] text-slate-400 mt-1">매일 현지 시간 자정(00:00)에 2회로 자동 초기화됩니다.</p>
               </div>
               <div class="text-right">
                 <span class="text-[10px] text-slate-400 font-bold">역대 최고 기록</span>
@@ -513,10 +539,19 @@ export class SiegeGame {
           <!-- 하단 출정 버튼 -->
           <div class="pt-4 border-t border-slate-800 flex items-center justify-between shrink-0">
             <span class="text-xs text-slate-400">단어장: <strong class="text-slate-200">${activeDeck ? activeDeck.name : '기본 단어장'}</strong></span>
-            <button id="siege-start-prep-btn" ${canPlay ? '' : 'disabled'}
-              class="px-6 py-2.5 rounded-2xl ${canPlay ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black shadow-lg shadow-amber-500/25' : 'bg-slate-700 text-slate-400 cursor-not-allowed'} text-sm transition flex items-center gap-2">
-              <span>⚔️</span> <span>공성전 출정하기</span>
-            </button>
+            <div class="flex items-center gap-2">
+              ${!canPlay ? `
+                <button id="siege-reset-and-start-btn"
+                  class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-black text-sm shadow-md transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
+                  <span>🔄</span> <span>횟수 충전 후 출정</span>
+                </button>
+              ` : `
+                <button id="siege-start-prep-btn"
+                  class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black shadow-lg shadow-amber-500/25 text-sm transition flex items-center gap-2 active:scale-95 cursor-pointer">
+                  <span>⚔️</span> <span>공성전 출정하기</span>
+                </button>
+              `}
+            </div>
           </div>
 
         </div>
@@ -526,8 +561,24 @@ export class SiegeGame {
     const closeBtn = document.getElementById('siege-lobby-close-btn');
     if (closeBtn) closeBtn.onclick = () => this.close();
 
+    const resetCountBtn = document.getElementById('siege-reset-count-btn');
+    if (resetCountBtn) {
+      resetCountBtn.onclick = () => {
+        SiegeManager.resetPlayCount();
+        this.open();
+      };
+    }
+
+    const resetAndStartBtn = document.getElementById('siege-reset-and-start-btn');
+    if (resetAndStartBtn) {
+      resetAndStartBtn.onclick = () => {
+        SiegeManager.resetPlayCount();
+        this.startPreparationPhase(ranksCount);
+      };
+    }
+
     const startBtn = document.getElementById('siege-start-prep-btn');
-    if (startBtn && canPlay) {
+    if (startBtn) {
       startBtn.onclick = () => {
         this.startPreparationPhase(ranksCount);
       };
