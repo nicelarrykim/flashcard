@@ -1,8 +1,8 @@
 // js/games/scramble.js
 // 스펠링 스크램블 (Word Scramble) 게임 모듈
 
-import { StorageManager } from '../storage.js?v=20261123_11';
-import { SoundManager } from '../tts.js?v=20261123_11';
+import { StorageManager } from '../storage.js?v=20261123_19';
+import { SoundManager } from '../tts.js?v=20261123_19';
 
 export class ScrambleGame {
   constructor(containerId) {
@@ -16,6 +16,16 @@ export class ScrambleGame {
     this.scrambledLetters = [];
     this.userLetters = [];
     this.hintUsed = false;
+    this.isPlaying = false;
+    this.pendingTimers = [];
+  }
+
+  stop() {
+    this.isPlaying = false;
+    if (this.pendingTimers && this.pendingTimers.length > 0) {
+      this.pendingTimers.forEach(t => clearTimeout(t));
+      this.pendingTimers = [];
+    }
   }
 
   init() {
@@ -71,11 +81,14 @@ export class ScrambleGame {
     this.currentIndex = 0;
     this.score = 0;
     this.streak = 0;
+    this.isPlaying = true;
 
     this.loadQuestion();
   }
 
   loadQuestion() {
+    if (!this.isPlaying) return;
+
     if (this.currentIndex >= this.words.length) {
       this.endGame();
       return;
@@ -309,23 +322,29 @@ export class ScrambleGame {
           window.confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
         }
 
-        setTimeout(() => {
+        const t1 = setTimeout(() => {
+          if (!this.isPlaying) return;
           this.currentIndex++;
           this.loadQuestion();
         }, 1000);
+        this.pendingTimers.push(t1);
       } else {
         // 오답
         SoundManager.playTone('wrong');
         const slotsEl = document.getElementById('scramble-slots');
         if (slotsEl) {
           slotsEl.classList.add('animate-shake');
-          setTimeout(() => slotsEl.classList.remove('animate-shake'), 500);
+          const t2 = setTimeout(() => {
+            if (slotsEl) slotsEl.classList.remove('animate-shake');
+          }, 500);
+          this.pendingTimers.push(t2);
         }
       }
     }
   }
 
   endGame() {
+    this.isPlaying = false;
     SoundManager.playTone('fanfare');
     this.container.innerHTML = `
       <div class="max-w-md mx-auto text-center py-8 px-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700">

@@ -1,12 +1,12 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261123_11';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_11';
-import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261123_11';
-import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261123_11';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_11';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_11';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261123_19';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_19';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261123_19';
+import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261123_19';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_19';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_19';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -25,6 +25,33 @@ export class StorageManager {
    * 1. 프로필 관리 시스템 (학습자별 분리)
    * ==========================================
    */
+  static _cachedProfileData = {};
+  static _profileSaveTimer = null;
+  static _pendingSaveProfileIds = new Set();
+  static _unloadListenerRegistered = false;
+
+  /**
+   * 보류 중인 프로필 데이터 저장 작업을 즉시 localStorage에 플러시
+   */
+  static flushPendingProfileSaves() {
+    if (this._profileSaveTimer) {
+      clearTimeout(this._profileSaveTimer);
+      this._profileSaveTimer = null;
+    }
+    if (this._pendingSaveProfileIds.size === 0) return;
+
+    for (const pid of this._pendingSaveProfileIds) {
+      const data = this._cachedProfileData[pid];
+      if (data) {
+        try {
+          localStorage.setItem(PROFILE_DATA_PREFIX + pid, JSON.stringify(data));
+        } catch (e) {
+          console.error(`Failed to flush profile data for ${pid}:`, e);
+        }
+      }
+    }
+    this._pendingSaveProfileIds.clear();
+  }
 
   /**
    * 모든 학습자 프로필 목록 조회
@@ -83,13 +110,22 @@ export class StorageManager {
 
   /**
    * 활성 프로필 전환
+   * - 전환 전 프로필 성과를 서버로 자동 업로드 (유실 방지)
+   * - 새로 선택된 프로필의 최신 성과를 서버에서 다운로드
    */
   static setActiveProfileId(profileId) {
     try {
+      this.flushPendingProfileSaves();
+      const oldProfileId = localStorage.getItem(ACTIVE_PROFILE_KEY);
       localStorage.setItem(ACTIVE_PROFILE_KEY, profileId);
+      this.invalidateDeckCache();
       window.dispatchEvent(new CustomEvent('vocaquest_profile_changed', { detail: { profileId } }));
       window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
       window.dispatchEvent(new CustomEvent('vocaquest_mastery_changed', { detail: { profileId } }));
+
+      if (oldProfileId && oldProfileId !== profileId) {
+        FirebaseSyncManager.switchProfileSafely(this, oldProfileId, profileId);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -152,6 +188,8 @@ export class StorageManager {
 
     // 해당 프로필 성취도 데이터 삭제
     try {
+      delete this._cachedProfileData[profileId];
+      this._pendingSaveProfileIds.delete(profileId);
       localStorage.removeItem(PROFILE_DATA_PREFIX + profileId);
     } catch (e) {}
 
@@ -163,32 +201,64 @@ export class StorageManager {
 
   /**
    * 특정 프로필의 단어 성취도 맵 { [wordId]: { memorized, wrongCount, mastery } }
+   * 인메모리 캐싱 지원으로 불필요한 JSON.parse 및 localStorage 읽기를 차단합니다.
    */
   static getProfileData(profileId = null) {
     const targetId = profileId || this.getActiveProfileId();
+    if (this._cachedProfileData[targetId]) {
+      return this._cachedProfileData[targetId];
+    }
     try {
       const data = localStorage.getItem(PROFILE_DATA_PREFIX + targetId);
       if (data) {
-        return JSON.parse(data) || {};
+        const parsed = JSON.parse(data) || {};
+        this._cachedProfileData[targetId] = parsed;
+        return parsed;
       }
     } catch (e) {
       console.error(e);
     }
-    return {};
-  }
-
-  static saveProfileData(data, profileId = null) {
-    const targetId = profileId || this.getActiveProfileId();
-    try {
-      localStorage.setItem(PROFILE_DATA_PREFIX + targetId, JSON.stringify(data || {}));
-      FirebaseSyncManager.saveProfileData(targetId, data);
-    } catch (e) {
-      console.error(e);
-    }
+    const empty = {};
+    this._cachedProfileData[targetId] = empty;
+    return empty;
   }
 
   /**
-   * Firebase와의 전체 프로필, 단어장 및 성취도 실시간 동기화 초기화
+   * 프로필 데이터 저장
+   * - 인메모리 캐시는 즉시 갱신 (0ms 지연)
+   * - localStorage 쓰기는 디바운스(200ms) 및 배치 처리하여 연속 학습 시 프레임 드랍을 원천 차단합니다.
+   */
+  static saveProfileData(data, profileId = null, immediate = false) {
+    const targetId = profileId || this.getActiveProfileId();
+    this._cachedProfileData[targetId] = data || {};
+    this._pendingSaveProfileIds.add(targetId);
+
+    // beforeunload 리스너가 등록되지 않았다면 등록 (새로고침/창 닫기 시 안전 플러시)
+    if (!this._unloadListenerRegistered && typeof window !== 'undefined') {
+      this._unloadListenerRegistered = true;
+      window.addEventListener('beforeunload', () => {
+        this.flushPendingProfileSaves();
+      });
+      window.addEventListener('pagehide', () => {
+        this.flushPendingProfileSaves();
+      });
+    }
+
+    if (immediate) {
+      this.flushPendingProfileSaves();
+      return;
+    }
+
+    if (this._profileSaveTimer) {
+      clearTimeout(this._profileSaveTimer);
+    }
+    this._profileSaveTimer = setTimeout(() => {
+      this.flushPendingProfileSaves();
+    }, 200);
+  }
+
+  /**
+   * Firebase 체크포인트 동기화 매니저 연결
    */
   static async initServerSync() {
     return await FirebaseSyncManager.initSync(this);
@@ -199,13 +269,13 @@ export class StorageManager {
    */
   static resetProfileData(profileId = null) {
     const targetId = profileId || this.getActiveProfileId();
-    this.saveProfileData({}, targetId);
+    this.saveProfileData({}, targetId, true);
     window.dispatchEvent(new CustomEvent('vocaquest_mastery_changed', { detail: { profileId: targetId } }));
     window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
   }
 
   /**
-   * 단어의 성취도 상태를 현재 활성 프로필에 동기화 저장 (Firebase 즉시 반영)
+   * 단어의 성취도 상태를 현재 활성 프로필에 동기화 저장 (0ms 메모리 캐시 + 디바운스 I/O)
    */
   static syncWordToProfile(word, profileId = null) {
     if (!word || !word.id) return;
@@ -214,11 +284,10 @@ export class StorageManager {
     const wordData = {
       memorized: !!word.memorized,
       wrongCount: typeof word.wrongCount === 'number' ? word.wrongCount : 0,
-      mastery: word.mastery ? JSON.parse(JSON.stringify(word.mastery)) : null
+      mastery: word.mastery ? { ...word.mastery } : null
     };
     profData[word.id] = wordData;
     this.saveProfileData(profData, targetId);
-    FirebaseSyncManager.saveWordProgress(targetId, word.id, wordData);
   }
 
   /**
@@ -227,10 +296,20 @@ export class StorageManager {
    * (단어장은 모든 프로필 공통, 성취도는 프로필별 분리 머지)
    * ==========================================
    */
+  static _cachedDecks = null;
+  static _lastDemotionCheck = 0;
+
+  static invalidateDeckCache() {
+    this._cachedDecks = null;
+  }
+
   /**
-   * 로컬에 저장된 모든 단어장(공용 + 모든 프로필의 개인 단어장) 원본 목록 조회
+   * 로컬에 저장된 모든 단어장(공용 + 모든 프로필의 개인 단어장) 원본 목록 조회 (메모리 캐싱 지원)
    */
   static getAllDecks() {
+    if (this._cachedDecks) {
+      return this._cachedDecks;
+    }
     try {
       const data = localStorage.getItem(DECKS_KEY);
       let decks = null;
@@ -334,12 +413,12 @@ export class StorageManager {
             if (pData) {
               word.memorized = !!pData.memorized;
               word.wrongCount = typeof pData.wrongCount === 'number' ? word.wrongCount : 0;
-              word.mastery = pData.mastery ? JSON.parse(JSON.stringify(pData.mastery)) : null;
+              word.mastery = pData.mastery ? { ...pData.mastery } : null;
             } else if (word.mastery) {
               profData[word.id] = {
                 memorized: !!word.memorized,
                 wrongCount: typeof word.wrongCount === 'number' ? word.wrongCount : 0,
-                mastery: JSON.parse(JSON.stringify(word.mastery))
+                mastery: { ...word.mastery }
               };
             } else {
               word.memorized = false;
@@ -355,6 +434,7 @@ export class StorageManager {
           localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
           localStorage.setItem(PROFILE_DATA_PREFIX + this.getActiveProfileId(), JSON.stringify(profData));
         }
+        this._cachedDecks = decks;
         return decks;
       }
       return this.resetToDefaultDecks();
@@ -398,6 +478,7 @@ export class StorageManager {
   static saveDecks(decks) {
     try {
       if (!Array.isArray(decks)) return;
+      this._cachedDecks = decks;
       localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
       window.dispatchEvent(new CustomEvent('vocaquest_decks_updated', { detail: decks }));
       FirebaseSyncManager.saveDecks(decks);
@@ -627,6 +708,7 @@ export class StorageManager {
     };
     all.push(newDeck);
     this.saveDecks(all);
+    FirebaseSyncManager.uploadDeck(newDeck);
     this.setActiveDeckId(newDeck.id);
     return newDeck;
   }
@@ -642,6 +724,7 @@ export class StorageManager {
       if (description !== undefined) deck.description = description.trim();
       if (imagePosition !== undefined) deck.imagePosition = (imagePosition === 'word' ? 'word' : 'meaning');
       this.saveDecks(decks);
+      FirebaseSyncManager.uploadDeck(deck);
       return deck;
     }
     return null;
@@ -795,9 +878,8 @@ export class StorageManager {
         if (memorized && w.wrongCount > 0) {
           w.wrongCount = Math.max(0, w.wrongCount - 1);
         }
-        // 프로필별 성취도 저장소에 동기화
+        // 프로필별 성취도 저장소에 동기화 (0ms 로컬 저장)
         this.syncWordToProfile(w);
-        this.saveDecks(decks);
         return;
       }
     }
@@ -813,9 +895,8 @@ export class StorageManager {
       if (w) {
         w.wrongCount = (w.wrongCount || 0) + 1;
         w.memorized = false;
-        // 프로필별 성취도 저장소에 동기화
+        // 프로필별 성취도 저장소에 동기화 (0ms 로컬 저장)
         this.syncWordToProfile(w);
-        this.saveDecks(decks);
         return;
       }
     }
@@ -839,9 +920,8 @@ export class StorageManager {
         } else if (action === 'fc_unknown' || action === 'quiz_wrong' || action === 'game_wrong') {
           w.memorized = false;
         }
-        // 프로필별 성취도 저장소에 동기화
+        // 프로필별 성취도 저장소에 동기화 (0ms 로컬 저장)
         this.syncWordToProfile(w);
-        this.saveDecks(decks);
 
         // 승급 이벤트 발송
         if (result.promotedToMaster || result.promotedToRoyalGuard) {
@@ -913,9 +993,15 @@ export class StorageManager {
   }
 
   /**
-   * 2일 이상 경과된 왕실근위대를 고급기사로 자동 강등 검사
+   * 2일 이상 경과된 왕실근위대를 고급기사로 자동 강등 검사 (10분 주기 쓰로틀)
    */
   static checkRoyalGuardDemotions() {
+    const now = Date.now();
+    if (now - this._lastDemotionCheck < 600000) {
+      return 0;
+    }
+    this._lastDemotionCheck = now;
+
     try {
       const decks = this.getDecks();
       const demotedCount = MasteryManager.checkAndApplyDemotions(decks);

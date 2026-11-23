@@ -1,9 +1,9 @@
 // js/games/quiz.js
 // 사지선다 스피드 퀴즈 게임 모듈
 
-import { StorageManager } from '../storage.js?v=20261123_11';
-import { SoundManager } from '../tts.js?v=20261123_11';
-import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261123_11';
+import { StorageManager } from '../storage.js?v=20261123_19';
+import { SoundManager } from '../tts.js?v=20261123_19';
+import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261123_19';
 
 export class QuizGame {
   constructor(containerId) {
@@ -16,11 +16,28 @@ export class QuizGame {
     this.maxCombo = 0;
     this.totalQuestions = 10;
     this.timer = null;
+    this.nextQuestionTimer = null;
     this.timeLeft = 10;
     this.maxTime = 10;
     this.isPlaying = false;
     this.wrongAnswers = [];
     this.mode = 'en-to-ko'; // 'en-to-ko' 또는 'ko-to-en'
+  }
+
+  clearAllTimers() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    if (this.nextQuestionTimer) {
+      clearTimeout(this.nextQuestionTimer);
+      this.nextQuestionTimer = null;
+    }
+  }
+
+  stop() {
+    this.isPlaying = false;
+    this.clearAllTimers();
   }
 
   init() {
@@ -125,12 +142,14 @@ export class QuizGame {
   }
 
   renderQuestion() {
+    if (!this.isPlaying) return;
+
     if (this.currentIndex >= this.totalQuestions) {
       this.endGame();
       return;
     }
 
-    clearInterval(this.timer);
+    this.clearAllTimers();
     const currentWord = this.words[this.currentIndex];
 
     // 오답 보기 3개 무작위 추출
@@ -306,7 +325,8 @@ export class QuizGame {
             delay = 2000;
           }
 
-          setTimeout(() => {
+          this.nextQuestionTimer = setTimeout(() => {
+            if (!this.isPlaying) return;
             this.currentIndex++;
             this.renderQuestion();
           }, delay);
@@ -334,7 +354,8 @@ export class QuizGame {
 
           SoundManager.playTone('wrong');
 
-          setTimeout(() => {
+          this.nextQuestionTimer = setTimeout(() => {
+            if (!this.isPlaying) return;
             this.currentIndex++;
             this.renderQuestion();
           }, 1200);
@@ -397,14 +418,15 @@ export class QuizGame {
       }
     }
 
-    setTimeout(() => {
+    this.nextQuestionTimer = setTimeout(() => {
+      if (!this.isPlaying) return;
       this.currentIndex++;
       this.renderQuestion();
     }, 1200);
   }
 
   endGame() {
-    clearInterval(this.timer);
+    this.clearAllTimers();
     this.isPlaying = false;
     SoundManager.playTone('fanfare');
     if (typeof window.confetti === 'function') {

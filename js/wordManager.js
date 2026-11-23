@@ -1,10 +1,10 @@
 // js/wordManager.js
 // 다중 단어장(Deck) CRUD 관리 및 다중 사진 일괄 OCR 스캐너 모듈
 
-import { StorageManager } from './storage.js?v=20261123_11';
-import { SoundManager } from './tts.js?v=20261123_11';
-import { OCRParser } from './ocr.js?v=20261123_11';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_11';
+import { StorageManager } from './storage.js?v=20261123_19';
+import { SoundManager } from './tts.js?v=20261123_19';
+import { OCRParser } from './ocr.js?v=20261123_19';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_19';
 
 export class WordManager {
   constructor(containerId) {
@@ -17,6 +17,8 @@ export class WordManager {
     this.columnMode = '2col';
     this.targetDeckMode = 'current'; // 'current' or 'new'
     this.newDeckNameInput = '';
+    this.displayLimit = 50;
+    this.searchDebounceTimer = null;
   }
 
   init() {
@@ -49,6 +51,10 @@ export class WordManager {
         (w.example && w.example.toLowerCase().includes(q))
       );
     }
+
+    const totalFilteredCount = filtered.length;
+    const displayedWords = filtered.slice(0, this.displayLimit);
+    const hasMore = totalFilteredCount > this.displayLimit;
 
     this.container.innerHTML = `
       <div class="max-w-4xl mx-auto flex flex-col gap-6">
@@ -211,8 +217,8 @@ export class WordManager {
                     <th class="py-3.5 px-3 text-right">관리</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
-                  ${filtered.map((w, idx) => `
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-200" id="mgr-word-tbody">
+                  ${displayedWords.map((w, idx) => `
                     <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-750/50 transition">
                       <td class="py-3.5 px-3 text-center">
                         <span class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold">
@@ -221,7 +227,7 @@ export class WordManager {
                       </td>
                       <td class="py-3.5 px-3">
                         <div class="flex items-center gap-2">
-                          <button class="mgr-tts-btn text-slate-400 hover:text-indigo-600 transition" data-word="${w.word}" data-audio="${w.audioUrl || ''}" title="원어민 발음 듣기">
+                          <button type="button" class="mgr-tts-btn text-slate-400 hover:text-indigo-600 transition" data-word="${w.word}" data-audio="${w.audioUrl || ''}" title="원어민 발음 듣기">
                             🔊
                           </button>
                           <div>
@@ -236,7 +242,7 @@ export class WordManager {
                       </td>
 
                       <td class="py-3.5 px-3 text-center">
-                        <button class="mgr-tts-btn px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-300 text-xs font-semibold transition" data-word="${w.word}" data-audio="${w.audioUrl || ''}">
+                        <button type="button" class="mgr-tts-btn px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-300 text-xs font-semibold transition" data-word="${w.word}" data-audio="${w.audioUrl || ''}">
                           ▶ 재생
                         </button>
                       </td>
@@ -259,10 +265,10 @@ export class WordManager {
 
                       <td class="py-3.5 px-3 text-right">
                         <div class="flex items-center justify-end gap-1">
-                          <button class="mgr-edit-btn p-1.5 text-slate-400 hover:text-indigo-600 rounded transition" data-id="${w.id}" title="수정">
+                          <button type="button" class="mgr-edit-btn p-1.5 text-slate-400 hover:text-indigo-600 rounded transition" data-id="${w.id}" title="수정">
                             ✏️
                           </button>
-                          <button class="mgr-del-btn p-1.5 text-slate-400 hover:text-rose-600 rounded transition" data-id="${w.id}" title="삭제">
+                          <button type="button" class="mgr-del-btn p-1.5 text-slate-400 hover:text-rose-600 rounded transition" data-id="${w.id}" title="삭제">
                             🗑️
                           </button>
                         </div>
@@ -272,6 +278,22 @@ export class WordManager {
                 </tbody>
               </table>
             </div>
+
+            ${hasMore ? `
+              <div class="p-3 bg-slate-50/80 dark:bg-slate-750/80 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+                <span class="text-slate-500 dark:text-slate-400 font-medium">
+                  총 <strong class="text-indigo-600 dark:text-indigo-400 font-mono">${totalFilteredCount}</strong>개 중 <strong>${displayedWords.length}개</strong> 표시 중
+                </span>
+                <div class="flex items-center gap-2">
+                  <button type="button" id="mgr-load-more-btn" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-sm flex items-center gap-1.5">
+                    <span>⬇️ 더보기 (+50)</span>
+                  </button>
+                  <button type="button" id="mgr-load-all-btn" class="px-3.5 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold transition">
+                    전체 보기 (${totalFilteredCount}개)
+                  </button>
+                </div>
+              </div>
+            ` : ''}
           `}
         </div>
 
@@ -306,8 +328,9 @@ export class WordManager {
 
   bindEvents() {
     // 단어장 선택 버튼
-    document.querySelectorAll('.select-deck-btn').forEach(btn => {
+    this.container.querySelectorAll('.select-deck-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        this.displayLimit = 50;
         StorageManager.setActiveDeckId(btn.dataset.id);
       });
     });
@@ -398,49 +421,83 @@ export class WordManager {
       });
     }
 
-    // 검색
+    // 검색 인풋 (180ms 디바운스 적용으로 한글 조합 보존 및 연속 렌더링 방지)
     const searchInput = document.getElementById('mgr-search-input');
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
-        this.filterSearch = e.target.value;
-        this.render();
+        const val = e.target.value;
+        if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+        this.searchDebounceTimer = setTimeout(() => {
+          this.filterSearch = val;
+          this.displayLimit = 50;
+          this.render();
+          const reInput = document.getElementById('mgr-search-input');
+          if (reInput) {
+            reInput.focus();
+            reInput.setSelectionRange(reInput.value.length, reInput.value.length);
+          }
+        }, 180);
       });
     }
 
     // 카테고리 필터
-    document.querySelectorAll('.mgr-cat-filter').forEach(btn => {
+    this.container.querySelectorAll('.mgr-cat-filter').forEach(btn => {
       btn.addEventListener('click', () => {
         this.filterCategory = btn.dataset.cat;
+        this.displayLimit = 50;
         this.render();
       });
     });
 
-    // TTS 발음 (원어민 MP3)
-    document.querySelectorAll('.mgr-tts-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        SoundManager.speak(btn.dataset.word, btn.dataset.audio);
-      });
-    });
+    // 테이블 단어 행 이벤트 위임 (Event Delegation - 수백 개 리스너를 단 1개로 통합)
+    const tableContainer = this.container.querySelector('table');
+    if (tableContainer) {
+      tableContainer.addEventListener('click', (e) => {
+        // 1. TTS 발음 듣기
+        const ttsBtn = e.target.closest('.mgr-tts-btn');
+        if (ttsBtn) {
+          SoundManager.speak(ttsBtn.dataset.word, ttsBtn.dataset.audio);
+          return;
+        }
 
-    // 단어 삭제
-    document.querySelectorAll('.mgr-del-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        if (confirm('이 단어를 단어장에서 삭제하시겠습니까?')) {
-          StorageManager.deleteWord(id);
-          this.render();
+        // 2. 단어 삭제
+        const delBtn = e.target.closest('.mgr-del-btn');
+        if (delBtn) {
+          const id = delBtn.dataset.id;
+          if (confirm('이 단어를 단어장에서 삭제하시겠습니까?')) {
+            StorageManager.deleteWord(id);
+            this.render();
+          }
+          return;
+        }
+
+        // 3. 단어 수정
+        const editBtn = e.target.closest('.mgr-edit-btn');
+        if (editBtn) {
+          const id = editBtn.dataset.id;
+          const word = StorageManager.getActiveWords().find(w => w.id === id);
+          if (word) this.openEditModal(word);
+          return;
         }
       });
-    });
+    }
 
-    // 단어 수정
-    document.querySelectorAll('.mgr-edit-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        const word = StorageManager.getActiveWords().find(w => w.id === id);
-        if (word) this.openEditModal(word);
+    // 더보기 및 전체보기 버튼
+    const loadMoreBtn = document.getElementById('mgr-load-more-btn');
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', () => {
+        this.displayLimit += 50;
+        this.render();
       });
-    });
+    }
+
+    const loadAllBtn = document.getElementById('mgr-load-all-btn');
+    if (loadAllBtn) {
+      loadAllBtn.addEventListener('click', () => {
+        this.displayLimit = 999999;
+        this.render();
+      });
+    }
 
     // 그림 변경 모달
     // 새 단어 직접 추가 모달

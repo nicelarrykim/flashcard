@@ -26,7 +26,7 @@
   </script>
 
   <!-- 커스텀 스타일 (3D 플립 & 모바일 가로스크롤 방지 등) -->
-  <link rel="stylesheet" href="css/style.css?v=20261123_11">
+  <link rel="stylesheet" href="css/style.css?v=20261123_19">
 
   <!-- Tesseract.js OCR 라이브러리 CDN (비동기 defer 로드) -->
   <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -112,11 +112,11 @@
           <span class="text-[10px] text-amber-600 dark:text-amber-400 font-extrabold">👑</span>
         </div>
 
-        <!-- 서버 연동 상태 뱃지 (클릭 시 서버 설정 및 다중 기기 안내) -->
-        <div id="header-server-badge" class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 cursor-pointer transition shrink-0" title="서버 연동 상태 (클릭 시 서버 설정)">
-          <span id="server-status-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
-          <span id="server-status-text" class="hidden xs:inline">서버 확인중</span>
-        </div>
+        <!-- 🏁 [학습 끝] 버튼 (클릭 시 현재 성과 Firebase 저장 & 최신 단어장 동기화) -->
+        <button id="header-finish-study-btn" class="flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-95 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-black shadow-md shadow-emerald-500/20 transition shrink-0 cursor-pointer" title="오늘 학습을 마치고 서버에 현재 성과를 저장합니다">
+          <span>🏁</span>
+          <span class="hidden xs:inline">학습 끝</span>
+        </button>
 
         <!-- 단어 통계 pill -->
         <div class="flex items-center gap-1 sm:gap-2 bg-slate-100 dark:bg-slate-800/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-semibold border border-slate-200/50 dark:border-slate-700/50">
@@ -152,6 +152,10 @@
         </span>
         <select id="global-deck-select" class="flex-1 max-w-[210px] sm:max-w-xs px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 text-xs font-bold text-slate-900 dark:text-white shadow-sm focus:outline-none focus:border-indigo-500 cursor-pointer truncate">
         </select>
+        <button id="global-refresh-decks-btn" class="px-2 py-1 rounded-xl bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-750 text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-200 dark:border-indigo-800 shadow-sm transition shrink-0 flex items-center gap-1" title="서버의 최신 단어장 다운로드 (새로고침)">
+          <span id="refresh-decks-icon">🔄</span>
+          <span class="hidden md:inline">단어장 새로고침</span>
+        </button>
         <button id="global-create-deck-btn" class="px-2 py-1 rounded-xl bg-white dark:bg-slate-800 hover:bg-indigo-50 text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-200 dark:border-indigo-800 shadow-sm transition shrink-0" title="새 단어장 만들기">
           + 새 단어장
         </button>
@@ -306,6 +310,6 @@
   </footer>
 
   <!-- 앱 메인 스크립트 (ES Module - 캐시 방지 버전 파라미터 적용) -->
-  <script type="module" src="js/app.js?v=20261123_11"></script>
+  <script type="module" src="js/app.js?v=20261123_19"></script>
 </body>
 </html>

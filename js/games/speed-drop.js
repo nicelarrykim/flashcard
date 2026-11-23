@@ -2,8 +2,8 @@
 // 단어 낙하 방패 디펜스 (Speed Drop Shield Defense) 아케이드 게임 모듈
 // 하늘에서 최대 2개의 단어가 떨어지며, 화면 아래 4개의 뜻 방패에 드래그하여 매칭하는 게임
 
-import { StorageManager } from '../storage.js?v=20261123_11';
-import { SoundManager } from '../tts.js?v=20261123_11';
+import { StorageManager } from '../storage.js?v=20261123_19';
+import { SoundManager } from '../tts.js?v=20261123_19';
 
 export class SpeedDropGame {
   constructor(containerId) {
@@ -591,6 +591,12 @@ export class SpeedDropGame {
 
   stop() {
     this.isPlaying = false;
-    cancelAnimationFrame(this.animationFrame);
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+      this.animationFrame = null;
+    }
+    this.draggingWord = null;
+    this.selectedWord = null;
+    this.activeWords = [];
   }
 }

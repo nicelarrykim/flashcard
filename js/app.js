@@ -1,18 +1,18 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261123_11';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_11';
-import { SoundManager } from './tts.js?v=20261123_11';
-import { FlashcardGame } from './games/flashcard.js?v=20261123_11';
-import { QuizGame } from './games/quiz.js?v=20261123_11';
-import { MatchGame } from './games/match.js?v=20261123_11';
-import { ScrambleGame } from './games/scramble.js?v=20261123_11';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261123_11';
-import { WordManager } from './wordManager.js?v=20261123_11';
-import { PerformanceView } from './performance.js?v=20261123_11';
-import { AdminManager } from './admin.js?v=20261123_11';
-import { SiegeGame } from './games/siege.js?v=20261123_11';
+import { StorageManager } from './storage.js?v=20261123_19';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_19';
+import { SoundManager } from './tts.js?v=20261123_19';
+import { FlashcardGame } from './games/flashcard.js?v=20261123_19';
+import { QuizGame } from './games/quiz.js?v=20261123_19';
+import { MatchGame } from './games/match.js?v=20261123_19';
+import { ScrambleGame } from './games/scramble.js?v=20261123_19';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261123_19';
+import { WordManager } from './wordManager.js?v=20261123_19';
+import { PerformanceView } from './performance.js?v=20261123_19';
+import { AdminManager } from './admin.js?v=20261123_19';
+import { SiegeGame } from './games/siege.js?v=20261123_19';
 
 class App {
   constructor() {
@@ -50,6 +50,23 @@ class App {
       }
     }, 50);
 
+    // 브라우저 탭/화면 전환(백그라운드 진입) 감지 시 백그라운드 게임 자동 완전 종료
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        this.stopAllGames();
+        // 퀴즈나 배틀 중 백그라운드로 전환되었다가 돌아올 때를 대비해 상태를 대기 화면으로 정리
+        if (this.currentTab === 'quiz') {
+          this.quizGame.init();
+        } else if (this.currentTab === 'speed-drop') {
+          this.speedDropGame.init();
+        } else if (this.currentTab === 'match') {
+          this.matchGame.init();
+        } else if (this.currentTab === 'scramble') {
+          this.scrambleGame.init();
+        }
+      }
+    });
+
     // 디바운스된 탭 리로드 헬퍼
     let reloadDebounceTimer = null;
     const debouncedReload = () => {
@@ -59,26 +76,27 @@ class App {
       }, 60);
     };
 
-    // 단어 또는 단어장 데이터 변경 감지
+    // 단어 또는 단어장 데이터 변경 감지 (통계 & 셀렉터 UI만 가볍게 갱신)
     window.addEventListener('vocaquest_words_updated', () => {
       this.updateStats();
       this.renderDeckSelector();
       this.syncStudyControlsUI();
     });
 
-    // Firebase 원격 단어장 실시간 업데이트 감지
+    // 단어 숙련도 변경 감지 (상단 통계 pill만 0ms 즉시 갱신)
+    window.addEventListener('vocaquest_mastery_changed', () => {
+      this.updateStats();
+    });
+
+    // 단어장 목록 변경 감지 (진행 중인 게임 리로드 금지 - 셀렉터 목록만 갱신)
     window.addEventListener('vocaquest_decks_updated', () => {
       this.updateStats();
       this.renderDeckSelector();
-      this.syncStudyControlsUI();
-      debouncedReload();
     });
 
-    // Firebase 원격 학습 성취도 실시간 업데이트 감지
+    // Firebase 원격 학습 성취도 실시간 업데이트 감지 (상단 통계만 갱신)
     window.addEventListener('vocaquest_progress_updated', () => {
       this.updateStats();
-      this.syncStudyControlsUI();
-      debouncedReload();
     });
 
     // 프로필 업데이트 감지
@@ -86,7 +104,7 @@ class App {
       this.updateActiveProfileBadge();
     });
 
-    // 서버/Firebase 동기화 완료 시 전체 상태 반영
+    // 서버/Firebase 전체 동기화 완료 시에만 전체 상태 반영
     window.addEventListener('vocaquest_sync_completed', () => {
       this.updateActiveProfileBadge();
       this.updateStats();
@@ -94,22 +112,11 @@ class App {
       this.reloadCurrentTab();
     });
 
-    // 서버 연결 상태 변경 감지
-    window.addEventListener('vocaquest_server_status_changed', (e) => {
-      this.updateServerBadge(e.detail);
-    });
-
-    window.addEventListener('vocaquest_decks_updated', () => {
-      this.updateStats();
-      this.renderDeckSelector();
-      this.syncStudyControlsUI();
-    });
-
+    // 단어장이 바뀌면 현재 열려있는 게임/화면 즉시 재초기화
     window.addEventListener('vocaquest_deck_changed', () => {
       this.updateStats();
       this.renderDeckSelector();
       this.syncStudyControlsUI();
-      // 단어장이 바뀌면 현재 열려있는 게임/화면 즉시 재초기화
       this.reloadCurrentTab();
     });
 
@@ -125,10 +132,6 @@ class App {
       this.updateStats();
       this.renderDeckSelector();
       this.reloadCurrentTab();
-    });
-
-    window.addEventListener('vocaquest_profiles_updated', () => {
-      this.updateActiveProfileBadge();
     });
 
     // 전역 함수로 탭 전환 등록
@@ -168,10 +171,10 @@ class App {
     if (!badge || !dot || !text) return;
 
     if (detail && detail.connected) {
-      dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
-      text.innerText = detail.isFirebase ? '🔥 Firebase 실시간' : '동기화 연결됨';
+      dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+      text.innerText = detail.isFirebase ? '🔥 Firebase 연동' : '동기화 연결됨';
       text.className = 'hidden xs:inline text-emerald-700 dark:text-emerald-300 font-bold';
-      badge.title = `Firebase Firestore 실시간 연동 중 (클릭 시 관리자 설정)`;
+      badge.title = `Firebase Firestore 연동 중 (로컬 우선 체크포인트 모드 - 클릭 시 설정)`;
     } else {
       dot.className = 'w-2 h-2 rounded-full bg-slate-400';
       text.innerText = '로컬 모드';
@@ -181,11 +184,30 @@ class App {
   }
 
   bindHeader() {
-    // 서버 연동 뱃지 클릭 시 서버 설정 모달
-    const serverBadge = document.getElementById('header-server-badge');
-    if (serverBadge) {
-      serverBadge.addEventListener('click', () => {
-        AdminManager.openServerConfigModal();
+    // 🏁 [학습 끝] 버튼 클릭 이벤트
+    const finishBtn = document.getElementById('header-finish-study-btn');
+    if (finishBtn) {
+      finishBtn.addEventListener('click', async () => {
+        const activeProf = StorageManager.getActiveProfile();
+        const profName = activeProf?.name || '학습자';
+        if (!confirm(`'${profName}' 님의 오늘 학습 성과를 서버(Firebase)에 저장하고 학습을 마치시겠습니까?`)) {
+          return;
+        }
+
+        const origHtml = finishBtn.innerHTML;
+        finishBtn.disabled = true;
+        finishBtn.innerHTML = '<span>⏳ 저장중...</span>';
+
+        const res = await FirebaseSyncManager.finishStudySession(StorageManager);
+
+        finishBtn.disabled = false;
+        finishBtn.innerHTML = origHtml;
+
+        if (res.success) {
+          alert(`🎉 [학습 완료]\n'${res.profileName}' 님의 학습 성과(단어 ${res.wordCount}개)가 서버에 안전하게 저장되었습니다!\n최신 단어장 ${res.decksCount}개도 동기화되었습니다.`);
+        } else {
+          alert(`❌ 성과 저장 실패: ${res.error}\n(네트워크 또는 서버 설정을 확인해주세요)`);
+        }
       });
     }
 
@@ -230,6 +252,28 @@ class App {
     if (selectEl) {
       selectEl.addEventListener('change', (e) => {
         StorageManager.setActiveDeckId(e.target.value);
+      });
+    }
+
+    const refreshDecksBtn = document.getElementById('global-refresh-decks-btn');
+    const refreshIcon = document.getElementById('refresh-decks-icon');
+    if (refreshDecksBtn) {
+      refreshDecksBtn.addEventListener('click', async () => {
+        if (refreshIcon) refreshIcon.classList.add('animate-spin');
+        refreshDecksBtn.disabled = true;
+
+        const res = await FirebaseSyncManager.downloadLatestDecks(StorageManager);
+
+        if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+        refreshDecksBtn.disabled = false;
+
+        if (res.success) {
+          this.renderDeckSelector();
+          this.reloadCurrentTab();
+          alert(`🔄 서버의 최신 단어장(${res.count}개)을 로컬로 새로고침했습니다!`);
+        } else {
+          alert(`❌ 단어장 새로고침 실패: ${res.error}`);
+        }
       });
     }
 
@@ -497,9 +541,40 @@ class App {
     };
   }
 
-  switchTab(tabName) {
-    if (this.currentTab === 'speed-drop' && tabName !== 'speed-drop') {
+  /**
+   * 진행 중인 모든 게임의 타이머, 애니메이션 루프 및 효과음 완전 종료
+   */
+  stopAllGames() {
+    // 1. 사지선다 스피드 퀴즈 카운트다운 타이머 정지
+    if (this.quizGame && typeof this.quizGame.stop === 'function') {
+      this.quizGame.stop();
+    }
+    // 2. 짝맞추기 게임 타이머 및 상태 완전 정지
+    if (this.matchGame && typeof this.matchGame.stop === 'function') {
+      this.matchGame.stop();
+    }
+    // 3. 단어 낙하 방패 애니메이션 및 드래그 완전 정지
+    if (this.speedDropGame && typeof this.speedDropGame.stop === 'function') {
       this.speedDropGame.stop();
+    }
+    // 4. 스펠링 맞추기(스크램블) 상태 및 타이머 정지
+    if (this.scrambleGame && typeof this.scrambleGame.stop === 'function') {
+      this.scrambleGame.stop();
+    }
+    // 5. 공성전 배틀 루프 정지 및 모달 닫기
+    if (typeof SiegeGame !== 'undefined' && typeof SiegeGame.closeActiveGame === 'function') {
+      SiegeGame.closeActiveGame();
+    }
+    // 6. 현재 재생 중인 TTS 및 오디오 정지
+    if (typeof SoundManager !== 'undefined' && typeof SoundManager.stop === 'function') {
+      SoundManager.stop();
+    }
+  }
+
+  switchTab(tabName) {
+    // 다른 탭으로 이동 시 이전 탭에서 진행 중이던 모든 게임/타이머를 완전히 종료
+    if (this.currentTab !== tabName) {
+      this.stopAllGames();
     }
 
     this.currentTab = tabName;

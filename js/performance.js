@@ -1,11 +1,11 @@
 // js/performance.js
 // 단어별 학습 성과 대시보드 및 나의 왕국(영지 발전 & 기사단 승급) 모듈
 
-import { StorageManager } from './storage.js?v=20261123_11';
-import { SoundManager } from './tts.js?v=20261123_11';
-import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261123_11';
-import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261123_11';
-import { SiegeGame, SiegeManager } from './games/siege.js?v=20261123_11';
+import { StorageManager } from './storage.js?v=20261123_19';
+import { SoundManager } from './tts.js?v=20261123_19';
+import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261123_19';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261123_19';
+import { SiegeGame, SiegeManager } from './games/siege.js?v=20261123_19';
 
 export class PerformanceView {
   constructor(containerId) {
@@ -15,6 +15,8 @@ export class PerformanceView {
     this.selectedRankFilter = 'all'; // 'all' 또는 RANK_TYPES 값
     this.sortBy = 'rank_desc'; // 'rank_desc', 'rank_asc', 'score_desc', 'score_asc', 'number_asc', 'alphabet_asc'
     this.searchQuery = '';
+    this.displayLimit = 50;
+    this.searchDebounceTimer = null;
   }
 
   init() {
@@ -365,7 +367,7 @@ export class PerformanceView {
             <div class="text-xs font-extrabold text-slate-700 dark:text-slate-300 flex items-center gap-2">
               <span>📋</span> <span>단어별 숙련도 및 상태</span>
               <span class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 font-mono">
-                ${filteredWords.length}개 표시 중
+                ${filteredWords.length}개 중 ${Math.min(filteredWords.length, this.displayLimit)}개 표시 중
               </span>
             </div>
             ${this.selectedRankFilter !== 'all' ? `
@@ -382,8 +384,8 @@ export class PerformanceView {
               <p class="text-xs text-slate-400">검색어나 등급 필터를 조정하거나 플래시카드 & 퀴즈를 플레이해보세요.</p>
             </div>
           ` : `
-            <div class="divide-y divide-slate-100 dark:divide-slate-700/60">
-              ${filteredWords.map(word => {
+            <div id="perf-words-list-container" class="divide-y divide-slate-100 dark:divide-slate-700/60">
+              ${filteredWords.slice(0, this.displayLimit).map(word => {
                 const rank = MasteryManager.getWordRank(word);
                 const cfg = RANK_CONFIG[rank];
                 const score = word.mastery.score || 0;
@@ -474,11 +476,11 @@ export class PerformanceView {
 
                     <!-- 우측: 컨트롤 버튼 (TTS 발음 듣기 & 상태 초기화) -->
                     <div class="flex items-center gap-2 self-end md:self-auto shrink-0">
-                      <button data-tts="${word.word}" data-audio="${word.audioUrl || ''}" class="perf-tts-btn p-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 text-slate-600 dark:text-slate-300 transition" title="발음 듣기">
+                      <button type="button" data-tts="${word.word}" data-audio="${word.audioUrl || ''}" class="perf-tts-btn p-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 text-slate-600 dark:text-slate-300 transition" title="발음 듣기">
                         🔊
                       </button>
 
-                      <button data-reset-id="${word.id}" data-reset-word="${word.word}" class="perf-reset-word-btn px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 dark:bg-slate-700 dark:hover:bg-rose-950/60 dark:text-slate-300 dark:hover:text-rose-300 text-xs font-bold transition flex items-center gap-1" title="이 단어의 숙련도와 등급을 초기화합니다">
+                      <button type="button" data-reset-id="${word.id}" data-reset-word="${word.word}" class="perf-reset-word-btn px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 dark:bg-slate-700 dark:hover:bg-rose-950/60 dark:text-slate-300 dark:hover:text-rose-300 text-xs font-bold transition flex items-center gap-1" title="이 단어의 숙련도와 등급을 초기화합니다">
                         <span>🔄</span> <span>초기화</span>
                       </button>
                     </div>
@@ -486,6 +488,22 @@ export class PerformanceView {
                 `;
               }).join('')}
             </div>
+
+            ${filteredWords.length > this.displayLimit ? `
+              <div class="p-3 bg-slate-50/80 dark:bg-slate-750/80 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+                <span class="text-slate-500 dark:text-slate-400 font-medium">
+                  총 <strong class="text-indigo-600 dark:text-indigo-400 font-mono">${filteredWords.length}</strong>개 중 <strong>${Math.min(filteredWords.length, this.displayLimit)}개</strong> 표시 중
+                </span>
+                <div class="flex items-center gap-2">
+                  <button type="button" id="perf-load-more-btn" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-sm flex items-center gap-1.5">
+                    <span>⬇️ 더보기 (+50)</span>
+                  </button>
+                  <button type="button" id="perf-load-all-btn" class="px-3.5 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold transition">
+                    전체 보기 (${filteredWords.length}개)
+                  </button>
+                </div>
+              </div>
+            ` : ''}
           `}
         </div>
 
@@ -623,6 +641,7 @@ export class PerformanceView {
     this.container.querySelectorAll('.deck-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         this.selectedDeckId = btn.dataset.deckId;
+        this.displayLimit = 50;
         this.render();
       });
     });
@@ -636,22 +655,27 @@ export class PerformanceView {
         } else {
           this.selectedRankFilter = rank;
         }
+        this.displayLimit = 50;
         this.render();
       });
     });
 
-    // 검색 인풋
+    // 검색 인풋 (180ms 디바운스 적용)
     const searchInput = document.getElementById('perf-search-input');
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
-        this.searchQuery = e.target.value;
-        this.render();
-        // 포커스 유지
-        const reInput = document.getElementById('perf-search-input');
-        if (reInput) {
-          reInput.focus();
-          reInput.setSelectionRange(reInput.value.length, reInput.value.length);
-        }
+        const val = e.target.value;
+        if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+        this.searchDebounceTimer = setTimeout(() => {
+          this.searchQuery = val;
+          this.displayLimit = 50;
+          this.render();
+          const reInput = document.getElementById('perf-search-input');
+          if (reInput) {
+            reInput.focus();
+            reInput.setSelectionRange(reInput.value.length, reInput.value.length);
+          }
+        }, 180);
       });
     }
 
@@ -660,6 +684,7 @@ export class PerformanceView {
     if (rankSelect) {
       rankSelect.addEventListener('change', (e) => {
         this.selectedRankFilter = e.target.value;
+        this.displayLimit = 50;
         this.render();
       });
     }
@@ -669,6 +694,7 @@ export class PerformanceView {
     if (sortSelect) {
       sortSelect.addEventListener('change', (e) => {
         this.sortBy = e.target.value;
+        this.displayLimit = 50;
         this.render();
       });
     }
@@ -678,31 +704,55 @@ export class PerformanceView {
     if (clearFilterBtn) {
       clearFilterBtn.addEventListener('click', () => {
         this.selectedRankFilter = 'all';
+        this.displayLimit = 50;
         this.render();
       });
     }
 
-    // 발음 듣기 버튼
-    this.container.querySelectorAll('.perf-tts-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const word = btn.dataset.tts;
-        const audio = btn.dataset.audio;
-        SoundManager.speak(word, audio);
-      });
-    });
+    // 단어 목록 이벤트 위임 (Event Delegation)
+    const wordsListContainer = document.getElementById('perf-words-list-container');
+    if (wordsListContainer) {
+      wordsListContainer.addEventListener('click', (e) => {
+        // 1. 발음 듣기
+        const ttsBtn = e.target.closest('.perf-tts-btn');
+        if (ttsBtn) {
+          const word = ttsBtn.dataset.tts;
+          const audio = ttsBtn.dataset.audio;
+          SoundManager.speak(word, audio);
+          return;
+        }
 
-    // 개별 단어 초기화 버튼
-    this.container.querySelectorAll('.perf-reset-word-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const wordId = btn.dataset.resetId;
-        const wordText = btn.dataset.resetWord;
-        if (confirm(`'${wordText}' 단어의 숙련도 점수와 등급 상태를 훈련병(0점)으로 초기화하시겠습니까?`)) {
-          StorageManager.resetWordMastery(wordId);
-          SoundManager.playTone('flip');
-          this.render();
+        // 2. 개별 단어 초기화
+        const resetBtn = e.target.closest('.perf-reset-word-btn');
+        if (resetBtn) {
+          const wordId = resetBtn.dataset.resetId;
+          const wordText = resetBtn.dataset.resetWord;
+          if (confirm(`'${wordText}' 단어의 숙련도 점수와 등급 상태를 훈련병(0점)으로 초기화하시겠습니까?`)) {
+            StorageManager.resetWordMastery(wordId);
+            SoundManager.playTone('flip');
+            this.render();
+          }
+          return;
         }
       });
-    });
+    }
+
+    // 더보기 및 전체보기 버튼
+    const loadMoreBtn = document.getElementById('perf-load-more-btn');
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', () => {
+        this.displayLimit += 50;
+        this.render();
+      });
+    }
+
+    const loadAllBtn = document.getElementById('perf-load-all-btn');
+    if (loadAllBtn) {
+      loadAllBtn.addEventListener('click', () => {
+        this.displayLimit = 999999;
+        this.render();
+      });
+    }
 
     // 선택 단어장 일괄 초기화 버튼
     const resetDeckBtn = document.getElementById('perf-reset-deck-btn');

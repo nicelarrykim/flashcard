@@ -3,9 +3,9 @@
 // 4x6 골짜기 미로 전장, 단어장 실제 인원수(1:1) 기반 10명 단위 원클릭&드래그 증원 배치,
 // 100웨이브 판타지 몹 대군단 스웜 디펜스, 10웨이브 단위 맵 변경 & 50% 부활, 성 함락 화염 연출
 
-import { StorageManager } from '../storage.js?v=20261123_11';
-import { SoundManager } from '../tts.js?v=20261123_11';
-import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261123_11';
+import { StorageManager } from '../storage.js?v=20261123_19';
+import { SoundManager } from '../tts.js?v=20261123_19';
+import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261123_19';
 
 export class SiegeManager {
   static getStorageKey() {
@@ -346,10 +346,22 @@ export class SiegeGame {
     this.draggedTile = null;
   }
 
+  static activeInstance = null;
+
+  static closeActiveGame() {
+    if (this.activeInstance) {
+      try {
+        this.activeInstance.close();
+      } catch (e) {}
+      this.activeInstance = null;
+    }
+  }
+
   /**
    * 공성전 모달 열기
    */
   open() {
+    SiegeGame.activeInstance = this;
     this.initModalContainer();
     const canPlay = SiegeManager.canPlay();
     const record = SiegeManager.getRecord();
@@ -367,6 +379,9 @@ export class SiegeGame {
   }
 
   close() {
+    if (SiegeGame.activeInstance === this) {
+      SiegeGame.activeInstance = null;
+    }
     this.stopBattleLoop();
     if (this.container) {
       this.container.innerHTML = '';

@@ -4,6 +4,38 @@
 export class SoundManager {
   static soundEnabled = true;
   static currentAudio = null;
+  static _audioCtx = null;
+
+  static getAudioContext() {
+    if (!this._audioCtx && typeof window !== 'undefined') {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        this._audioCtx = new AudioCtx();
+      }
+    }
+    if (this._audioCtx && this._audioCtx.state === 'suspended') {
+      this._audioCtx.resume().catch(() => {});
+    }
+    return this._audioCtx;
+  }
+
+  /**
+   * 현재 재생 중인 모든 오디오 및 음성 합성 즉시 정지
+   */
+  static stop() {
+    if (this.currentAudio) {
+      try {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+      } catch (e) {}
+      this.currentAudio = null;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {}
+    }
+  }
 
   /**
    * 실제 미국식 원어민 음성 재생
@@ -92,9 +124,8 @@ export class SoundManager {
   static playTone(type = 'correct') {
     if (!this.soundEnabled) return;
     try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
+      const ctx = this.getAudioContext();
+      if (!ctx) return;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 

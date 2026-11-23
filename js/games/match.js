@@ -2,8 +2,8 @@
 // 칼(공격/영단어 8개) vs 방패(방어/한글뜻 8개) 실시간 배틀 짝맞추기 게임 모듈
 // 카드는 모두 오픈 상태이며, 정답 매칭 시 방어 효과와 함께 새 단어가 보충되어 8:8 랜덤 재배치됨
 
-import { StorageManager } from '../storage.js?v=20261123_11';
-import { SoundManager } from '../tts.js?v=20261123_11';
+import { StorageManager } from '../storage.js?v=20261123_19';
+import { SoundManager } from '../tts.js?v=20261123_19';
 
 export class MatchGame {
   constructor(containerId) {
@@ -25,6 +25,7 @@ export class MatchGame {
     this.targetCount = this.isMobile ? 6 : 8;        // 모바일은 6:6, PC는 8:8
     this.isProcessing = false;   // 판정 중 클릭 방지
     this.timer = null;
+    this.pendingTimers = [];
     this.seconds = 0;
     this.isPlaying = false;
   }
@@ -364,7 +365,8 @@ export class MatchGame {
 
       this.showClashEffect(true, left.text, right.text);
 
-      setTimeout(() => {
+      const t1 = setTimeout(() => {
+        if (!this.isPlaying) return;
         // 맞춘 단어 제거
         this.activeWords = this.activeWords.filter(w => w.id !== left.wordId);
 
@@ -387,6 +389,7 @@ export class MatchGame {
         this.isProcessing = false;
         this.renderBoard();
       }, 550);
+      this.pendingTimers.push(t1);
 
     } else {
       // 2. 오답! 방어 실패 (하트 감소)
@@ -401,7 +404,8 @@ export class MatchGame {
 
       this.showClashEffect(false);
 
-      setTimeout(() => {
+      const t2 = setTimeout(() => {
+        if (!this.isPlaying) return;
         this.selectedLeft = null;
         this.selectedRight = null;
         this.isProcessing = false;
@@ -412,6 +416,7 @@ export class MatchGame {
           this.renderBoard();
         }
       }, 650);
+      this.pendingTimers.push(t2);
     }
   }
 
@@ -445,9 +450,10 @@ export class MatchGame {
     }
 
     overlay.classList.remove('hidden');
-    setTimeout(() => {
+    const t3 = setTimeout(() => {
       overlay.classList.add('hidden');
     }, 500);
+    this.pendingTimers.push(t3);
   }
 
   gameOver() {
@@ -538,6 +544,16 @@ export class MatchGame {
 
   stop() {
     this.isPlaying = false;
-    clearInterval(this.timer);
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    if (this.pendingTimers && this.pendingTimers.length > 0) {
+      this.pendingTimers.forEach(t => clearTimeout(t));
+      this.pendingTimers = [];
+    }
+    this.selectedLeft = null;
+    this.selectedRight = null;
+    this.isProcessing = false;
   }
 }

@@ -1,9 +1,9 @@
 // js/games/flashcard.js
 // 3D 플립 플래시카드 & 라이트너 암기 시스템 모듈
 
-import { StorageManager } from '../storage.js?v=20261123_11';
-import { SoundManager } from '../tts.js?v=20261123_11';
-import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261123_11';
+import { StorageManager } from '../storage.js?v=20261123_19';
+import { SoundManager } from '../tts.js?v=20261123_19';
+import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261123_19';
 
 export class FlashcardGame {
   constructor(containerId) {
@@ -86,8 +86,13 @@ export class FlashcardGame {
     const word = this.words[this.currentIndex] || this.words[0];
     if (!word) return;
 
-    // 플래시카드에서 처음 본 단어: 기본 20점 시작 (노출만 됨)
-    StorageManager.updateWordMastery(word.id, 'fc_seen');
+    // 플래시카드에서 처음 본 단어: 기본 20점 시작 (최초 1회만 노출 기록)
+    if (this._lastSeenWordId !== word.id) {
+      this._lastSeenWordId = word.id;
+      if (!word.mastery || word.mastery.score === 0) {
+        StorageManager.updateWordMastery(word.id, 'fc_seen');
+      }
+    }
 
     const total = this.words.length;
     const progressPercent = Math.round(((this.currentIndex + 1) / total) * 100);
@@ -426,10 +431,14 @@ export class FlashcardGame {
     this._keyboardBound = true;
 
     window.addEventListener('keydown', (e) => {
-      // 플래시카드 탭이 활성화되어 있고 입력창에 포커스가 없을 때만 반응
+      // 입력 요소(input, textarea)이거나 모달이 열려있으면 즉시 리턴
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) return;
+      if (document.getElementById('admin-modal-container')?.children?.length > 0) return;
+
       const activeTab = document.querySelector('.nav-tab.active')?.dataset?.tab;
       if (activeTab !== 'flashcard') return;
-      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
 
       if (e.code === 'Space') {
         e.preventDefault();

@@ -1,10 +1,10 @@
 // js/admin.js
 // 관리자 인증(암호 2217) 및 다중 학습자 프로필 관리 모듈
 
-import { StorageManager } from './storage.js?v=20261123_11';
-import { KingdomManager } from './kingdom.js?v=20261123_11';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_11';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_11';
+import { StorageManager } from './storage.js?v=20261123_19';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261123_19';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_19';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_19';
 
 export const ADMIN_PASSWORD = '2217';
 
@@ -27,7 +27,7 @@ export class AdminManager {
     this.init();
 
     this.container.innerHTML = `
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80">
         <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
           <div class="text-center mb-4">
             <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center text-2xl shadow-inner mb-3">
@@ -39,7 +39,7 @@ export class AdminManager {
 
           <form id="admin-auth-form" class="space-y-3">
             <div>
-              <input type="password" id="admin-pass-input" placeholder="관리자 암호 4자리" maxlength="10" autofocus
+              <input type="password" id="admin-pass-input" placeholder="관리자 암호 4자리" maxlength="10" autocomplete="off" autofocus
                 class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-center text-lg font-mono tracking-widest text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
               <p id="admin-auth-error" class="hidden text-xs text-rose-500 font-bold mt-1.5 text-center">암호가 일치하지 않습니다.</p>
             </div>
@@ -64,6 +64,15 @@ export class AdminManager {
     const passInput = document.getElementById('admin-pass-input');
     const errorEl = document.getElementById('admin-auth-error');
 
+    if (passInput) {
+      setTimeout(() => passInput.focus(), 30);
+      passInput.addEventListener('input', () => {
+        if (passInput.value.trim() === ADMIN_PASSWORD) {
+          this.openAdminPanel();
+        }
+      });
+    }
+
     form.onsubmit = (e) => {
       e.preventDefault();
       const val = passInput ? passInput.value.trim() : '';
@@ -87,10 +96,20 @@ export class AdminManager {
     const profiles = StorageManager.getProfiles();
     const activeProfileId = StorageManager.getActiveProfileId();
     const decks = StorageManager.getDecks();
-    const allWords = decks.flatMap(d => (d && Array.isArray(d.words)) ? d.words : []).filter(Boolean);
+    const totalWordsCount = decks.reduce((sum, d) => sum + ((d && Array.isArray(d.words)) ? d.words.length : 0), 0) || 2475;
+
+    const rankPoints = {
+      [RANK_TYPES.RECRUIT]: 1,
+      [RANK_TYPES.INFANTRY]: 2,
+      [RANK_TYPES.JUNIOR_KNIGHT]: 4,
+      [RANK_TYPES.SENIOR_KNIGHT]: 6,
+      [RANK_TYPES.HIGH_KNIGHT]: 8,
+      [RANK_TYPES.ROYAL_GUARD]: 11,
+      [RANK_TYPES.MASTER]: 14
+    };
 
     this.container.innerHTML = `
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/80">
         <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[92vh] flex flex-col">
           
           <!-- 상단 헤더 -->
@@ -114,10 +133,10 @@ export class AdminManager {
           <!-- Firebase 실시간 동기화 상태 배너 -->
           <div class="mt-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 flex flex-wrap items-center justify-between gap-2 shrink-0">
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full ${FirebaseSyncManager.isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
+              <span class="w-2.5 h-2.5 rounded-full ${FirebaseSyncManager.isConnected ? 'bg-emerald-500' : 'bg-slate-400'}"></span>
               <div>
                 <span class="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-1">
-                  <span>${FirebaseSyncManager.isConnected ? '🔥 Firebase 실시간 연동 중 (즉시 반영)' : '💻 단독 로컬 모드 (Firebase 미연결)'}</span>
+                  <span>${FirebaseSyncManager.isConnected ? '🔥 Firebase 클라우드 연동 (로컬 우선 체크포인트)' : '💻 단독 로컬 모드 (Firebase 미연결)'}</span>
                 </span>
                 <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                   Cloud Firestore (vocaquest-web)
@@ -151,35 +170,34 @@ export class AdminManager {
           <div class="flex-1 overflow-y-auto space-y-3 pr-1 py-1">
             ${profiles.map(prof => {
               const isActive = prof.id === activeProfileId;
-              // 프로필별 성취도 계산
-              const pData = StorageManager.getProfileData(prof.id);
-              let totalScore = 0;
+              // 프로필별 성취도 계산 (객체 복사 없이 0ms 즉각 집계)
+              const pData = StorageManager.getProfileData(prof.id) || {};
               let memorizedCount = 0;
               let masterCount = 0;
-              let royalGuardCount = 0;
+              let totalPoints = 0;
 
-              // 임시 단어 리스트에 프로필 성취도 주입하여 왕국 전투력 계산
-              const tempWords = allWords.map(w => {
-                const copy = { ...w };
-                const pd = pData[w.id];
-                if (pd) {
-                  copy.memorized = !!pd.memorized;
-                  copy.wrongCount = pd.wrongCount || 0;
-                  copy.mastery = pd.mastery ? { ...pd.mastery } : null;
-                } else {
-                  copy.memorized = false;
-                  copy.wrongCount = 0;
-                  copy.mastery = null;
-                }
-                MasteryManager.ensureMastery(copy);
-                totalScore += copy.mastery.score || 0;
-                if (copy.memorized) memorizedCount++;
-                if (copy.mastery.status === RANK_TYPES.MASTER) masterCount++;
-                if (copy.mastery.status === RANK_TYPES.ROYAL_GUARD) royalGuardCount++;
-                return copy;
-              });
+              for (const item of Object.values(pData)) {
+                if (item && item.memorized) memorizedCount++;
+                const rank = (item && item.mastery && item.mastery.status) || RANK_TYPES.RECRUIT;
+                totalPoints += (rankPoints[rank] || 1);
+                if (rank === RANK_TYPES.MASTER) masterCount++;
+              }
 
-              const pPower = KingdomManager.calculateKingdomPower(tempWords);
+              // 아직 학습하지 않은 나머지 단어들은 기본 신병(RECRUIT: 1pt)으로 가산
+              const studiedCount = Object.keys(pData).length;
+              const unstudiedCount = Math.max(0, totalWordsCount - studiedCount);
+              totalPoints += unstudiedCount * 1;
+
+              const maxPower = Math.max(1, totalWordsCount * 14);
+              const progressPct = Math.min(100, Math.max(0, Math.round((totalPoints / maxPower) * 100)));
+
+              let tier = KINGDOM_TIERS.TIER_1;
+              if (progressPct >= 80) tier = KINGDOM_TIERS.TIER_5;
+              else if (progressPct >= 60) tier = KINGDOM_TIERS.TIER_4;
+              else if (progressPct >= 40) tier = KINGDOM_TIERS.TIER_3;
+              else if (progressPct >= 20) tier = KINGDOM_TIERS.TIER_2;
+
+              const pPower = { tier, totalPoints };
 
               return `
                 <div class="p-4 rounded-2xl border-2 transition ${isActive ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-md' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-750/50 hover:border-slate-300'}">
@@ -401,7 +419,7 @@ export class AdminManager {
     const profiles = StorageManager.getProfiles();
 
     this.container.innerHTML = `
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/80">
         <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-700">
           
           <div class="flex items-start justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
@@ -463,15 +481,16 @@ export class AdminManager {
               </div>
             </div>
 
-            <!-- 실시간 동기화 안내 카드 -->
+            <!-- 로컬 우선 체크포인트 동기화 안내 카드 -->
             <div class="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 text-emerald-900 dark:text-emerald-200 space-y-1.5 leading-relaxed">
               <h4 class="font-black text-xs flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
-                <span>⚡</span> <span>별도의 동기화 버튼 클릭이 필요 없습니다!</span>
+                <span>⚡</span> <span>로컬 우선(0ms 지연 없음) + 스마트 체크포인트 동기화</span>
               </h4>
               <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
-                <li>단어 암기 체크, 퀴즈 오답, 단어장 추가/편집이 <strong>즉시 Firebase에 반영</strong>됩니다.</li>
-                <li>PC, 스마트폰, 태블릿 등 어떤 기기에서 접속하든 <strong>실시간으로 동일한 상태</strong>가 유지됩니다.</li>
-                <li>Linux 서버 실행이나 Cloudflare 터널 유지 없이 언제 어디서나 바로 사용할 수 있습니다.</li>
+                <li>학습 중에는 네트워크 지연 없이 <strong>100% 로컬(PC/스마트폰/패드)에서 즉시 반응</strong>합니다.</li>
+                <li>학습을 마치고 상단의 <strong>[🏁 학습 끝]</strong> 버튼을 누르면 성과가 Firebase에 안전하게 저장되고 최신 단어장이 동기화됩니다.</li>
+                <li><strong>프로필을 변경</strong>하면 변경 전 프로필의 성과가 자동 백업되고, 새 프로필의 최신 성과가 자동 다운로드됩니다.</li>
+                <li>단어장 드롭다운 옆 <strong>[🔄 단어장 새로고침]</strong> 버튼을 누르면 서버의 최신 단어장을 언제든 다운로드합니다.</li>
               </ul>
             </div>
           </div>
@@ -543,7 +562,7 @@ export class AdminManager {
     const activeProfId = StorageManager.getActiveProfileId();
 
     this.container.innerHTML = `
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/80">
         <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[85vh] flex flex-col">
           
           <div class="flex items-start justify-between pb-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
