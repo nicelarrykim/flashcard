@@ -5,7 +5,9 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
 import { 
   getFirestore, 
-  enableIndexedDbPersistence 
+  initializeFirestore, 
+  persistentLocalCache, 
+  persistentMultipleTabManager 
 } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
 
 export const firebaseConfig = {
@@ -28,20 +30,19 @@ let db = null;
 if (isFirebaseConfigured()) {
   try {
     app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-
-    // 오프라인 지속성(IndexedDB 캐시) 활성화
-    enableIndexedDbPersistence(db).catch((err) => {
-      if (err.code === 'failed-precondition') {
-        // 여러 탭이 열려있을 때 첫 번째 탭에서만 활성화됨
-        console.warn('[Firebase] Persistence failed: Multiple tabs open');
-      } else if (err.code === 'unimplemented') {
-        // 브라우저가 지원하지 않는 경우
-        console.warn('[Firebase] Persistence not supported by browser');
-      }
-    });
-
-    console.log('[Firebase] Successfully initialized Firestore with offline persistence');
+    
+    // 멀티 탭 IndexedDB 캐시 지속성(Multi-tab Persistence) 활성화
+    try {
+      db = initializeFirestore(app, {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager()
+        })
+      });
+      console.log('[Firebase] Multi-tab Firestore persistence enabled');
+    } catch (cacheErr) {
+      console.warn('[Firebase] Multi-tab persistence fallback to default Firestore:', cacheErr);
+      db = getFirestore(app);
+    }
   } catch (err) {
     console.error('[Firebase] Initialization error:', err);
   }

@@ -3,9 +3,9 @@
 // 4x6 골짜기 미로 전장, 단어장 실제 인원수(1:1) 기반 10명 단위 원클릭&드래그 증원 배치,
 // 100웨이브 판타지 몹 대군단 스웜 디펜스, 10웨이브 단위 맵 변경 & 50% 부활, 성 함락 화염 연출
 
-import { StorageManager } from '../storage.js?v=20261123_07';
-import { SoundManager } from '../tts.js?v=20261123_07';
-import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261123_07';
+import { StorageManager } from '../storage.js?v=20261123_08';
+import { SoundManager } from '../tts.js?v=20261123_08';
+import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261123_08';
 
 export class SiegeManager {
   static getStorageKey() {
