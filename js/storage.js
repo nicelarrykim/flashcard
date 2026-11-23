@@ -1,12 +1,12 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261123_06';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_06';
-import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261123_06';
-import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261123_06';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_06';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_06';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261123_07';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_07';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261123_07';
+import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261123_07';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_07';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_07';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -397,16 +397,10 @@ export class StorageManager {
 
   static saveDecks(decks) {
     try {
-      const currentAll = this.getAllDecks();
-      const deckMap = new Map();
-      currentAll.forEach(d => deckMap.set(d.id, d));
-      decks.forEach(d => deckMap.set(d.id, d));
-      const fullList = Array.from(deckMap.values());
-
-      localStorage.setItem(DECKS_KEY, JSON.stringify(fullList));
-      window.dispatchEvent(new CustomEvent('vocaquest_decks_updated', { detail: fullList }));
-      window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
-      FirebaseSyncManager.saveDecks(fullList);
+      if (!Array.isArray(decks)) return;
+      localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
+      window.dispatchEvent(new CustomEvent('vocaquest_decks_updated', { detail: decks }));
+      FirebaseSyncManager.saveDecks(decks);
     } catch (e) {
       console.error('Failed to save decks:', e);
     }
@@ -641,7 +635,7 @@ export class StorageManager {
    * 단어장 이름, 설명 및 그림 위치 수정
    */
   static updateDeck(deckId, { name, description, imagePosition }) {
-    const decks = this.getDecks();
+    const decks = this.getAllDecks();
     const deck = decks.find(d => d.id === deckId);
     if (deck) {
       if (name !== undefined) deck.name = name.trim();
@@ -657,7 +651,7 @@ export class StorageManager {
    * 단어장 삭제
    */
   static deleteDeck(deckId) {
-    let decks = this.getDecks();
+    let decks = this.getAllDecks();
     if (decks.length <= 1) {
       throw new Error('최소 한 개 이상의 단어장이 유지되어야 합니다.');
     }
@@ -675,7 +669,7 @@ export class StorageManager {
    * 단어 추가 (deckId 생략 시 현재 활성 단어장에 추가)
    */
   static addWord(wordData, targetDeckId = null) {
-    const decks = this.getDecks();
+    const decks = this.getAllDecks();
     const deckId = targetDeckId || (this.getActiveDeckId() === 'all' ? decks[0].id : this.getActiveDeckId());
     const deck = decks.find(d => d.id === deckId) || decks[0];
 
@@ -761,7 +755,7 @@ export class StorageManager {
    * 단어 수정
    */
   static updateWord(wordId, updatedFields) {
-    const decks = this.getDecks();
+    const decks = this.getAllDecks();
     for (const deck of decks) {
       const w = deck.words.find(item => item.id === wordId);
       if (w) {
@@ -777,7 +771,7 @@ export class StorageManager {
    * 단어 삭제
    */
   static deleteWord(wordId) {
-    const decks = this.getDecks();
+    const decks = this.getAllDecks();
     for (const deck of decks) {
       const idx = deck.words.findIndex(item => item.id === wordId);
       if (idx !== -1) {
@@ -793,7 +787,7 @@ export class StorageManager {
    * 암기 완료 상태 표시
    */
   static markMemorized(wordId, memorized = true) {
-    const decks = this.getDecks();
+    const decks = this.getAllDecks();
     for (const deck of decks) {
       const w = deck.words.find(item => item.id === wordId);
       if (w) {
@@ -813,7 +807,7 @@ export class StorageManager {
    * 오답 기록
    */
   static recordMistake(wordId) {
-    const decks = this.getDecks();
+    const decks = this.getAllDecks();
     for (const deck of decks) {
       const w = deck.words.find(item => item.id === wordId);
       if (w) {
@@ -834,7 +828,7 @@ export class StorageManager {
    * @param {Object} meta 부가 정보
    */
   static updateWordMastery(wordId, action, meta = {}) {
-    const decks = this.getDecks();
+    const decks = this.getAllDecks();
     for (const deck of decks) {
       const w = deck.words.find(item => item.id === wordId);
       if (w) {
@@ -874,7 +868,7 @@ export class StorageManager {
    * 특정 단어 숙련도 0점/초기 상태로 리셋
    */
   static resetWordMastery(wordId) {
-    const decks = this.getDecks();
+    const decks = this.getAllDecks();
     for (const deck of decks) {
       const w = deck.words.find(item => item.id === wordId);
       if (w) {

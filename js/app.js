@@ -1,18 +1,18 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261123_06';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_06';
-import { SoundManager } from './tts.js?v=20261123_06';
-import { FlashcardGame } from './games/flashcard.js?v=20261123_06';
-import { QuizGame } from './games/quiz.js?v=20261123_06';
-import { MatchGame } from './games/match.js?v=20261123_06';
-import { ScrambleGame } from './games/scramble.js?v=20261123_06';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261123_06';
-import { WordManager } from './wordManager.js?v=20261123_06';
-import { PerformanceView } from './performance.js?v=20261123_06';
-import { AdminManager } from './admin.js?v=20261123_06';
-import { SiegeGame } from './games/siege.js?v=20261123_06';
+import { StorageManager } from './storage.js?v=20261123_07';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_07';
+import { SoundManager } from './tts.js?v=20261123_07';
+import { FlashcardGame } from './games/flashcard.js?v=20261123_07';
+import { QuizGame } from './games/quiz.js?v=20261123_07';
+import { MatchGame } from './games/match.js?v=20261123_07';
+import { ScrambleGame } from './games/scramble.js?v=20261123_07';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261123_07';
+import { WordManager } from './wordManager.js?v=20261123_07';
+import { PerformanceView } from './performance.js?v=20261123_07';
+import { AdminManager } from './admin.js?v=20261123_07';
+import { SiegeGame } from './games/siege.js?v=20261123_07';
 
 class App {
   constructor() {
