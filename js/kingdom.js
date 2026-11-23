@@ -1,7 +1,7 @@
 // js/kingdom.js
 // 단어장별 왕국 발전도(Kingdom Evolution) 계산 및 성채 SVG 일러스트 모듈
 
-import { RANK_TYPES } from './mastery.js?v=20261123_08';
+import { RANK_TYPES } from './mastery.js?v=20261123_09';
 
 export const KINGDOM_TIERS = {
   TIER_1: {

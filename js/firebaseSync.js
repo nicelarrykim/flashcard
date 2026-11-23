@@ -2,7 +2,7 @@
 // VocaQuest Firebase Firestore 실시간 동기화 모듈
 // 프로필, 단어장(Decks), 학습 성취도를 Firestore와 양방향 실시간(onSnapshot) 연동
 
-import { db, isFirebaseConfigured } from './firebaseConfig.js?v=20261123_08';
+import { db, isFirebaseConfigured } from './firebaseConfig.js?v=20261123_09';
 import { 
   collection, 
   doc, 

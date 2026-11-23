@@ -26,16 +26,16 @@
   </script>
 
   <!-- 커스텀 스타일 (3D 플립 & 모바일 가로스크롤 방지 등) -->
-  <link rel="stylesheet" href="css/style.css?v=20261123_08">
+  <link rel="stylesheet" href="css/style.css?v=20261123_09">
 
-  <!-- Tesseract.js OCR 라이브러리 CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <!-- Tesseract.js OCR 라이브러리 CDN (비동기 defer 로드) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-  <!-- sql.js SQLite DB 파일 파서 CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <!-- sql.js SQLite DB 파일 파서 CDN (비동기 defer 로드) -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 
-  <!-- Confetti 축하 애니메이션 CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <!-- Confetti 축하 애니메이션 CDN (비동기 defer 로드) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
 <body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200 bg-grid-pattern">
 
@@ -306,6 +306,6 @@
   </footer>
 
   <!-- 앱 메인 스크립트 (ES Module - 캐시 방지 버전 파라미터 적용) -->
-  <script type="module" src="js/app.js?v=20261123_08"></script>
+  <script type="module" src="js/app.js?v=20261123_09"></script>
 </body>
 </html>

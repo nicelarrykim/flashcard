@@ -1,18 +1,18 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261123_08';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_08';
-import { SoundManager } from './tts.js?v=20261123_08';
-import { FlashcardGame } from './games/flashcard.js?v=20261123_08';
-import { QuizGame } from './games/quiz.js?v=20261123_08';
-import { MatchGame } from './games/match.js?v=20261123_08';
-import { ScrambleGame } from './games/scramble.js?v=20261123_08';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261123_08';
-import { WordManager } from './wordManager.js?v=20261123_08';
-import { PerformanceView } from './performance.js?v=20261123_08';
-import { AdminManager } from './admin.js?v=20261123_08';
-import { SiegeGame } from './games/siege.js?v=20261123_08';
+import { StorageManager } from './storage.js?v=20261123_09';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_09';
+import { SoundManager } from './tts.js?v=20261123_09';
+import { FlashcardGame } from './games/flashcard.js?v=20261123_09';
+import { QuizGame } from './games/quiz.js?v=20261123_09';
+import { MatchGame } from './games/match.js?v=20261123_09';
+import { ScrambleGame } from './games/scramble.js?v=20261123_09';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261123_09';
+import { WordManager } from './wordManager.js?v=20261123_09';
+import { PerformanceView } from './performance.js?v=20261123_09';
+import { AdminManager } from './admin.js?v=20261123_09';
+import { SiegeGame } from './games/siege.js?v=20261123_09';
 
 class App {
   constructor() {
@@ -38,19 +38,26 @@ class App {
     this.updateStats();
     this.updateActiveProfileBadge();
 
-    // 초기 탭 렌더링
+    // 1. 첫 화면(플래시카드) 즉시 렌더링
     this.switchTab('flashcard');
 
-    // Firebase 실시간 동기화 초기화 (비동기 안전 실행)
-    if (typeof FirebaseSyncManager !== 'undefined' && typeof FirebaseSyncManager.initSync === 'function') {
-      FirebaseSyncManager.initSync(StorageManager).catch(err => {
-        console.warn('[VocaQuest] Firebase 동기화 초기화 경고:', err);
-      });
-    } else if (typeof StorageManager.initServerSync === 'function') {
-      StorageManager.initServerSync().catch(err => {
-        console.warn('[VocaQuest] 서버 동기화 초기화 경고:', err);
-      });
-    }
+    // 2. 화면이 뜬 직후 백그라운드에서 Firebase 실시간 동기화 가동 (초기 UI 블로킹 방지)
+    setTimeout(() => {
+      if (typeof FirebaseSyncManager !== 'undefined' && typeof FirebaseSyncManager.initSync === 'function') {
+        FirebaseSyncManager.initSync(StorageManager).catch(err => {
+          console.warn('[VocaQuest] Firebase 동기화 초기화 경고:', err);
+        });
+      }
+    }, 50);
+
+    // 디바운스된 탭 리로드 헬퍼
+    let reloadDebounceTimer = null;
+    const debouncedReload = () => {
+      if (reloadDebounceTimer) clearTimeout(reloadDebounceTimer);
+      reloadDebounceTimer = setTimeout(() => {
+        this.reloadCurrentTab();
+      }, 60);
+    };
 
     // 단어 또는 단어장 데이터 변경 감지
     window.addEventListener('vocaquest_words_updated', () => {
@@ -64,14 +71,14 @@ class App {
       this.updateStats();
       this.renderDeckSelector();
       this.syncStudyControlsUI();
-      this.reloadCurrentTab();
+      debouncedReload();
     });
 
     // Firebase 원격 학습 성취도 실시간 업데이트 감지
     window.addEventListener('vocaquest_progress_updated', () => {
       this.updateStats();
       this.syncStudyControlsUI();
-      this.reloadCurrentTab();
+      debouncedReload();
     });
 
     // 프로필 업데이트 감지
