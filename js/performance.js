@@ -1,11 +1,11 @@
 // js/performance.js
 // 단어별 학습 성과 대시보드 및 나의 왕국(영지 발전 & 기사단 승급) 모듈
 
-import { StorageManager } from './storage.js?v=20261123_05';
-import { SoundManager } from './tts.js?v=20261123_05';
-import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261123_05';
-import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261123_05';
-import { SiegeGame, SiegeManager } from './games/siege.js?v=20261123_05';
+import { StorageManager } from './storage.js?v=20261123_06';
+import { SoundManager } from './tts.js?v=20261123_06';
+import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261123_06';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261123_06';
+import { SiegeGame, SiegeManager } from './games/siege.js?v=20261123_06';
 
 export class PerformanceView {
   constructor(containerId) {

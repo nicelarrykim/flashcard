@@ -1,18 +1,18 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261123_05';
-import { ServerSyncManager } from './serverSync.js?v=20261123_05';
-import { SoundManager } from './tts.js?v=20261123_05';
-import { FlashcardGame } from './games/flashcard.js?v=20261123_05';
-import { QuizGame } from './games/quiz.js?v=20261123_05';
-import { MatchGame } from './games/match.js?v=20261123_05';
-import { ScrambleGame } from './games/scramble.js?v=20261123_05';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261123_05';
-import { WordManager } from './wordManager.js?v=20261123_05';
-import { PerformanceView } from './performance.js?v=20261123_05';
-import { AdminManager } from './admin.js?v=20261123_05';
-import { SiegeGame } from './games/siege.js?v=20261123_05';
+import { StorageManager } from './storage.js?v=20261123_06';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_06';
+import { SoundManager } from './tts.js?v=20261123_06';
+import { FlashcardGame } from './games/flashcard.js?v=20261123_06';
+import { QuizGame } from './games/quiz.js?v=20261123_06';
+import { MatchGame } from './games/match.js?v=20261123_06';
+import { ScrambleGame } from './games/scramble.js?v=20261123_06';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261123_06';
+import { WordManager } from './wordManager.js?v=20261123_06';
+import { PerformanceView } from './performance.js?v=20261123_06';
+import { AdminManager } from './admin.js?v=20261123_06';
+import { SiegeGame } from './games/siege.js?v=20261123_06';
 
 class App {
   constructor() {
@@ -41,10 +41,10 @@ class App {
     // 초기 탭 렌더링
     this.switchTab('flashcard');
 
-    // 서버 동기화 초기화 (비동기 안전 실행)
-    if (typeof ServerSyncManager !== 'undefined' && typeof ServerSyncManager.initSync === 'function') {
-      ServerSyncManager.initSync(StorageManager).catch(err => {
-        console.warn('[VocaQuest] 서버 동기화 초기화 경고:', err);
+    // Firebase 실시간 동기화 초기화 (비동기 안전 실행)
+    if (typeof FirebaseSyncManager !== 'undefined' && typeof FirebaseSyncManager.initSync === 'function') {
+      FirebaseSyncManager.initSync(StorageManager).catch(err => {
+        console.warn('[VocaQuest] Firebase 동기화 초기화 경고:', err);
       });
     } else if (typeof StorageManager.initServerSync === 'function') {
       StorageManager.initServerSync().catch(err => {
@@ -59,7 +59,27 @@ class App {
       this.syncStudyControlsUI();
     });
 
-    // 서버 동기화 완료 시 전체 상태 반영
+    // Firebase 원격 단어장 실시간 업데이트 감지
+    window.addEventListener('vocaquest_decks_updated', () => {
+      this.updateStats();
+      this.renderDeckSelector();
+      this.syncStudyControlsUI();
+      this.reloadCurrentTab();
+    });
+
+    // Firebase 원격 학습 성취도 실시간 업데이트 감지
+    window.addEventListener('vocaquest_progress_updated', () => {
+      this.updateStats();
+      this.syncStudyControlsUI();
+      this.reloadCurrentTab();
+    });
+
+    // 프로필 업데이트 감지
+    window.addEventListener('vocaquest_profiles_updated', () => {
+      this.updateActiveProfileBadge();
+    });
+
+    // 서버/Firebase 동기화 완료 시 전체 상태 반영
     window.addEventListener('vocaquest_sync_completed', () => {
       this.updateActiveProfileBadge();
       this.updateStats();
@@ -142,14 +162,14 @@ class App {
 
     if (detail && detail.connected) {
       dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
-      text.innerText = '서버 연동';
+      text.innerText = detail.isFirebase ? '🔥 Firebase 실시간' : '동기화 연결됨';
       text.className = 'hidden xs:inline text-emerald-700 dark:text-emerald-300 font-bold';
-      badge.title = `서버(${detail.serverUrl})와 실시간 동기화 중 (클릭 시 설정)`;
+      badge.title = `Firebase Firestore 실시간 연동 중 (클릭 시 관리자 설정)`;
     } else {
       dot.className = 'w-2 h-2 rounded-full bg-slate-400';
-      text.innerText = '로컬';
-      text.className = 'hidden xs:inline text-slate-500 dark:text-slate-400';
-      badge.title = '단독 로컬 모드 (클릭하여 서버 주소 연결)';
+      text.innerText = '로컬 모드';
+      text.className = 'hidden xs:inline text-slate-500 dark:text-slate-400 font-bold';
+      badge.title = 'Firebase 미연결 (로컬 저장소 모드 - 클릭 시 설정)';
     }
   }
 

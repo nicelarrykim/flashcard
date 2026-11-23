@@ -1,10 +1,10 @@
 // js/admin.js
 // 관리자 인증(암호 2217) 및 다중 학습자 프로필 관리 모듈
 
-import { StorageManager } from './storage.js?v=20261123_05';
-import { KingdomManager } from './kingdom.js?v=20261123_05';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_05';
-import { ServerSyncManager } from './serverSync.js?v=20261123_05';
+import { StorageManager } from './storage.js?v=20261123_06';
+import { KingdomManager } from './kingdom.js?v=20261123_06';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_06';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_06';
 
 export const ADMIN_PASSWORD = '2217';
 
@@ -111,28 +111,28 @@ export class AdminManager {
             </button>
           </div>
 
-          <!-- 서버 실시간 동기화 상태 배너 -->
+          <!-- Firebase 실시간 동기화 상태 배너 -->
           <div class="mt-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 flex flex-wrap items-center justify-between gap-2 shrink-0">
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full ${ServerSyncManager.isServerConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
+              <span class="w-2.5 h-2.5 rounded-full ${FirebaseSyncManager.isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
               <div>
                 <span class="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-1">
-                  <span>${ServerSyncManager.isServerConnected ? '🌐 서버 연동 활성 (다중 기기 동기화)' : '💻 단독 로컬 모드 (서버 미연결)'}</span>
+                  <span>${FirebaseSyncManager.isConnected ? '🔥 Firebase 실시간 연동 중 (즉시 반영)' : '💻 단독 로컬 모드 (Firebase 미연결)'}</span>
                 </span>
                 <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                  ${ServerSyncManager.getServerUrl()}
+                  Cloud Firestore (vocaquest-web)
                 </p>
               </div>
             </div>
             <div class="flex items-center gap-1.5 ml-auto flex-wrap">
-              <button id="admin-banner-upload-btn" class="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="현재 선택된 프로필의 학습 성과를 서버로 저장">
-                <span>📤</span> <span>현재 프로필 올리기</span>
+              <button id="admin-banner-upload-btn" class="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="로컬의 프로필, 단어장, 성과 전체를 Firebase로 일괄 백업/동기화">
+                <span>📦</span> <span>전체 데이터 Firebase 백업</span>
               </button>
-              <button id="admin-banner-download-btn" class="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="서버에 저장된 프로필 중 선택하여 받기">
-                <span>📥</span> <span>프로필 선택하여 받기</span>
+              <button id="admin-banner-download-btn" class="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="Firebase 원격 데이터를 이 기기로 전체 동기화">
+                <span>📥</span> <span>Firebase 데이터 받기</span>
               </button>
               <button id="admin-server-setup-btn" class="px-2.5 py-1 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1 shadow-sm">
-                <span>⚙️</span> <span>설정</span>
+                <span>⚙️</span> <span>클라우드 정보</span>
               </button>
             </div>
           </div>
@@ -280,45 +280,48 @@ export class AdminManager {
     if (closeBtn) closeBtn.onclick = () => this.close();
     if (doneBtn) doneBtn.onclick = () => this.close();
 
-    // 배너 1. 현재 선택된 사용자의 성과만 서버로 올리기 (업로드)
+    // 배너 1. 전체 로컬 데이터(프로필+단어장+성과) Firebase로 일괄 백업
     const bannerUploadBtn = document.getElementById('admin-banner-upload-btn');
     if (bannerUploadBtn) {
       bannerUploadBtn.onclick = async () => {
-        const activeProf = StorageManager.getActiveProfile();
-        if (!confirm(`현재 선택된 학습자 프로필 [${activeProf.avatar} ${activeProf.name}]의 성과를 서버로 올리시겠습니까?`)) {
+        if (!confirm('현재 기기의 모든 프로필, 단어장, 학습 성과를 Firebase Cloud Firestore로 업로드하시겠습니까?')) {
           return;
         }
         bannerUploadBtn.disabled = true;
-        bannerUploadBtn.innerText = '올리는 중...';
-        const res = await ServerSyncManager.uploadActiveProfileToServer(StorageManager);
+        bannerUploadBtn.innerText = '업로드 중...';
+        const res = await FirebaseSyncManager.uploadAllLocalToFirebase(StorageManager);
         bannerUploadBtn.disabled = false;
-        bannerUploadBtn.innerHTML = '<span>📤</span> <span>현재 프로필 올리기</span>';
+        bannerUploadBtn.innerHTML = '<span>📦</span> <span>전체 데이터 Firebase 백업</span>';
 
         if (res.success) {
-          alert(`🎉 [${res.profile.name}] 학습자의 성과(단어 ${res.wordCount}개)가 서버에 성공적으로 저장되었습니다!\n\n이제 다른 기기에서 [프로필 선택하여 받기]로 가져갈 수 있습니다.`);
+          alert(`🎉 Firebase 동기화 완료!\n- 프로필: ${res.profilesCount}개\n- 단어장: ${res.decksCount}개\n\n모든 기기에서 실시간으로 즉시 조회 및 연동됩니다.`);
           this.openAdminPanel();
         } else {
-          alert(`❌ 서버 업로드 실패: ${res.error}\n\n서버 설정에서 동기화 서버 주소가 http://192.168.0.110:8080 등으로 올바르게 지정되었는지 확인하세요.`);
+          alert(`❌ Firebase 업로드 실패: ${res.error}\n\nFirebase 콘솔에서 Firestore 데이터베이스가 생성되어 있는지 확인하세요.`);
         }
       };
     }
 
-    // 배너 2. 서버에서 어느 프로필을 받을지 선택하여 받기 (다운로드)
+    // 배너 2. Firebase 원격 데이터 내려받기
     const bannerDownloadBtn = document.getElementById('admin-banner-download-btn');
     if (bannerDownloadBtn) {
       bannerDownloadBtn.onclick = async () => {
-        bannerDownloadBtn.disabled = true;
-        bannerDownloadBtn.innerText = '목록 조회중...';
-        const res = await ServerSyncManager.fetchServerProfiles();
-        bannerDownloadBtn.disabled = false;
-        bannerDownloadBtn.innerHTML = '<span>📥</span> <span>프로필 선택하여 받기</span>';
-
-        if (!res.success || !res.profiles || res.profiles.length === 0) {
-          alert(`서버에 저장된 프로필이 없거나 서버에 연결할 수 없습니다: ${res.error || '목록 없음'}`);
+        if (!confirm('Firebase의 최신 원격 데이터를 내려받아 현재 기기를 갱신하시겠습니까?')) {
           return;
         }
+        bannerDownloadBtn.disabled = true;
+        bannerDownloadBtn.innerText = '동기화 중...';
+        const res = await FirebaseSyncManager.downloadAllFromFirebase(StorageManager);
+        bannerDownloadBtn.disabled = false;
+        bannerDownloadBtn.innerHTML = '<span>📥</span> <span>Firebase 데이터 받기</span>';
 
-        this.openServerProfilePickerModal(res.profiles);
+        if (res.success) {
+          alert(`🎉 Firebase 데이터 동기화 완료! (프로필 ${res.profilesCount}개, 단어장 ${res.decksCount}개)`);
+          this.openAdminPanel();
+          window.location.reload();
+        } else {
+          alert(`❌ Firebase 다운로드 실패: ${res.error}`);
+        }
       };
     }
 
@@ -388,13 +391,14 @@ export class AdminManager {
   }
 
   /**
-   * 서버 설정 및 다중 기기 연동 안내 모달
+   * Firebase 실시간 클라우드 설정 및 상태 안내 모달
    */
   static openServerConfigModal() {
     this.init();
-    const currentUrl = ServerSyncManager.getServerUrl();
-    const isConnected = ServerSyncManager.isServerConnected;
+    const isConnected = FirebaseSyncManager.isConnected;
     const activeProf = StorageManager.getActiveProfile();
+    const decks = StorageManager.getDecks();
+    const profiles = StorageManager.getProfiles();
 
     this.container.innerHTML = `
       <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
@@ -402,10 +406,10 @@ export class AdminManager {
           
           <div class="flex items-start justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
             <div>
-              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 text-xs font-black mb-1">
-                <span>🌐</span> <span>다중 기기 서버 동기화</span>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-xs font-black mb-1">
+                <span>🔥</span> <span>Firebase Serverless Cloud</span>
               </div>
-              <h3 class="text-lg font-black text-slate-900 dark:text-white">서버 연결 및 기기 연동 설정</h3>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">클라우드 실시간 동기화 상태</h3>
             </div>
             <button id="server-cfg-close-btn" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold">
               ✕
@@ -415,69 +419,67 @@ export class AdminManager {
           <div class="py-4 space-y-4 text-xs">
             <!-- 현재 연결 상태 -->
             <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600">
-              <span class="font-bold text-slate-700 dark:text-slate-300">현재 연결 상태:</span>
+              <span class="font-bold text-slate-700 dark:text-slate-300">Firestore 연결 상태:</span>
               <span class="font-black px-2.5 py-1 rounded-xl text-xs flex items-center gap-1.5 ${isConnected ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300' : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300'}">
                 <span class="w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
-                <span>${isConnected ? '서버 연결 완료 (온라인)' : '서버 미연결 (로컬 모드)'}</span>
+                <span>${isConnected ? '실시간 연동 완료 (온라인)' : '로컬 모드 (Firebase 미연결)'}</span>
               </span>
             </div>
 
-            <!-- 서버 URL 입력 폼 -->
-            <div>
-              <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                동기화 서버 주소 (API URL):
-              </label>
-              <div class="flex items-center gap-2">
-                <input type="text" id="server-cfg-url-input" value="${currentUrl}" placeholder="https://... 또는 http://..."
-                  class="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 font-mono text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                <button type="button" id="server-cfg-test-btn" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-sm shrink-0">
-                  연결 확인
-                </button>
+            <!-- Firebase 프로젝트 정보 -->
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 space-y-1.5 font-mono text-[11px]">
+              <div class="flex justify-between">
+                <span class="text-slate-500">Project ID:</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">vocaquest-web</span>
               </div>
-              <p class="text-[11px] text-slate-400 mt-1">
-                기본값으로 보안 HTTPS 동기화 서버 주소가 자동으로 채워집니다.
-              </p>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Region:</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">asia-northeast3 (서울)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Database:</span>
+                <span class="font-bold text-emerald-600 dark:text-emerald-400">Cloud Firestore (Serverless)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">현재 기기 데이터:</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">프로필 ${profiles.length}명 / 단어장 ${decks.length}개</span>
+              </div>
             </div>
 
-            <!-- 양방향 수동 동기화 제어 카드 -->
+            <!-- 데이터 백업 및 마이그레이션 도구 카드 -->
             <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 space-y-2">
               <span class="block font-bold text-slate-800 dark:text-slate-200">
-                데이터 동기화 (현재 프로필: <span class="text-indigo-600 dark:text-indigo-400 font-black">${activeProf ? activeProf.avatar + ' ' + activeProf.name : '선택 안 됨'}</span>):
+                원클릭 데이터 백업 & 동기화 도구:
               </span>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button type="button" id="server-cfg-upload-btn" class="p-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-md transition flex flex-col items-center text-center gap-1">
-                  <span class="text-xs sm:text-sm">📤 [${activeProf ? activeProf.name : '현재 프로필'}] 성과 ➔ 서버로 올리기</span>
-                  <span class="text-[10px] font-normal opacity-90">현재 선택된 학습자의 성과만 서버로 저장</span>
+                  <span class="text-xs sm:text-sm">📦 전체 데이터 ➔ Firebase 백업</span>
+                  <span class="text-[10px] font-normal opacity-90">현재 기기의 모든 프로필·단어장·성과 업로드</span>
                 </button>
                 <button type="button" id="server-cfg-download-btn" class="p-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xs shadow-md transition flex flex-col items-center text-center gap-1">
-                  <span class="text-xs sm:text-sm">📥 서버 프로필 선택 ➔ 이 기기로 받기</span>
-                  <span class="text-[10px] font-normal opacity-90">서버의 프로필 중 하나를 골라 가져오기</span>
+                  <span class="text-xs sm:text-sm">📥 Firebase ➔ 현재 기기로 동기화</span>
+                  <span class="text-[10px] font-normal opacity-90">Firebase 최신 데이터로 로컬 갱신</span>
                 </button>
               </div>
             </div>
 
-            <!-- 다중 기기 학습 안내 카드 -->
-            <div class="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 text-indigo-900 dark:text-indigo-200 space-y-1.5 leading-relaxed">
-              <h4 class="font-black text-xs flex items-center gap-1.5 text-indigo-800 dark:text-indigo-300">
-                <span>📱</span> <span>스마트폰/태블릿 등 서로 다른 기기에서 연동하기</span>
+            <!-- 실시간 동기화 안내 카드 -->
+            <div class="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 text-emerald-900 dark:text-emerald-200 space-y-1.5 leading-relaxed">
+              <h4 class="font-black text-xs flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
+                <span>⚡</span> <span>별도의 동기화 버튼 클릭이 필요 없습니다!</span>
               </h4>
-              <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
-                <li>컴퓨터 터미널에서 <code>python3 server.py</code>를 실행합니다.</li>
-                <li>기존에 공부하던 기기에서 <strong>[📤 내 로컬 성과 ➔ 서버로 올리기]</strong>를 누릅니다.</li>
-                <li>동기화 서버 주소: <code>http://192.168.0.110:8080</code> (로컬 게임과 분리된 전용 포트)</li>
-              </ol>
+              <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
+                <li>단어 암기 체크, 퀴즈 오답, 단어장 추가/편집이 <strong>즉시 Firebase에 반영</strong>됩니다.</li>
+                <li>PC, 스마트폰, 태블릿 등 어떤 기기에서 접속하든 <strong>실시간으로 동일한 상태</strong>가 유지됩니다.</li>
+                <li>Linux 서버 실행이나 Cloudflare 터널 유지 없이 언제 어디서나 바로 사용할 수 있습니다.</li>
+              </ul>
             </div>
           </div>
 
-          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-            <button type="button" id="server-cfg-reset-btn" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-medium">
-              기본 주소로 초기화
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-end">
+            <button type="button" id="server-cfg-close-bottom" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition">
+              닫기
             </button>
-            <div class="flex items-center gap-2">
-              <button type="button" id="server-cfg-close-bottom" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition">
-                닫기
-              </button>
-            </div>
           </div>
 
         </div>
@@ -490,75 +492,44 @@ export class AdminManager {
     if (closeBtn) closeBtn.onclick = close;
     if (closeBottom) closeBottom.onclick = close;
 
-    const urlInput = document.getElementById('server-cfg-url-input');
-    const testBtn = document.getElementById('server-cfg-test-btn');
-    const resetBtn = document.getElementById('server-cfg-reset-btn');
     const uploadBtn = document.getElementById('server-cfg-upload-btn');
     const downloadBtn = document.getElementById('server-cfg-download-btn');
 
-    // 1. 현재 선택된 사용자의 성과만 서버로 올리기 (업로드)
+    // 1. 전체 데이터 Firebase 백업
     if (uploadBtn) {
       uploadBtn.onclick = async () => {
-        const activeProf = StorageManager.getActiveProfile();
-        if (!confirm(`현재 선택된 [${activeProf.avatar} ${activeProf.name}] 학습자의 성과를 서버로 올리시겠습니까?`)) return;
-        const val = urlInput ? urlInput.value.trim() : '';
+        if (!confirm('현재 기기의 모든 프로필, 단어장, 학습 성과를 Firebase Cloud Firestore로 업로드하시겠습니까?')) return;
         uploadBtn.disabled = true;
-        uploadBtn.innerText = '서버로 올리는 중...';
-        const res = await ServerSyncManager.uploadActiveProfileToServer(StorageManager, val);
+        uploadBtn.innerText = '업로드 중...';
+        const res = await FirebaseSyncManager.uploadAllLocalToFirebase(StorageManager);
         uploadBtn.disabled = false;
-        uploadBtn.innerHTML = `<span>📤 [${activeProf.name}] 성과 ➔ 서버로 올리기</span>`;
+        uploadBtn.innerHTML = `<span>📦 전체 데이터 ➔ Firebase 백업</span>`;
 
         if (res.success) {
-          alert(`🎉 [${res.profile.name}] 학습자의 성과(단어 ${res.wordCount}개)가 서버에 성공적으로 저장되었습니다!\n\n이제 다른 기기에서 [서버 프로필 선택하여 받기]로 가져갈 수 있습니다.`);
+          alert(`🎉 Firebase 동기화 완료!\n- 프로필: ${res.profilesCount}개\n- 단어장: ${res.decksCount}개\n\n모든 기기에서 즉시 실시간으로 연동됩니다.`);
           this.close();
         } else {
-          alert(`❌ 서버 업로드 실패: ${res.error}\n\n서버 주소가 맞는지, 리눅스에서 server.py가 실행 중인지 확인하세요.`);
+          alert(`❌ Firebase 업로드 실패: ${res.error}`);
         }
       };
     }
 
-    // 2. 서버에서 어느 프로필을 받을지 선택하여 받기 (다운로드)
+    // 2. Firebase 원격 데이터 내려받기
     if (downloadBtn) {
       downloadBtn.onclick = async () => {
-        const val = urlInput ? urlInput.value.trim() : '';
+        if (!confirm('Firebase의 최신 원격 데이터를 내려받아 현재 기기를 갱신하시겠습니까?')) return;
         downloadBtn.disabled = true;
-        downloadBtn.innerText = '서버 목록 조회중...';
-        const res = await ServerSyncManager.fetchServerProfiles(val);
+        downloadBtn.innerText = '동기화 중...';
+        const res = await FirebaseSyncManager.downloadAllFromFirebase(StorageManager);
         downloadBtn.disabled = false;
-        downloadBtn.innerHTML = '<span>📥 서버 프로필 선택 ➔ 이 기기로 받기</span>';
+        downloadBtn.innerHTML = '<span>📥 Firebase ➔ 현재 기기로 동기화</span>';
 
-        if (!res.success || !res.profiles || res.profiles.length === 0) {
-          alert(`서버에 저장된 프로필이 없거나 연결할 수 없습니다: ${res.error || '목록 없음'}`);
-          return;
-        }
-
-        this.openServerProfilePickerModal(res.profiles, val);
-      };
-    }
-
-    if (resetBtn) {
-      resetBtn.onclick = async () => {
-        ServerSyncManager.setCustomServerUrl('');
-        if (urlInput) urlInput.value = ServerSyncManager.getServerUrl();
-        await ServerSyncManager.checkConnection(true);
-        this.openServerConfigModal();
-      };
-    }
-
-    if (testBtn) {
-      testBtn.onclick = async () => {
-        const val = urlInput ? urlInput.value.trim() : '';
-        testBtn.disabled = true;
-        testBtn.innerText = '확인 중...';
-        ServerSyncManager.setCustomServerUrl(val);
-        const { connected } = await ServerSyncManager.checkConnection(true);
-        testBtn.disabled = false;
-        testBtn.innerText = '연결 확인';
-        if (connected) {
-          alert('✅ 서버 연결 성공! 실시간 동기화가 활성화되었습니다.');
-          this.openServerConfigModal();
+        if (res.success) {
+          alert(`🎉 Firebase 데이터 동기화 완료! (프로필 ${res.profilesCount}개, 단어장 ${res.decksCount}개)`);
+          this.close();
+          window.location.reload();
         } else {
-          alert('❌ 서버에 연결할 수 없습니다. server.py가 실행 중인지 확인하세요.');
+          alert(`❌ Firebase 다운로드 실패: ${res.error}`);
         }
       };
     }
@@ -636,10 +607,10 @@ export class AdminManager {
 
         btn.disabled = true;
         btn.innerText = '가져오는 중...';
-        const res = await ServerSyncManager.downloadSpecificProfileFromServer(StorageManager, id, targetUrl);
+        const res = await FirebaseSyncManager.downloadSpecificProfile(StorageManager, id);
 
         if (res.success) {
-          alert(`🎉 '${name}' 학습자의 성과(단어 ${res.wordCount}개)를 성공적으로 가져와 현재 학습자로 설정했습니다!`);
+          alert(`🎉 '${name}' 학습자의 성과를 성공적으로 가져와 현재 학습자로 설정했습니다!`);
           this.close();
         } else {
           btn.disabled = false;

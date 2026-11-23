@@ -4,7 +4,7 @@
 
 const SERVER_URL_KEY = 'vocaquest_server_custom_url_v1';
 const LAST_SYNC_KEY = 'vocaquest_last_sync_time_v1';
-export const DEFAULT_HTTPS_SERVER_URL = 'https://organizing-solaris-feel-attachments.trycloudflare.com';
+export const DEFAULT_HTTPS_SERVER_URL = 'https://informative-connections-dale-titanium.trycloudflare.com';
 
 export class ServerSyncManager {
   static isServerConnected = false;

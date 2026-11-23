@@ -1,12 +1,12 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261123_05';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_05';
-import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261123_05';
-import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261123_05';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_05';
-import { ServerSyncManager } from './serverSync.js?v=20261123_05';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261123_06';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261123_06';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261123_06';
+import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261123_06';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261123_06';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261123_06';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -59,7 +59,7 @@ export class StorageManager {
     try {
       localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
       window.dispatchEvent(new CustomEvent('vocaquest_profiles_updated', { detail: profiles }));
-      ServerSyncManager.uploadProfiles(profiles);
+      FirebaseSyncManager.saveProfiles(profiles);
     } catch (e) {
       console.error(e);
     }
@@ -148,7 +148,7 @@ export class StorageManager {
     }
     profiles = profiles.filter(p => p.id !== profileId);
     this.saveProfiles(profiles);
-    ServerSyncManager.deleteProfile(profileId);
+    FirebaseSyncManager.deleteProfile(profileId);
 
     // 해당 프로필 성취도 데이터 삭제
     try {
@@ -181,17 +181,17 @@ export class StorageManager {
     const targetId = profileId || this.getActiveProfileId();
     try {
       localStorage.setItem(PROFILE_DATA_PREFIX + targetId, JSON.stringify(data || {}));
-      ServerSyncManager.scheduleProfileDataSave(targetId, data);
+      FirebaseSyncManager.saveProfileData(targetId, data);
     } catch (e) {
       console.error(e);
     }
   }
 
   /**
-   * 서버와의 전체 프로필 및 성취도 동기화 초기화
+   * Firebase와의 전체 프로필, 단어장 및 성취도 실시간 동기화 초기화
    */
   static async initServerSync() {
-    return await ServerSyncManager.initSync(this);
+    return await FirebaseSyncManager.initSync(this);
   }
 
   /**
@@ -205,17 +205,20 @@ export class StorageManager {
   }
 
   /**
-   * 단어의 성취도 상태를 현재 활성 프로필에 동기화 저장
+   * 단어의 성취도 상태를 현재 활성 프로필에 동기화 저장 (Firebase 즉시 반영)
    */
   static syncWordToProfile(word, profileId = null) {
     if (!word || !word.id) return;
-    const profData = this.getProfileData(profileId);
-    profData[word.id] = {
+    const targetId = profileId || this.getActiveProfileId();
+    const profData = this.getProfileData(targetId);
+    const wordData = {
       memorized: !!word.memorized,
       wrongCount: typeof word.wrongCount === 'number' ? word.wrongCount : 0,
       mastery: word.mastery ? JSON.parse(JSON.stringify(word.mastery)) : null
     };
-    this.saveProfileData(profData, profileId);
+    profData[word.id] = wordData;
+    this.saveProfileData(profData, targetId);
+    FirebaseSyncManager.saveWordProgress(targetId, word.id, wordData);
   }
 
   /**
@@ -360,6 +363,7 @@ export class StorageManager {
       localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
       window.dispatchEvent(new CustomEvent('vocaquest_decks_updated', { detail: decks }));
       window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
+      FirebaseSyncManager.saveDecks(decks);
     } catch (e) {
       console.error('Failed to save decks:', e);
     }
@@ -616,6 +620,7 @@ export class StorageManager {
     }
     decks = decks.filter(d => d.id !== deckId);
     this.saveDecks(decks);
+    FirebaseSyncManager.deleteDeck(deckId);
 
     if (this.getActiveDeckId() === deckId) {
       this.setActiveDeckId(decks[0].id);
@@ -1191,7 +1196,7 @@ export class StorageManager {
 
 // 브라우저 전역 안전 접근 바인딩 (구버전 캐시 또는 모듈 분리 시 안전성 보장)
 StorageManager.initServerSync = async function() {
-  return await ServerSyncManager.initSync(StorageManager);
+  return await FirebaseSyncManager.initSync(StorageManager);
 };
 
 if (typeof window !== 'undefined') {
