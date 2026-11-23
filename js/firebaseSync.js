@@ -2,7 +2,7 @@
 // VocaQuest Firebase Firestore 실시간 동기화 모듈
 // 프로필, 단어장(Decks), 학습 성취도를 Firestore와 양방향 실시간(onSnapshot) 연동
 
-import { db, isFirebaseConfigured } from './firebaseConfig.js?v=20261123_10';
+import { db, isFirebaseConfigured } from './firebaseConfig.js?v=20261123_11';
 import { 
   collection, 
   doc, 
@@ -87,6 +87,11 @@ export class FirebaseSyncManager {
     }));
   }
 
+  static lastProfilesJson = '';
+  static lastDecksJson = '';
+  static lastProgressJson = '';
+  static debounceSaveTimer = null;
+
   /**
    * ==========================================
    * 1. 프로필(Profiles) 실시간 리스너 및 저장
@@ -104,16 +109,18 @@ export class FirebaseSyncManager {
       });
 
       if (remoteProfiles.length > 0) {
+        const newJson = JSON.stringify(remoteProfiles);
+        if (newJson === this.lastProfilesJson) return; // 내용 불변 시 리렌더링 차단
+        this.lastProfilesJson = newJson;
+
         this.isSyncingFromRemote = true;
         try {
           const localProfiles = this.storageManager.getProfiles();
-          // 원격 데이터와 로컬 데이터 병합 (최신순 또는 ID 기준)
           const profileMap = new Map();
           localProfiles.forEach(p => profileMap.set(p.id, p));
           remoteProfiles.forEach(p => profileMap.set(p.id, { ...profileMap.get(p.id), ...p }));
 
           const merged = Array.from(profileMap.values());
-          // 로컬 스토리지에 원격 변경사항 반영 (Firebase 재업로드 트리거 방지)
           localStorage.setItem('vocaquest_profiles_v1', JSON.stringify(merged));
           window.dispatchEvent(new CustomEvent('vocaquest_profiles_updated', { detail: merged }));
         } finally {
@@ -194,10 +201,14 @@ export class FirebaseSyncManager {
       });
 
       if (remoteDecks.length > 0) {
+        const newJson = JSON.stringify(remoteDecks);
+        if (newJson === this.lastDecksJson) return; // 내용 불변 시 중복 리렌더링 차단
+        this.lastDecksJson = newJson;
+
         this.isSyncingFromRemote = true;
         try {
           // 로컬 단어장 저장소 갱신
-          localStorage.setItem('vocaquest_decks_v2', JSON.stringify(remoteDecks));
+          localStorage.setItem('vocaquest_decks_v2', newJson);
           window.dispatchEvent(new CustomEvent('vocaquest_decks_updated', { detail: remoteDecks }));
         } finally {
           this.isSyncingFromRemote = false;
@@ -276,6 +287,9 @@ export class FirebaseSyncManager {
     this.activeProgressUnsub = onSnapshot(docRef, (docSnap) => {
       if (!docSnap.exists()) return;
       const remoteData = docSnap.data() || {};
+      const newJson = JSON.stringify(remoteData);
+      if (newJson === this.lastProgressJson) return; // 내용 불변 시 중복 리렌더링 차단
+      this.lastProgressJson = newJson;
 
       this.isSyncingFromRemote = true;
       try {
@@ -303,7 +317,6 @@ export class FirebaseSyncManager {
     if (!db || !profileId || !wordId || this.isSyncingFromRemote) return;
     try {
       const docRef = doc(db, 'profileData', profileId);
-      // Firestore의 점 표기법(dot notation)으로 해당 wordId 키만 부분 즉시 업데이트
       await setDoc(docRef, {
         [wordId]: {
           ...wordData,
@@ -316,16 +329,23 @@ export class FirebaseSyncManager {
   }
 
   /**
-   * 프로필 전체 성과 저장
+   * 프로필 전체 성과 저장 (디바운스 적용)
    */
   static async saveProfileData(profileId, data) {
     if (!db || !profileId || this.isSyncingFromRemote) return;
-    try {
-      const docRef = doc(db, 'profileData', profileId);
-      await setDoc(docRef, data || {}, { merge: true });
-    } catch (e) {
-      console.error(`[FirebaseSync] 프로필(${profileId}) 전체 성과 저장 실패:`, e);
+    
+    if (this.debounceSaveTimer) {
+      clearTimeout(this.debounceSaveTimer);
     }
+
+    this.debounceSaveTimer = setTimeout(async () => {
+      try {
+        const docRef = doc(db, 'profileData', profileId);
+        await setDoc(docRef, data || {}, { merge: true });
+      } catch (e) {
+        console.error(`[FirebaseSync] 프로필(${profileId}) 전체 성과 저장 실패:`, e);
+      }
+    }, 350);
   }
 
   /**
