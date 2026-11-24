@@ -78,8 +78,16 @@ export const RANK_CONFIG = {
 };
 
 export class MasteryManager {
-  // 왕실근위대 유지 기간: 2일 (48시간)
-  static ROYAL_GUARD_DURATION_MS = 2 * 24 * 60 * 60 * 1000;
+  // 마스터 등급 단계별 유지 기간 (간격 반복)
+  // 1성: 2일, 2성: 5일, 3성: 10일, 4성: 20일, 5성: 30일, 6성: 영구(무한)
+  static MASTER_TIER_DURATIONS_MS = {
+    1: 2 * 24 * 60 * 60 * 1000,
+    2: 5 * 24 * 60 * 60 * 1000,
+    3: 10 * 24 * 60 * 60 * 1000,
+    4: 20 * 24 * 60 * 60 * 1000,
+    5: 30 * 24 * 60 * 60 * 1000,
+    6: Infinity // 6성은 영구 마스터
+  };
 
   /**
    * 단어 객체에 mastery 필드가 온전한지 검증 및 보정
@@ -94,6 +102,8 @@ export class MasteryManager {
         consecutiveQuizCorrectInKnight: 0,
         promotionsToRoyalGuard: 0,
         royalGuardDate: null,
+        masterTier: 0,        // 0: 미달성, 1~5: 별 1~5개, 6: 영구 마스터(큰별)
+        masterDate: null,      // 마스터 승급 시각 (ms)
         status: RANK_TYPES.RECRUIT,
         updatedAt: Date.now()
       };
@@ -105,6 +115,8 @@ export class MasteryManager {
       if (typeof word.mastery.consecutiveQuizCorrectInKnight !== 'number') word.mastery.consecutiveQuizCorrectInKnight = 0;
       if (typeof word.mastery.promotionsToRoyalGuard !== 'number') word.mastery.promotionsToRoyalGuard = 0;
       if (word.mastery.royalGuardDate === undefined) word.mastery.royalGuardDate = null;
+      if (typeof word.mastery.masterTier !== 'number') word.mastery.masterTier = 0;
+      if (word.mastery.masterDate === undefined) word.mastery.masterDate = null;
       if (!word.mastery.status) word.mastery.status = this.calculateRankFromScore(word.mastery.score);
     }
     return word;
@@ -128,16 +140,22 @@ export class MasteryManager {
     this.ensureMastery(word);
     const m = word.mastery;
 
-    if (m.promotionsToRoyalGuard >= 3 || m.status === RANK_TYPES.MASTER) {
+    if (m.status === RANK_TYPES.MASTER) {
+      // 6성은 영구 마스터
+      if ((m.masterTier || 0) >= 6) {
+        return RANK_TYPES.MASTER;
+      }
+      // 기간제 마스터 만료 확인
+      const duration = this.MASTER_TIER_DURATIONS_MS[m.masterTier || 1] || (2 * 24 * 60 * 60 * 1000);
+      if (m.masterDate && (Date.now() - m.masterDate >= duration)) {
+        // 기한 만료 시 왕실근위대로 복귀 (마스터 별 티어는 유지됨)
+        return RANK_TYPES.ROYAL_GUARD;
+      }
       return RANK_TYPES.MASTER;
     }
 
     if (m.status === RANK_TYPES.ROYAL_GUARD) {
-      // 2일 경과 확인
-      if (m.royalGuardDate && (Date.now() - m.royalGuardDate >= this.ROYAL_GUARD_DURATION_MS)) {
-        // 강등 대상
-        return RANK_TYPES.HIGH_KNIGHT;
-      }
+      // 왕실근위대는 시간 경과로 인한 자동 강등이 제거됨!
       return RANK_TYPES.ROYAL_GUARD;
     }
 
@@ -145,21 +163,33 @@ export class MasteryManager {
   }
 
   /**
-   * 왕실근위대 남은 시간(ms) 계산 (만료되었거나 아니면 0)
+   * 마스터 상태인 단어의 남은 유지 시간(ms) 계산 (영구 마스터는 Infinity, 만료되었거나 비마스터는 0)
    */
-  static getRoyalGuardRemainingTime(word) {
+  static getMasterRemainingTime(word) {
     this.ensureMastery(word);
     const m = word.mastery;
-    if (m.status !== RANK_TYPES.ROYAL_GUARD || !m.royalGuardDate) return 0;
-    const elapsed = Date.now() - m.royalGuardDate;
-    const remain = this.ROYAL_GUARD_DURATION_MS - elapsed;
+    if (m.status !== RANK_TYPES.MASTER) return 0;
+    if ((m.masterTier || 0) >= 6) return Infinity;
+    if (!m.masterDate) return 0;
+
+    const duration = this.MASTER_TIER_DURATIONS_MS[m.masterTier || 1] || (2 * 24 * 60 * 60 * 1000);
+    const elapsed = Date.now() - m.masterDate;
+    const remain = duration - elapsed;
     return Math.max(0, remain);
   }
 
   /**
-   * 남은 시간을 포맷팅된 문자열로 반환 (예: "1일 14시간", "8시간 25분", "만료됨")
+   * 하위 호환성을 위해 유지하되, 마스터 남은 시간을 반환
+   */
+  static getRoyalGuardRemainingTime(word) {
+    return this.getMasterRemainingTime(word);
+  }
+
+  /**
+   * 남은 시간을 포맷팅된 문자열로 반환 (예: "1일 14시간", "8시간 25분", "영구 마스터", "기한 만료")
    */
   static formatRemainingTime(ms) {
+    if (ms === Infinity) return '영구 마스터 (★)';
     if (ms <= 0) return '기한 만료';
     const hoursTotal = Math.floor(ms / (1000 * 60 * 60));
     const days = Math.floor(hoursTotal / 24);
@@ -176,9 +206,10 @@ export class MasteryManager {
   }
 
   /**
-   * 왕실근위대 2일 초과 시 고급기사로 자동 강등 검사
+   * 마스터 단어 만료 검사 (기간 만료 시 왕실근위대로 복귀)
+   * (왕실근위대의 시간 만료 자동 강등은 제거됨)
    * @param {Array} decks 
-   * @returns {number} 강등된 단어 수
+   * @returns {number} 복귀된 단어 수
    */
   static checkAndApplyDemotions(decks) {
     let demotedCount = 0;
@@ -190,15 +221,20 @@ export class MasteryManager {
         if (!word) return;
         this.ensureMastery(word);
         const m = word.mastery;
-        if (m.status === RANK_TYPES.ROYAL_GUARD && m.royalGuardDate) {
-          if (now - m.royalGuardDate >= this.ROYAL_GUARD_DURATION_MS) {
-            // 강등 처리: 점수는 100점 고급기사로 복귀, 승급 카운트는 유지
-            m.status = RANK_TYPES.HIGH_KNIGHT;
-            m.score = 100;
-            m.royalGuardDate = null;
-            m.consecutiveQuizCorrectInKnight = 0;
-            m.updatedAt = now;
-            demotedCount++;
+
+        // 마스터 기간 만료 검사
+        if (m.status === RANK_TYPES.MASTER) {
+          const tier = m.masterTier || 1;
+          if (tier < 6 && m.masterDate) {
+            const duration = this.MASTER_TIER_DURATIONS_MS[tier] || (2 * 24 * 60 * 60 * 1000);
+            if (now - m.masterDate >= duration) {
+              // 마스터 기간 만료 -> 왕실근위대로 복귀 (점수는 100점, 별 티어는 보존)
+              m.status = RANK_TYPES.ROYAL_GUARD;
+              m.score = 100;
+              m.masterDate = null;
+              m.updatedAt = now;
+              demotedCount++;
+            }
           }
         }
       });
@@ -209,13 +245,15 @@ export class MasteryManager {
 
   /**
    * 플래시카드 & 게임 등에서 제외할 단어인지 판별
-   * (유효한 왕실근위대이거나 영구 마스터인 경우 true)
+   * 이제 왕실근위대도 모든 게임에 참여하므로 제외하지 않음!
+   * (오직 6성 '영구 마스터' 단어만 일반 학습에서 제외 선택 가능, 기본 false)
    */
   static isExcludedFromStudy(word) {
     if (!word) return false;
     this.ensureMastery(word);
-    const rank = this.getWordRank(word);
-    return rank === RANK_TYPES.ROYAL_GUARD || rank === RANK_TYPES.MASTER;
+    const m = word.mastery;
+    // 영구 마스터(6성)인 경우에만 기본 학습 풀에서 제외
+    return m.status === RANK_TYPES.MASTER && (m.masterTier || 0) >= 6;
   }
 
   /**
@@ -294,27 +332,28 @@ export class MasteryManager {
           m.score = Math.min(100, m.score + 10 + bonus);
         }
 
-        // 고급기사 상태에서 퀴즈 문제를 2번 연속 맞추면 왕실근위대 표시
+        // 고급기사 상태에서 퀴즈 문제를 2번 연속 맞추면 왕실근위대 승급
         if (m.score >= 80 && m.status !== RANK_TYPES.ROYAL_GUARD && m.status !== RANK_TYPES.MASTER) {
           m.consecutiveQuizCorrectInKnight = (m.consecutiveQuizCorrectInKnight || 0) + 1;
           if (m.consecutiveQuizCorrectInKnight >= 2) {
-            // 왕실근위대 승급!
+            // 왕실근위대 승급! (마스터 승급은 전용 '승급 심사'를 통해서만 달성)
             m.promotionsToRoyalGuard = (m.promotionsToRoyalGuard || 0) + 1;
             m.consecutiveQuizCorrectInKnight = 0;
             m.score = 100;
-
-            if (m.promotionsToRoyalGuard >= 3) {
-              // 왕실근위대로 3번 승급 시 -> 마스터 등급!
-              m.status = RANK_TYPES.MASTER;
-              m.royalGuardDate = null;
-              promotedToMaster = true;
-            } else {
-              m.status = RANK_TYPES.ROYAL_GUARD;
-              m.royalGuardDate = Date.now();
-              promotedToRoyalGuard = true;
-            }
+            m.status = RANK_TYPES.ROYAL_GUARD;
+            m.royalGuardDate = Date.now();
+            promotedToRoyalGuard = true;
           }
         }
+        break;
+
+      case 'promote_to_master': // 근위대 승급 심사 합격 시 마스터 승급
+        m.firstSeen = true;
+        m.score = 100;
+        m.status = RANK_TYPES.MASTER;
+        m.masterTier = Math.min(6, (m.masterTier || 0) + 1); // 1성 ~ 6성(영구)
+        m.masterDate = Date.now();
+        promotedToMaster = true;
         break;
 
       case 'quiz_wrong': // 퀴즈에서 오답 (-10점, 최소 0점)
@@ -369,10 +408,17 @@ export class MasteryManager {
    * 각 등급별 '사람이 걷는 모습' & '무장 상태 차이'를 정밀하게 표현한 SVG 생성
    * @param {string} rank 등급명 (recruit, infantry, junior_knight, senior_knight, high_knight, royal_guard, master)
    * @param {number} size 픽셀 크기 (기본값 64)
+   * @param {Object|number} [wordOrTier=null] 단어 객체 또는 마스터 성급(tier, 1~6)
    * @returns {string} SVG HTML 문자열
    */
-  static getWalkingKnightIcon(rank, size = 64) {
+  static getWalkingKnightIcon(rank, size = 64, wordOrTier = null) {
     const r = rank || RANK_TYPES.RECRUIT;
+    let masterTier = 1;
+    if (typeof wordOrTier === 'number') {
+      masterTier = wordOrTier;
+    } else if (wordOrTier && wordOrTier.mastery) {
+      masterTier = wordOrTier.mastery.masterTier || 1;
+    }
 
     switch (r) {
       case RANK_TYPES.RECRUIT:
@@ -617,8 +663,36 @@ export class MasteryManager {
 
       case RANK_TYPES.MASTER:
         // 7. 마스터: 전설의 그랜드마스터! 찬란한 빛의 날개, 후광 왕관, 전설의 엑스칼리버, 신화적 위용
+        // + 마스터 머리 위 또는 상단에 별(월드컵 우승 스타) 렌더링 (1~5성: 작은별, 6성: 영구 큰별)
+        let masterStarsSvg = '';
+        if (masterTier >= 6) {
+          // 6성 영구 마스터: 중앙 거대 황금 별 (반짝임 이펙트)
+          masterStarsSvg = `
+            <g class="master-star-crown" transform="translate(50, 6)">
+              <polygon points="0,-7 2.2,-2 7.5,-1.5 3.5,2.2 4.8,7.5 0,4.6 -4.8,7.5 -3.5,2.2 -7.5,-1.5 -2.2,-2" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" />
+              <circle cx="0" cy="0" r="1.5" fill="#ffffff" />
+            </g>
+          `;
+        } else {
+          // 1~5성: 마스터 상단에 작은 황금 별들 배치
+          const count = Math.max(1, Math.min(5, masterTier));
+          const starSpacing = 6;
+          const startX = 50 - ((count - 1) * starSpacing) / 2;
+          let starsGroup = '';
+          for (let i = 0; i < count; i++) {
+            const sx = startX + i * starSpacing;
+            starsGroup += `
+              <polygon points="${sx},2 ${sx + 1.2},4.5 ${sx + 3.8},4.8 ${sx + 1.8},6.6 ${sx + 2.4},9.2 ${sx},7.8 ${sx - 2.4},9.2 ${sx - 1.8},6.6 ${sx - 3.8},4.8 ${sx - 1.2},4.5" fill="#fde047" stroke="#d97706" stroke-width="0.6" />
+            `;
+          }
+          masterStarsSvg = `<g class="master-stars-cluster">${starsGroup}</g>`;
+        }
+
         return `
           <svg width="${size}" height="${size}" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="walking-hero rank-master drop-shadow-2xl">
+            <!-- 마스터 영예의 별 (1~5성 또는 6성 큰별) -->
+            ${masterStarsSvg}
+
             <!-- 신화의 찬란한 빛의 날개 (좌/우) -->
             <path d="M38 36 Q10 16 2 34 Q16 48 36 46 Z" fill="url(#wingGradLeft)" opacity="0.85" />
             <path d="M62 36 Q90 16 98 34 Q84 48 64 46 Z" fill="url(#wingGradRight)" opacity="0.85" />
@@ -686,13 +760,37 @@ export class MasteryManager {
   }
 
   /**
-   * 등급 뱃지 HTML 생성
+   * 등급 뱃지 HTML 생성 (마스터인 경우 별 1~5개 또는 6성 큰별 렌더링)
    */
-  static getRankBadgeHTML(rank) {
+  static getRankBadgeHTML(rank, word = null) {
     const config = RANK_CONFIG[rank] || RANK_CONFIG[RANK_TYPES.RECRUIT];
+    let starsHtml = '';
+
+    if (rank === RANK_TYPES.MASTER && word && word.mastery) {
+      const tier = word.mastery.masterTier || 1;
+      if (tier >= 6) {
+        // 6성: 영구 마스터 (황금 왕관 + 특대형 큰 별)
+        starsHtml = `
+          <span class="inline-flex items-center gap-0.5 ml-1 px-1.5 py-0.2 bg-amber-400 text-slate-900 font-black rounded-md text-[10px] shadow-sm animate-pulse" title="6성 영구 마스터 (강등 없음)">
+            <span>👑</span>
+            <span class="text-xs">★</span>
+          </span>
+        `;
+      } else {
+        // 1~5성: 작은 별 N개
+        const starChars = '★'.repeat(tier);
+        starsHtml = `
+          <span class="inline-flex items-center ml-1 text-amber-300 font-black tracking-tighter text-xs" title="${tier}성 마스터 (${this.formatRemainingTime(this.getMasterRemainingTime(word))})">
+            ${starChars}
+          </span>
+        `;
+      }
+    }
+
     return `
       <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black border ${config.badgeBg}">
         <span>${config.name}</span>
+        ${starsHtml}
       </span>
     `;
   }

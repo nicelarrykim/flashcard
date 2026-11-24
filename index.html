@@ -247,6 +247,12 @@
           <span>🛡️</span> <span>단어 낙하 방패</span>
         </button>
 
+        <!-- 신규: 왕실근위대 마스터 승급 심사 탭 -->
+        <button data-tab="royal-exam" class="nav-tab shrink-0 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition whitespace-nowrap text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800" title="왕실근위대 마스터 승급 시험">
+          <span>👑</span> <span>근위대 승급 심사</span>
+          <span id="nav-royal-exam-count" class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-black">0</span>
+        </button>
+
         <button data-tab="performance" class="nav-tab shrink-0 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition whitespace-nowrap text-purple-600 dark:text-purple-400">
           <span>🏰</span> <span>나의 왕국</span>
         </button>
@@ -288,6 +294,9 @@
 
     <!-- 5. 단어 낙하 디펜스 탭 -->
     <section id="tab-speed-drop" class="tab-content hidden w-full max-w-full overflow-hidden"></section>
+
+    <!-- 5-1. 왕실근위대 마스터 승급 심사 탭 -->
+    <section id="tab-royal-exam" class="tab-content hidden w-full max-w-full overflow-hidden"></section>
 
     <!-- 6. 단어장 관리 및 OCR 탭 -->
     <section id="tab-manager" class="tab-content hidden w-full max-w-full overflow-hidden"></section>

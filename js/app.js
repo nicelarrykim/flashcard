@@ -9,6 +9,7 @@ import { QuizGame } from './games/quiz.js?v=20261124_01';
 import { MatchGame } from './games/match.js?v=20261124_01';
 import { ScrambleGame } from './games/scramble.js?v=20261124_01';
 import { SpeedDropGame } from './games/speed-drop.js?v=20261124_01';
+import { RoyalExamGame } from './games/royal-exam.js?v=20261124_01';
 import { WordManager } from './wordManager.js?v=20261124_01';
 import { PerformanceView } from './performance.js?v=20261124_01';
 import { AdminManager } from './admin.js?v=20261124_01';
@@ -22,6 +23,7 @@ class App {
     this.matchGame = new MatchGame('tab-match');
     this.scrambleGame = new ScrambleGame('tab-scramble');
     this.speedDropGame = new SpeedDropGame('tab-speed-drop');
+    this.royalExamGame = new RoyalExamGame('tab-royal-exam');
     this.wordManager = new WordManager('tab-manager');
     this.performanceView = new PerformanceView('tab-performance');
   }
@@ -561,6 +563,10 @@ class App {
     if (this.scrambleGame && typeof this.scrambleGame.stop === 'function') {
       this.scrambleGame.stop();
     }
+    // 4-1. 근위대 승급 심사 소리 및 상태 정지
+    if (this.royalExamGame && typeof this.royalExamGame.stop === 'function') {
+      this.royalExamGame.stop();
+    }
     // 5. 공성전 배틀 루프 정지 및 모달 닫기
     if (typeof SiegeGame !== 'undefined' && typeof SiegeGame.closeActiveGame === 'function') {
       SiegeGame.closeActiveGame();
@@ -613,6 +619,8 @@ class App {
       this.scrambleGame.init();
     } else if (tabName === 'speed-drop') {
       this.speedDropGame.init();
+    } else if (tabName === 'royal-exam') {
+      this.royalExamGame.init();
     } else if (tabName === 'manager') {
       this.wordManager.init();
     } else if (tabName === 'performance') {
@@ -632,6 +640,21 @@ class App {
     if (totalEl) totalEl.innerText = activeWords.length;
     if (memorizedEl) memorizedEl.innerText = memorized;
     if (wrongEl) wrongEl.innerText = wrong;
+
+    // 근위대 승급 심사 대기 단어 수 뱃지 갱신
+    const royalExamCountEl = document.getElementById('nav-royal-exam-count');
+    if (royalExamCountEl) {
+      const royalCount = activeWords.filter(w => {
+        return w && w.mastery && w.mastery.status === 'royal_guard';
+      }).length;
+
+      if (royalCount > 0) {
+        royalExamCountEl.innerText = royalCount;
+        royalExamCountEl.classList.remove('hidden');
+      } else {
+        royalExamCountEl.classList.add('hidden');
+      }
+    }
   }
 }
 

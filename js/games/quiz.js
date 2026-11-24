@@ -161,7 +161,7 @@ export class QuizGame {
 
     const wordRank = MasteryManager.getWordRank(currentWord);
     const rankCfg = RANK_CONFIG[wordRank] || RANK_CONFIG[RANK_TYPES.RECRUIT];
-    const knightSvg = MasteryManager.getWalkingKnightIcon(wordRank, 24);
+    const knightSvg = MasteryManager.getWalkingKnightIcon(wordRank, 24, word);
     const scoreVal = currentWord.mastery ? currentWord.mastery.score : 0;
 
     this.container.innerHTML = `

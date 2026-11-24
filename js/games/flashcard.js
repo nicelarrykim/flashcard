@@ -24,9 +24,11 @@ export class FlashcardGame {
   }
 
   loadWords() {
-    const studyWords = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getStudyWords === 'function')
-      ? StorageManager.getStudyWords()
-      : ((typeof StorageManager !== 'undefined' && typeof StorageManager?.getWords === 'function') ? StorageManager.getWords() : []);
+    const studyWords = (typeof StorageManager !== 'undefined' && typeof StorageManager?.getFlashcardStudyWords === 'function')
+      ? StorageManager.getFlashcardStudyWords()
+      : ((typeof StorageManager !== 'undefined' && typeof StorageManager?.getStudyWords === 'function')
+        ? StorageManager.getStudyWords()
+        : ((typeof StorageManager !== 'undefined' && typeof StorageManager?.getWords === 'function') ? StorageManager.getWords() : []));
 
     if (this.filterOnlyWrong) {
       this.words = studyWords.filter(w => (w.wrongCount || 0) > 0);
@@ -103,7 +105,7 @@ export class FlashcardGame {
 
     const wordRank = MasteryManager.getWordRank(word);
     const rankCfg = RANK_CONFIG[wordRank] || RANK_CONFIG[RANK_TYPES.RECRUIT];
-    const knightSvg = MasteryManager.getWalkingKnightIcon(wordRank, 36);
+    const knightSvg = MasteryManager.getWalkingKnightIcon(wordRank, 36, word);
     const scoreVal = word.mastery ? word.mastery.score : 0;
 
     // 사진 표시 옵션 판정:
@@ -129,7 +131,7 @@ export class FlashcardGame {
             <!-- 기사 등급 미니 뱃지 -->
             <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border ${rankCfg.badgeBg}">
               <div class="w-5 h-5 flex items-center justify-center shrink-0">
-                ${MasteryManager.getWalkingKnightIcon(wordRank, 20)}
+                ${MasteryManager.getWalkingKnightIcon(wordRank, 20, word)}
               </div>
               <span>${rankCfg.name}</span>
               <span class="font-mono text-[11px] opacity-80">(${scoreVal}점)</span>

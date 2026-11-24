@@ -546,13 +546,29 @@ export class StorageManager {
   }
 
   /**
+   * 플래시카드 전용 학습 단어 목록 조회
+   * 1. 지정된 번호 범위 필터 적용
+   * 2. 플래시카드에서 '외움(memorized: true)'으로 체크된 단어는 제외!
+   *    (단, 다른 게임에서 오답 시 다시 memorized: false가 되어 플래시카드에 복귀함)
+   * 3. 6성 영구 마스터는 제외
+   */
+  static getFlashcardStudyWords(includeMemorized = false) {
+    this.checkRoyalGuardDemotions();
+    let words = this.getStudyWords(false);
+    if (!includeMemorized) {
+      words = words.filter(w => !w.memorized);
+    }
+    return words;
+  }
+
+  /**
    * 플래시카드 & 퀴즈/게임용 단어 목록 조회
-   * 1. 지정된 번호 범위 필터 (예: 1~50번) 적용 (학습에만 적용, 성과는 전체 유지)
-   * 2. 왕실근위대(2일 이내)와 마스터 등급 단어는 학습 대상에서 제외!
+   * 1. 지정된 번호 범위 필터 (예: 1~50번) 적용
+   * 2. 왕실근위대도 모든 게임에 포함됨! (영구 마스터만 제외)
    * @param {boolean} [includeGraduated=false] 졸업 단어 포함 여부
    */
   static getStudyWords(includeGraduated = false) {
-    // 자동 강등 확인
+    // 마스터 기간 만료 및 왕실근위대 복귀 확인
     this.checkRoyalGuardDemotions();
     const activeWords = this.getActiveWords();
 
@@ -905,7 +921,7 @@ export class StorageManager {
   /**
    * 단어 숙련도 활동 반영
    * @param {string} wordId 단어 ID
-   * @param {string} action 'fc_seen' | 'fc_know' | 'fc_confused' | 'fc_unknown' | 'quiz_correct' | 'quiz_wrong' | 'game_correct' | 'game_wrong' | 'reset'
+   * @param {string} action 'fc_seen' | 'fc_know' | 'fc_confused' | 'fc_unknown' | 'quiz_correct' | 'quiz_wrong' | 'game_correct' | 'game_wrong' | 'promote_to_master' | 'reset'
    * @param {Object} meta 부가 정보
    */
   static updateWordMastery(wordId, action, meta = {}) {
@@ -914,10 +930,11 @@ export class StorageManager {
       const w = deck.words.find(item => item.id === wordId);
       if (w) {
         const result = MasteryManager.applyAction(w, action, meta);
-        // memorized 상태 동기화 (고급기사 이상 또는 80점 이상 시 memorized = true)
-        if (w.mastery.score >= 80) {
+        // memorized 상태 동기화
+        if (action === 'fc_know') {
           w.memorized = true;
         } else if (action === 'fc_unknown' || action === 'quiz_wrong' || action === 'game_wrong') {
+          // 게임이나 플래시카드에서 오답 시 memorized 해제 -> 플래시카드에 다시 등장!
           w.memorized = false;
         }
         // 프로필별 성취도 저장소에 동기화 (0ms 로컬 저장)
@@ -994,6 +1011,7 @@ export class StorageManager {
 
   /**
    * 2일 이상 경과된 왕실근위대를 고급기사로 자동 강등 검사 (10분 주기 쓰로틀)
+   * -> 이제 마스터 기간 만료 시 왕실근위대로 복귀 검사로 동작함
    */
   static checkRoyalGuardDemotions() {
     const now = Date.now();
@@ -1010,7 +1028,7 @@ export class StorageManager {
           (d.words || []).forEach(w => this.syncWordToProfile(w));
         });
         this.saveDecks(decks);
-        console.log(`[VocaQuest] 왕실근위대 기간(2일) 만료로 ${demotedCount}개 단어가 고급기사로 강등되었습니다.`);
+        console.log(`[VocaQuest] 마스터 기간 만료로 ${demotedCount}개 단어가 왕실근위대로 복귀되었습니다.`);
       }
       return demotedCount;
     } catch (e) {

@@ -389,8 +389,8 @@ export class PerformanceView {
                 const rank = MasteryManager.getWordRank(word);
                 const cfg = RANK_CONFIG[rank];
                 const score = word.mastery.score || 0;
-                const knightIconSvg = MasteryManager.getWalkingKnightIcon(rank, 44);
-                const remainMs = MasteryManager.getRoyalGuardRemainingTime(word);
+                const knightIconSvg = MasteryManager.getWalkingKnightIcon(rank, 44, word);
+                const remainMs = MasteryManager.getMasterRemainingTime(word);
                 const remainTimeStr = MasteryManager.formatRemainingTime(remainMs);
 
                 // 게이지 바 색상
@@ -427,7 +427,7 @@ export class PerformanceView {
                             ${word.partOfSpeech || 'word'}
                           </span>
                           <!-- 등급 배지 -->
-                          ${MasteryManager.getRankBadgeHTML(rank)}
+                          ${MasteryManager.getRankBadgeHTML(rank, word)}
                         </div>
 
                         <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium truncate">
