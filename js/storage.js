@@ -1,12 +1,14 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261125_01';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261125_01';
-import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261125_01';
-import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261125_01';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261125_01';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261125_01';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261126_01';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261126_01';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261126_01';
+import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261126_01';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261126_01';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261126_01';
+import { IdbBackup } from './idbBackup.js?v=20261126_01';
+import { AdminLogger } from './adminLogger.js?v=20261126_01';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -45,6 +47,7 @@ export class StorageManager {
       if (data) {
         try {
           localStorage.setItem(PROFILE_DATA_PREFIX + pid, JSON.stringify(data));
+          IdbBackup.set('profileData_' + pid, data);
         } catch (e) {
           console.error(`Failed to flush profile data for ${pid}:`, e);
         }
@@ -69,7 +72,7 @@ export class StorageManager {
       console.error('Failed to load profiles:', e);
     }
 
-    // 기본 프로필 생성
+    // 기본 프로필 로컬 생성 (초기화 시 Firebase를 덮어쓰지 않도록 로컬에만 저장)
     const defaultProfile = {
       id: 'prof_default',
       name: '기본 학습자',
@@ -78,13 +81,18 @@ export class StorageManager {
       avatar: '🛡️'
     };
     const list = [defaultProfile];
-    this.saveProfiles(list);
+    try {
+      localStorage.setItem(PROFILES_KEY, JSON.stringify(list));
+    } catch (e) {
+      console.error(e);
+    }
     return list;
   }
 
   static saveProfiles(profiles) {
     try {
       localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+      IdbBackup.set('profiles', profiles);
       window.dispatchEvent(new CustomEvent('vocaquest_profiles_updated', { detail: profiles }));
       FirebaseSyncManager.saveProfiles(profiles);
     } catch (e) {
@@ -118,6 +126,7 @@ export class StorageManager {
       this.flushPendingProfileSaves();
       const oldProfileId = localStorage.getItem(ACTIVE_PROFILE_KEY);
       localStorage.setItem(ACTIVE_PROFILE_KEY, profileId);
+      IdbBackup.set('activeProfileId', profileId);
       this.invalidateDeckCache();
       window.dispatchEvent(new CustomEvent('vocaquest_profile_changed', { detail: { profileId } }));
       window.dispatchEvent(new CustomEvent('vocaquest_words_updated', { detail: this.getActiveWords() }));
@@ -129,6 +138,33 @@ export class StorageManager {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  /**
+   * ADMIN 프로필이 목록에 없으면 로컬에 추가 (개발/모니터링용)
+   */
+  static ensureAdminProfile() {
+    const profiles = this.getProfiles();
+    const hasAdmin = profiles.some(
+      p => p && (p.id === 'prof_admin' || (p.name || '').trim().toUpperCase() === 'ADMIN')
+    );
+    if (!hasAdmin) {
+      profiles.push({
+        id: 'prof_admin',
+        name: 'ADMIN',
+        description: '실시간 로그 및 동기화 모니터링 전용 프로필',
+        createdAt: Date.now(),
+        avatar: '🛠️'
+      });
+      try {
+        localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+        IdbBackup.set('profiles', profiles);
+        window.dispatchEvent(new CustomEvent('vocaquest_profiles_updated', { detail: profiles }));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return profiles;
   }
 
   /**
@@ -191,6 +227,7 @@ export class StorageManager {
       delete this._cachedProfileData[profileId];
       this._pendingSaveProfileIds.delete(profileId);
       localStorage.removeItem(PROFILE_DATA_PREFIX + profileId);
+      IdbBackup.remove('profileData_' + profileId);
     } catch (e) {}
 
     if (this.getActiveProfileId() === profileId) {
@@ -228,19 +265,22 @@ export class StorageManager {
    * - 인메모리 캐시는 즉시 갱신 (0ms 지연)
    * - localStorage 쓰기는 디바운스(200ms) 및 배치 처리하여 연속 학습 시 프레임 드랍을 원천 차단합니다.
    */
-  static saveProfileData(data, profileId = null, immediate = false) {
+  static saveProfileData(data, profileId = null, immediate = false, changedWordId = null) {
     const targetId = profileId || this.getActiveProfileId();
     this._cachedProfileData[targetId] = data || {};
     this._pendingSaveProfileIds.add(targetId);
+    FirebaseSyncManager.markDirty(targetId, this, changedWordId);
 
-    // beforeunload 리스너가 등록되지 않았다면 등록 (새로고침/창 닫기 시 안전 플러시)
+    // beforeunload/pagehide 리스너 등록 (새로고침/창 닫기 시 로컬 플러시 + Firebase 자동 백업)
     if (!this._unloadListenerRegistered && typeof window !== 'undefined') {
       this._unloadListenerRegistered = true;
       window.addEventListener('beforeunload', () => {
         this.flushPendingProfileSaves();
+        FirebaseSyncManager.flushDirtySync(this);
       });
       window.addEventListener('pagehide', () => {
         this.flushPendingProfileSaves();
+        FirebaseSyncManager.flushDirtySync(this);
       });
     }
 
@@ -281,13 +321,18 @@ export class StorageManager {
     if (!word || !word.id) return;
     const targetId = profileId || this.getActiveProfileId();
     const profData = this.getProfileData(targetId);
+    const now = Date.now();
+    if (word.mastery && !word.mastery.updatedAt) {
+      word.mastery.updatedAt = now;
+    }
     const wordData = {
       memorized: !!word.memorized,
       wrongCount: typeof word.wrongCount === 'number' ? word.wrongCount : 0,
-      mastery: word.mastery ? { ...word.mastery } : null
+      mastery: word.mastery ? { ...word.mastery } : null,
+      updatedAt: now
     };
     profData[word.id] = wordData;
-    this.saveProfileData(profData, targetId);
+    this.saveProfileData(profData, targetId, false, word.id);
   }
 
   /**

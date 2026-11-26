@@ -1,9 +1,9 @@
 // js/games/quiz.js
 // 사지선다 스피드 퀴즈 게임 모듈
 
-import { StorageManager } from '../storage.js?v=20261125_01';
-import { SoundManager } from '../tts.js?v=20261125_01';
-import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261125_01';
+import { StorageManager } from '../storage.js?v=20261126_01';
+import { SoundManager } from '../tts.js?v=20261126_01';
+import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261126_01';
 
 export class QuizGame {
   constructor(containerId) {
@@ -161,7 +161,7 @@ export class QuizGame {
 
     const wordRank = MasteryManager.getWordRank(currentWord);
     const rankCfg = RANK_CONFIG[wordRank] || RANK_CONFIG[RANK_TYPES.RECRUIT];
-    const knightSvg = MasteryManager.getWalkingKnightIcon(wordRank, 24, word);
+    const knightSvg = MasteryManager.getWalkingKnightIcon(wordRank, 24, currentWord);
     const scoreVal = currentWord.mastery ? currentWord.mastery.score : 0;
 
     this.container.innerHTML = `

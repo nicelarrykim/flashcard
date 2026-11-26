@@ -1,19 +1,21 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261125_01';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261125_01';
-import { SoundManager } from './tts.js?v=20261125_01';
-import { FlashcardGame } from './games/flashcard.js?v=20261125_01';
-import { QuizGame } from './games/quiz.js?v=20261125_01';
-import { MatchGame } from './games/match.js?v=20261125_01';
-import { ScrambleGame } from './games/scramble.js?v=20261125_01';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261125_01';
-import { RoyalExamGame } from './games/royal-exam.js?v=20261125_01';
-import { WordManager } from './wordManager.js?v=20261125_01';
-import { PerformanceView } from './performance.js?v=20261125_01';
-import { AdminManager } from './admin.js?v=20261125_01';
-import { SiegeGame } from './games/siege.js?v=20261125_01';
+import { StorageManager } from './storage.js?v=20261126_01';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261126_01';
+import { IdbBackup } from './idbBackup.js?v=20261126_01';
+import { AdminLogger } from './adminLogger.js?v=20261126_01';
+import { SoundManager } from './tts.js?v=20261126_01';
+import { FlashcardGame } from './games/flashcard.js?v=20261126_01';
+import { QuizGame } from './games/quiz.js?v=20261126_01';
+import { MatchGame } from './games/match.js?v=20261126_01';
+import { ScrambleGame } from './games/scramble.js?v=20261126_01';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261126_01';
+import { RoyalExamGame } from './games/royal-exam.js?v=20261126_01';
+import { WordManager } from './wordManager.js?v=20261126_01';
+import { PerformanceView } from './performance.js?v=20261126_01';
+import { AdminManager } from './admin.js?v=20261126_01';
+import { SiegeGame } from './games/siege.js?v=20261126_01';
 
 class App {
   constructor() {
@@ -29,6 +31,10 @@ class App {
   }
 
   init() {
+    // ADMIN 프로필 자동 확보 및 활성 상태 반영
+    StorageManager.ensureAdminProfile();
+    AdminLogger.updateAdminState(StorageManager.getActiveProfile());
+
     // 왕실근위대 2일 초과 자동 강등 확인
     StorageManager.checkRoyalGuardDemotions();
 
@@ -43,18 +49,31 @@ class App {
     // 1. 첫 화면(플래시카드) 즉시 렌더링
     this.switchTab('flashcard');
 
-    // 2. 화면이 뜬 직후 백그라운드에서 Firebase 실시간 동기화 가동 (초기 UI 블로킹 방지)
-    setTimeout(() => {
+    // 2. 화면이 뜬 직후 백그라운드에서 영구 저장소 요청, IndexedDB 복구 및 Firebase 자동 백업 가동
+    setTimeout(async () => {
+      IdbBackup.requestPersistentStorage();
+      const backupRes = await IdbBackup.syncOrRestore(StorageManager);
+      if (backupRes && backupRes.restored) {
+        StorageManager.ensureAdminProfile();
+        AdminLogger.updateAdminState(StorageManager.getActiveProfile());
+        this.updateStats();
+        this.updateActiveProfileBadge();
+        this.reloadCurrentTab();
+      }
       if (typeof FirebaseSyncManager !== 'undefined' && typeof FirebaseSyncManager.initSync === 'function') {
         FirebaseSyncManager.initSync(StorageManager).catch(err => {
+          AdminLogger.log('ERROR', 'Firebase 초기 동기화 경고', err.message);
           console.warn('[VocaQuest] Firebase 동기화 초기화 경고:', err);
         });
       }
     }, 50);
 
-    // 브라우저 탭/화면 전환(백그라운드 진입) 감지 시 백그라운드 게임 자동 완전 종료
+    // 브라우저 탭/화면 전환(백그라운드 진입) 감지 시 게임 정지 + 로컬/Firebase 즉시 백업
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
+        AdminLogger.log('EVENT', '앱 백그라운드 진입(visibilitychange) → 즉시 백업 실행');
+        StorageManager.flushPendingProfileSaves();
+        FirebaseSyncManager.flushDirtySync(StorageManager);
         this.stopAllGames();
         // 퀴즈나 배틀 중 백그라운드로 전환되었다가 돌아올 때를 대비해 상태를 대기 화면으로 정리
         if (this.currentTab === 'quiz') {
@@ -86,8 +105,21 @@ class App {
     });
 
     // 단어 숙련도 변경 감지 (상단 통계 pill만 0ms 즉시 갱신)
-    window.addEventListener('vocaquest_mastery_changed', () => {
+    window.addEventListener('vocaquest_mastery_changed', (e) => {
       this.updateStats();
+      if (e.detail && e.detail.action) {
+        AdminLogger.log('MASTERY', `단어 학습 반영 (${e.detail.action})`, {
+          wordId: e.detail.wordId,
+          score: `${e.detail.oldScore}→${e.detail.newScore}`,
+          rank: `${e.detail.oldRank}→${e.detail.newRank}`
+        });
+      }
+    });
+
+    window.addEventListener('vocaquest_rank_promoted', (e) => {
+      if (e.detail && e.detail.word) {
+        AdminLogger.log('MASTERY', `등급 승급! '${e.detail.word.word}' → ${e.detail.toRank}`);
+      }
     });
 
     // 단어장 목록 변경 감지 (진행 중인 게임 리로드 금지 - 셀렉터 목록만 갱신)
@@ -96,9 +128,12 @@ class App {
       this.renderDeckSelector();
     });
 
-    // Firebase 원격 학습 성취도 실시간 업데이트 감지 (상단 통계만 갱신)
-    window.addEventListener('vocaquest_progress_updated', () => {
+    // Firebase 원격 학습 성취도 실시간 업데이트 감지 (초기 로드에서 원격 갱신이 있으면 현재 탭도 즉시 반영)
+    window.addEventListener('vocaquest_progress_updated', (e) => {
       this.updateStats();
+      if (e.detail && e.detail.fromInit && e.detail.hasRemoteUpdates) {
+        this.reloadCurrentTab();
+      }
     });
 
     // 프로필 업데이트 감지
@@ -130,6 +165,7 @@ class App {
 
     // 프로필 변경 감지 (학습자가 바뀌면 해당 학습자 성취도로 전체 화면 즉시 갱신)
     window.addEventListener('vocaquest_profile_changed', () => {
+      AdminLogger.updateAdminState(StorageManager.getActiveProfile());
       this.updateActiveProfileBadge();
       this.updateStats();
       this.renderDeckSelector();
@@ -581,6 +617,11 @@ class App {
     // 다른 탭으로 이동 시 이전 탭에서 진행 중이던 모든 게임/타이머를 완전히 종료
     if (this.currentTab !== tabName) {
       this.stopAllGames();
+      StorageManager.flushPendingProfileSaves();
+      if (FirebaseSyncManager._dirtyProfileIds && FirebaseSyncManager._dirtyProfileIds.size > 0) {
+        AdminLogger.log('EVENT', `탭 전환(${this.currentTab} → ${tabName}) → 변경사항 자동 백업 실행`);
+      }
+      FirebaseSyncManager.flushDirtySync(StorageManager);
     }
 
     this.currentTab = tabName;

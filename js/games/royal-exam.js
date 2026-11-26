@@ -6,9 +6,9 @@
 // 4. 스펠링 조합 완료 후 하단에 4지선다형 뜻 선택지 등장
 // 5. 정답 선택 시 마스터로 승급 (별 1~5개, 6회째 영구 마스터 큰별)
 
-import { StorageManager } from '../storage.js?v=20261125_01';
-import { SoundManager } from '../tts.js?v=20261125_01';
-import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261125_01';
+import { StorageManager } from '../storage.js?v=20261126_01';
+import { SoundManager } from '../tts.js?v=20261126_01';
+import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261126_01';
 
 export class RoyalExamGame {
   constructor(containerId) {
@@ -295,14 +295,18 @@ export class RoyalExamGame {
           </div>
         </div>
 
-        <!-- 하단 컨트롤 버튼 (지우기 / 건너뛰기) -->
-        <div class="flex items-center gap-3">
+        <!-- 하단 컨트롤 버튼 (지우기 / 전체 비우기 / 건너뛰기) -->
+        <div class="flex items-center justify-center flex-wrap gap-2.5">
           <button id="royal-clear-btn" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5">
             <span>⌫</span>
             <span>한 글자 지우기</span>
           </button>
           <button id="royal-reset-btn" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-xs font-bold transition">
             전체 비우기
+          </button>
+          <button id="royal-skip-btn" class="px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-xs font-bold transition flex items-center gap-1.5">
+            <span>⏭️</span>
+            <span>모르는 단어 건너뛰기</span>
           </button>
         </div>
       </div>
@@ -368,6 +372,14 @@ export class RoyalExamGame {
       });
     }
 
+    // 모르는 단어 건너뛰기
+    const skipBtn = document.getElementById('royal-skip-btn');
+    if (skipBtn) {
+      skipBtn.addEventListener('click', () => {
+        this.skipWord();
+      });
+    }
+
     // 뜻 4지선다 버튼 클릭
     const optionBtns = this.container.querySelectorAll('.royal-option-btn');
     optionBtns.forEach(btn => {
@@ -376,6 +388,14 @@ export class RoyalExamGame {
         this.handleMeaningSelect(idx, btn);
       });
     });
+  }
+
+  skipWord() {
+    this.stop();
+    this.selectedOption = null;
+    this.spellingCompleted = false;
+    this.currentIndex++;
+    this.render();
   }
 
   selectLetter(letterId) {
