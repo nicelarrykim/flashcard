@@ -6,9 +6,9 @@
 // 4. 스펠링 조합 완료 후 하단에 4지선다형 뜻 선택지 등장
 // 5. 정답 선택 시 마스터로 승급 (별 1~5개, 6회째 영구 마스터 큰별)
 
-import { StorageManager } from '../storage.js?v=20261127_01';
-import { SoundManager } from '../tts.js?v=20261127_01';
-import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261127_01';
+import { StorageManager } from '../storage.js?v=20261127_02';
+import { SoundManager } from '../tts.js?v=20261127_02';
+import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261127_02';
 
 export class RoyalExamGame {
   constructor(containerId) {

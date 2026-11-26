@@ -1,11 +1,11 @@
 // js/performance.js
 // 단어별 학습 성과 대시보드 및 나의 왕국(영지 발전 & 기사단 승급) 모듈
 
-import { StorageManager } from './storage.js?v=20261127_01';
-import { SoundManager } from './tts.js?v=20261127_01';
-import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261127_01';
-import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261127_01';
-import { SiegeGame, SiegeManager } from './games/siege.js?v=20261127_01';
+import { StorageManager } from './storage.js?v=20261127_02';
+import { SoundManager } from './tts.js?v=20261127_02';
+import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261127_02';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261127_02';
+import { SiegeGame, SiegeManager } from './games/siege.js?v=20261127_02';
 
 export class PerformanceView {
   constructor(containerId) {
@@ -64,6 +64,8 @@ export class PerformanceView {
     // 공성전 기록 및 남은 횟수
     const siegeRecord = SiegeManager.getRecord();
     const canPlaySiege = SiegeManager.canPlay();
+    const maxDailyDefeats = SiegeManager.MAX_DAILY_DEFEATS;
+    const leftDefeats = Math.max(0, maxDailyDefeats - (siegeRecord.playCount || 0));
 
     // 왕국 발전도 계산 (선택 단어장 기준)
     const kingdomPower = KingdomManager.calculateKingdomPower(currentDeckWords);
@@ -83,12 +85,12 @@ export class PerformanceView {
             <h3 class="text-2xl sm:text-3xl font-black text-amber-400 flex flex-wrap items-center gap-3 tracking-tight">
               <span>🏰 삼국지 공성 타워디펜스</span>
               <span class="text-xs sm:text-sm px-3 py-1 rounded-full font-bold ${canPlaySiege ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400' : 'bg-rose-500/25 text-rose-300 border border-rose-400'}">
-                ${canPlaySiege ? `남은 패배 기회: ${2 - siegeRecord.playCount}/2회` : '오늘 패배 소진 (0/2회)'}
+                ${canPlaySiege ? `남은 패배 기회: ${leftDefeats}/${maxDailyDefeats}회` : `오늘 패배 소진 (0/${maxDailyDefeats}회)`}
               </span>
             </h3>
             <p class="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
               단어장에서 육성한 기사단으로 <strong>6×8 구불구불 전장</strong>에 6종 타워를 세워 <strong>50개 삼국지 도시</strong>를 정복하세요!<br class="hidden sm:inline">
-              이기면 계속 진격할 수 있으며, 하루 2번 패배 시 밤 12시(자정)에 기회가 초기화됩니다.
+              이기면 계속 진격할 수 있으며, 하루 ${maxDailyDefeats}번 패배 시 밤 12시(자정)에 기회가 초기화됩니다.
             </p>
           </div>
 

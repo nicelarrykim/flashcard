@@ -1,14 +1,14 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261127_01';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261127_01';
-import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261127_01';
-import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261127_01';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261127_01';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261127_01';
-import { IdbBackup } from './idbBackup.js?v=20261127_01';
-import { AdminLogger } from './adminLogger.js?v=20261127_01';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261127_02';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261127_02';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261127_02';
+import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261127_02';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261127_02';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261127_02';
+import { IdbBackup } from './idbBackup.js?v=20261127_02';
+import { AdminLogger } from './adminLogger.js?v=20261127_02';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';

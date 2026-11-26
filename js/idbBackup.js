@@ -2,7 +2,7 @@
 // IndexedDB 이중 백업 및 영구 저장소(Persistent Storage) 보호 모듈
 // 태블릿/모바일 브라우저에서 localStorage가 초기화되더라도 프로필과 학습 성과를 자동 복구합니다.
 
-import { AdminLogger } from './adminLogger.js?v=20261127_01';
+import { AdminLogger } from './adminLogger.js?v=20261127_02';
 
 const DB_NAME = 'vocaquest_backup_db';
 const DB_VERSION = 1;
