@@ -2,7 +2,7 @@
 // IndexedDB 이중 백업 및 영구 저장소(Persistent Storage) 보호 모듈
 // 태블릿/모바일 브라우저에서 localStorage가 초기화되더라도 프로필과 학습 성과를 자동 복구합니다.
 
-import { AdminLogger } from './adminLogger.js?v=20261126_01';
+import { AdminLogger } from './adminLogger.js?v=20261126_02';
 
 const DB_NAME = 'vocaquest_backup_db';
 const DB_VERSION = 1;
@@ -143,6 +143,10 @@ export class IdbBackup {
             if (pData && typeof pData === 'object') {
               localStorage.setItem('vocaquest_prof_data_' + p.id, JSON.stringify(pData));
             }
+            const cData = await this.get('conquest_' + p.id);
+            if (cData && typeof cData === 'object') {
+              localStorage.setItem('vocaquest_siege_conquest_' + p.id, JSON.stringify(cData));
+            }
           }
         }
 
@@ -167,6 +171,12 @@ export class IdbBackup {
             if (rawData) {
               try {
                 await this.set('profileData_' + p.id, JSON.parse(rawData));
+              } catch { /* ignore */ }
+            }
+            const rawConq = localStorage.getItem('vocaquest_siege_conquest_' + p.id);
+            if (rawConq) {
+              try {
+                await this.set('conquest_' + p.id, JSON.parse(rawConq));
               } catch { /* ignore */ }
             }
           }

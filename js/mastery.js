@@ -105,7 +105,7 @@ export class MasteryManager {
         masterTier: 0,        // 0: 미달성, 1~5: 별 1~5개, 6: 영구 마스터(큰별)
         masterDate: null,      // 마스터 승급 시각 (ms)
         status: RANK_TYPES.RECRUIT,
-        updatedAt: Date.now()
+        updatedAt: 0           // 미학습 기본 상태는 0 (실제 학습 시에만 Date.now() 기록)
       };
     } else {
       // 누락된 속성 보정

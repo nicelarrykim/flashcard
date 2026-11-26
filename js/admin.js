@@ -1,10 +1,10 @@
 // js/admin.js
 // 관리자 인증(암호 2217) 및 다중 학습자 프로필 관리 모듈
 
-import { StorageManager } from './storage.js?v=20261126_01';
-import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261126_01';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261126_01';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261126_01';
+import { StorageManager } from './storage.js?v=20261126_02';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261126_02';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261126_02';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261126_02';
 
 export const ADMIN_PASSWORD = '2217';
 
@@ -369,13 +369,17 @@ export class AdminManager {
 
     // 각 프로필 카드 액션 버튼들
     this.container.querySelectorAll('.prof-action-btn').forEach(btn => {
-      btn.onclick = () => {
+      btn.onclick = async () => {
         const action = btn.dataset.action;
         const id = btn.dataset.id;
         const name = btn.dataset.name;
 
         if (action === 'switch') {
+          btn.disabled = true;
+          btn.innerText = '불러오는 중...';
           StorageManager.setActiveProfileId(id);
+          await FirebaseSyncManager.downloadProfileProgress(id, StorageManager);
+          await FirebaseSyncManager.downloadSiegeConquest(id);
           this.openAdminPanel();
         } else if (action === 'edit') {
           const prof = StorageManager.getProfiles().find(p => p.id === id);

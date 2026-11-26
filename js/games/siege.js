@@ -1,1608 +1,1878 @@
 // js/games/siege.js
-// VocaQuest 성채 공성전 (Siege Defense) 게임 모듈
-// 4x6 골짜기 미로 전장, 단어장 실제 인원수(1:1) 기반 10명 단위 원클릭&드래그 증원 배치,
-// 100웨이브 판타지 몹 대군단 스웜 디펜스, 10웨이브 단위 맵 변경 & 50% 부활, 성 함락 화염 연출
+// VocaQuest 삼국지 9 50도시 정복전 & 6x8 타워 디펜스 모듈
+// - 우측 최상단 '나의 왕국'에서 길로 연결된 50개 삼국지 도시를 정복
+// - 6x8 구불구불한 전장: 적(상단 성문 -> 하단 전초기지) vs 아군 진격병(하단 전초기지 -> 상단 성문)
+// - 아군 진격병이 적을 피해 성문에 도달하면 승리(무제한 연승 가능), 적이 전초기지 도달 시 패배(1일 2패 제한, 자정 리셋)
+// - 점령 영토 및 일일 패배 횟수 Firebase / IndexedDB 동기화
 
-import { StorageManager } from '../storage.js?v=20261126_01';
-import { SoundManager } from '../tts.js?v=20261126_01';
-import { RANK_TYPES, RANK_CONFIG } from '../mastery.js?v=20261126_01';
+import { StorageManager } from '../storage.js?v=20261126_02';
+import { SoundManager } from '../tts.js?v=20261126_02';
+import { MasteryManager, RANK_TYPES } from '../mastery.js?v=20261126_02';
+import { FirebaseSyncManager } from '../firebaseSync.js?v=20261126_02';
+import { IdbBackup } from '../idbBackup.js?v=20261126_02';
+import { RTK_CITIES, RTK_EDGES, buildRtkAdjacency, getCityBattlePath } from './rtkMapData.js?v=20261126_02';
 
-export class SiegeManager {
-  static getStorageKey() {
-    let profId = 'prof_default';
-    try {
-      if (typeof StorageManager !== 'undefined' && StorageManager.getActiveProfileId) {
-        profId = StorageManager.getActiveProfileId() || 'prof_default';
-      }
-    } catch (e) {
-      profId = 'prof_default';
-    }
-    return `vocaquest_siege_record_${profId}_v2`;
-  }
-
-  /**
-   * 로컬 날짜(YYYY-MM-DD) 반환 (UTC 시차 오류 방지, 현지 시간 기준 자정 리셋)
-   */
-  static getLocalDateStr() {
-    const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  /**
-   * 오늘 공성전 기록 및 남은 횟수 조회 (새벽 12시 자동 리셋, 프로필별 독립 2회)
-   */
-  static getRecord() {
-    const today = this.getLocalDateStr();
-    const key = this.getStorageKey();
-    try {
-      let data = localStorage.getItem(key);
-      // 이전 전역 키가 있고 기본 프로필인 경우 마이그레이션 호환 처리
-      if (!data && key === 'vocaquest_siege_record_prof_default_v2') {
-        const legacy = localStorage.getItem('vocaquest_siege_record_v2');
-        if (legacy) {
-          data = legacy;
-          localStorage.setItem(key, legacy);
-        }
-      }
-
-      if (data) {
-        const parsed = JSON.parse(data);
-        if (parsed.date === today) {
-          return parsed;
-        }
-        return {
-          date: today,
-          playCount: 0,
-          bestWave: parsed.bestWave || 0,
-          history: parsed.history || []
-        };
-      }
-    } catch (e) {}
-
-    const fresh = {
-      date: today,
-      playCount: 0,
-      bestWave: 0,
-      history: []
-    };
-    this.saveRecord(fresh);
-    return fresh;
-  }
-
-  static canPlay() {
-    return this.getRecord().playCount < 2;
-  }
-
-  /**
-   * 출정 횟수 즉시 초기화 (테스트 및 자유 연습 지원)
-   */
-  static resetPlayCount() {
-    const rec = this.getRecord();
-    rec.playCount = 0;
-    this.saveRecord(rec);
-    return rec;
-  }
-
-  static saveRecord(rec) {
-    try {
-      const key = this.getStorageKey();
-      localStorage.setItem(key, JSON.stringify(rec));
-    } catch (e) {}
-  }
-
-  static recordBattleResult(waveReached, totalKills, totalCasualties) {
-    const rec = this.getRecord();
-    rec.playCount += 1;
-    const isNewRecord = waveReached > (rec.bestWave || 0);
-    if (isNewRecord) {
-      rec.bestWave = waveReached;
-    }
-    rec.history.unshift({
-      date: Date.now(),
-      wave: waveReached,
-      kills: totalKills,
-      casualties: totalCasualties
-    });
-    if (rec.history.length > 20) rec.history.pop();
-    this.saveRecord(rec);
-    return { isNewRecord, bestWave: rec.bestWave, playCount: rec.playCount };
-  }
-}
-
-// 병사 계급별 밸런스 재조정 (몬스터 대비 과도한 강함 하향 조정, 1인당 스펙)
-export const SOLDIER_SPECS = {
-  [RANK_TYPES.RECRUIT]: {
-    name: '훈련병',
-    icon: '🪵',
-    color: '#64748b',
-    hp: 25,
-    atk: 3,
-    atkSpeed: 1100,
-    range: 1.0,
-    desc: '신병 (10명: HP 250, ATK 30)'
+// 6종 방어 타워 정의 및 등급별 병력 소모 매트릭스 (훈련병 제외, 보병부터 전투 참가)
+export const TOWER_DEFS = {
+  wood: {
+    id: 'wood',
+    name: '나무망루',
+    desc: '기본 화살 1발',
+    image: 'assets/images/towers/tower_1_wood.jpg',
+    range: 1.9,
+    cooldownMs: 920,
+    damage: 18,
+    effect: 'arrow',
+    accent: '#d97706',
+    costs: { infantry: 60, junior: 30, senior: 16 }
   },
-  [RANK_TYPES.INFANTRY]: {
-    name: '보병',
-    icon: '🗡️',
-    color: '#d97706',
-    hp: 45,
-    atk: 6,
-    atkSpeed: 1000,
-    range: 1.0,
-    desc: '단검 보병 (10명: HP 450, ATK 60)'
+  stone: {
+    id: 'stone',
+    name: '돌타워',
+    desc: '빠른 화살 연사',
+    image: 'assets/images/towers/tower_2_stone.jpg',
+    range: 2.1,
+    cooldownMs: 500,
+    damage: 21,
+    effect: 'fast_arrow',
+    accent: '#38bdf8',
+    costs: { junior: 60, senior: 30, high: 16 }
   },
-  [RANK_TYPES.JUNIOR_KNIGHT]: {
-    name: '초급기사',
-    icon: '⚔️',
-    color: '#0284c7',
-    hp: 75,
-    atk: 10,
-    atkSpeed: 950,
-    range: 1.1,
-    desc: '사슬 기사 (10명: HP 750, ATK 100)'
+  iron: {
+    id: 'iron',
+    name: '철제타워',
+    desc: '불화살 2발 + 화상',
+    image: 'assets/images/towers/tower_3_iron.jpg',
+    range: 2.2,
+    cooldownMs: 850,
+    damage: 24,
+    effect: 'fire_twin',
+    accent: '#f97316',
+    costs: { senior: 60, high: 30, royal: 16, master: 8 }
   },
-  [RANK_TYPES.SENIOR_KNIGHT]: {
-    name: '중급기사',
-    icon: '🛡️',
-    color: '#6366f1',
-    hp: 120,
-    atk: 16,
-    atkSpeed: 900,
-    range: 1.2,
-    desc: '판금 기사 (10명: HP 1200, ATK 160)'
+  magic: {
+    id: 'magic',
+    name: '마법 수정 타워',
+    desc: '얼음(둔화) + 번개(기절)',
+    image: 'assets/images/towers/tower_4_magic.jpg',
+    range: 2.45,
+    cooldownMs: 1000,
+    damage: 30,
+    effect: 'frost_shock',
+    accent: '#a855f7',
+    costs: { high: 60, royal: 30, master: 16 }
   },
-  [RANK_TYPES.HIGH_KNIGHT]: {
-    name: '고급기사',
-    icon: '✨',
-    color: '#8b5cf6',
-    hp: 190,
-    atk: 25,
-    atkSpeed: 850,
-    range: 1.3,
-    desc: '룬검 기사 (10명: HP 1900, ATK 250)'
+  golden: {
+    id: 'golden',
+    name: '황금빛 성탑',
+    desc: '빛의 화살 3발',
+    image: 'assets/images/towers/tower_5_golden.jpg',
+    range: 2.6,
+    cooldownMs: 760,
+    damage: 38,
+    effect: 'light_triple',
+    accent: '#eab308',
+    costs: { royal: 60, master: 30 }
   },
-  [RANK_TYPES.ROYAL_GUARD]: {
-    name: '왕실근위대',
-    icon: '👑',
-    color: '#f59e0b',
-    hp: 300,
-    atk: 40,
-    atkSpeed: 800,
-    range: 1.5,
-    desc: '근위대 (10명: HP 3000, ATK 400)'
-  },
-  [RANK_TYPES.MASTER]: {
-    name: '마스터',
-    icon: '🌟',
-    color: '#ec4899',
-    hp: 500,
-    atk: 70,
-    atkSpeed: 750,
-    range: 1.8,
-    desc: '마스터 기사 (10명: HP 5000, ATK 700)'
+  dragon: {
+    id: 'dragon',
+    name: '드래곤 타워',
+    desc: '황금 관통 레이저 (4~5체)',
+    image: 'assets/images/towers/tower_6_dragon.jpg',
+    range: 3.1,
+    cooldownMs: 1300,
+    damage: 90,
+    effect: 'dragon_laser',
+    accent: '#ef4444',
+    costs: { master: 100 }
   }
 };
 
-// 100웨이브 판타지 몬스터 테마 (10웨이브 단위로 진화)
-export const MONSTER_THEMES = [
-  { tier: 1, name: '슬라임 & 고블린', type: 'slime', hp: 55, atk: 7, speed: 2.2, color: '#22c55e' },
-  { tier: 2, name: '오크 보병단', type: 'orc', hp: 95, atk: 12, speed: 2.1, color: '#ea580c' },
-  { tier: 3, name: '스켈레톤 군단', type: 'skeleton', hp: 160, atk: 18, speed: 2.3, color: '#cbd5e1' },
-  { tier: 4, name: '가고일 & 하피', type: 'gargoyle', hp: 250, atk: 28, speed: 2.5, color: '#a855f7' },
-  { tier: 5, name: '오우거 & 트롤', type: 'ogre', hp: 420, atk: 45, speed: 1.8, color: '#b45309' },
-  { tier: 6, name: '골렘 & 가디언', type: 'golem', hp: 680, atk: 65, speed: 1.6, color: '#64748b' },
-  { tier: 7, name: '다크 어쌔신 & 늑대', type: 'assassin', hp: 1050, atk: 95, speed: 2.8, color: '#4f46e5' },
-  { tier: 8, name: '데스나이트 & 리치', type: 'deathknight', hp: 1600, atk: 140, speed: 2.0, color: '#e11d48' },
-  { tier: 9, name: '와이번 & 히드라', type: 'wyvern', hp: 2400, atk: 210, speed: 2.4, color: '#dc2626' },
-  { tier: 10, name: '파멸의 고대 흑룡', type: 'dragon', hp: 3800, atk: 320, speed: 2.2, color: '#991b1b' }
+export const RANK_POOL_META = [
+  { key: 'master',  label: '마스터',        short: '마', color: 'text-emerald-400', bg: 'bg-emerald-500/20 border-emerald-500/40' },
+  { key: 'royal',   label: '왕실근위대',    short: '근', color: 'text-rose-400',    bg: 'bg-rose-500/20 border-rose-500/40' },
+  { key: 'high',    label: '고급기사',      short: '고', color: 'text-purple-400',  bg: 'bg-purple-500/20 border-purple-500/40' },
+  { key: 'senior',  label: '중급기사',      short: '중', color: 'text-indigo-400',  bg: 'bg-indigo-500/20 border-indigo-500/40' },
+  { key: 'junior',   label: '초급기사',      short: '초', color: 'text-sky-400',     bg: 'bg-sky-500/20 border-sky-500/40' },
+  { key: 'infantry', label: '보병',          short: '보', color: 'text-amber-400',   bg: 'bg-amber-500/20 border-amber-500/40' }
 ];
 
-/**
- * 판타지 몬스터 전용 캐릭터 SVG 그래픽 렌더러
- */
-export function getMonsterCharacterSVG(type, tier, size = 26) {
-  switch (type) {
-    case 'slime':
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 32" class="drop-shadow">
-          <path d="M16 4 C24 4 28 14 28 22 C28 28 23 29 16 29 C9 29 4 28 4 22 C4 14 8 4 16 4 Z" fill="#22c55e" />
-          <ellipse cx="16" cy="22" rx="10" ry="6" fill="#15803d" opacity="0.4" />
-          <circle cx="12" cy="14" r="2.5" fill="#ffffff" />
-          <circle cx="13" cy="14" r="1.2" fill="#0f172a" />
-          <circle cx="20" cy="14" r="2.5" fill="#ffffff" />
-          <circle cx="19" cy="14" r="1.2" fill="#0f172a" />
-          <path d="M13 20 Q16 23 19 20" stroke="#052e16" stroke-width="1.5" fill="none" stroke-linecap="round" />
-        </svg>
-      `;
-    case 'orc':
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 32" class="drop-shadow">
-          <circle cx="16" cy="16" r="11" fill="#ea580c" />
-          <path d="M5 12 L9 16 L5 20 Z" fill="#c2410c" />
-          <path d="M27 12 L23 16 L27 20 Z" fill="#c2410c" />
-          <circle cx="12" cy="14" r="2" fill="#fef08a" />
-          <circle cx="12" cy="14" r="1" fill="#7f1d1d" />
-          <circle cx="20" cy="14" r="2" fill="#fef08a" />
-          <circle cx="20" cy="14" r="1" fill="#7f1d1d" />
-          <path d="M13 22 L14 18 L15 22 Z" fill="#ffffff" />
-          <path d="M17 22 L18 18 L19 22 Z" fill="#ffffff" />
-          <path d="M11 22 Q16 25 21 22" stroke="#431407" stroke-width="2" fill="none" />
-        </svg>
-      `;
-    case 'skeleton':
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 32" class="drop-shadow">
-          <ellipse cx="16" cy="14" rx="9" ry="8" fill="#e2e8f0" />
-          <rect x="13" y="20" width="6" height="5" fill="#cbd5e1" rx="1" />
-          <circle cx="12" cy="13" r="2.8" fill="#0f172a" />
-          <circle cx="20" cy="13" r="2.8" fill="#0f172a" />
-          <circle cx="12.5" cy="13" r="0.8" fill="#38bdf8" />
-          <circle cx="19.5" cy="13" r="0.8" fill="#38bdf8" />
-          <polygon points="16,16 15,18 17,18" fill="#0f172a" />
-          <line x1="14" y1="23" x2="18" y2="23" stroke="#0f172a" stroke-width="1.5" />
-          <line x1="15" y1="21" x2="15" y2="25" stroke="#0f172a" stroke-width="1.2" />
-          <line x1="17" y1="21" x2="17" y2="25" stroke="#0f172a" stroke-width="1.2" />
-        </svg>
-      `;
-    case 'gargoyle':
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 32" class="drop-shadow">
-          <path d="M4 16 Q8 6 14 12 L14 20 Z" fill="#9333ea" />
-          <path d="M28 16 Q24 6 18 12 L18 20 Z" fill="#9333ea" />
-          <circle cx="16" cy="16" r="8" fill="#6b21a8" />
-          <path d="M13 10 L11 4 L14 8 Z" fill="#4c1d95" />
-          <path d="M19 10 L21 4 L18 8 Z" fill="#4c1d95" />
-          <circle cx="13" cy="15" r="1.8" fill="#facc15" />
-          <circle cx="19" cy="15" r="1.8" fill="#facc15" />
-          <path d="M14 20 Q16 22 18 20" stroke="#ffffff" stroke-width="1.5" fill="none" />
-        </svg>
-      `;
-    case 'ogre':
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 32" class="drop-shadow">
-          <rect x="7" y="8" width="18" height="18" rx="7" fill="#b45309" />
-          <path d="M16 6 L14 2 L17 4 Z" fill="#fde047" />
-          <circle cx="12" cy="14" r="2" fill="#ef4444" />
-          <circle cx="20" cy="14" r="2" fill="#ef4444" />
-          <ellipse cx="16" cy="18" rx="3.5" ry="2" fill="#78350f" />
-          <path d="M11 23 L13 19 L15 23 L17 19 L19 23 L21 21" stroke="#ffffff" stroke-width="1.8" fill="none" />
-        </svg>
-      `;
-    case 'golem':
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 32" class="drop-shadow">
-          <rect x="8" y="7" width="16" height="18" rx="3" fill="#64748b" stroke="#334155" stroke-width="1.5" />
-          <line x1="8" y1="14" x2="24" y2="14" stroke="#475569" stroke-width="1" />
-          <line x1="16" y1="7" x2="16" y2="25" stroke="#475569" stroke-width="1" />
-          <rect x="11" y="11" width="3" height="3" fill="#38bdf8" class="animate-pulse" />
-          <rect x="18" y="11" width="3" height="3" fill="#38bdf8" class="animate-pulse" />
-          <path d="M13 18 H19" stroke="#38bdf8" stroke-width="2" />
-        </svg>
-      `;
-    case 'assassin':
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 32" class="drop-shadow">
-          <path d="M16 4 C9 4 7 12 7 20 C7 26 11 28 16 28 C21 28 25 26 25 20 C25 12 23 4 16 4 Z" fill="#1e1b4b" />
-          <ellipse cx="16" cy="18" rx="6" ry="3.5" fill="#0f172a" />
-          <circle cx="13" cy="17" r="1.5" fill="#a855f7" />
-          <circle cx="19" cy="17" r="1.5" fill="#a855f7" />
-          <path d="M4 18 L7 15 L6 22 Z" fill="#818cf8" />
-          <path d="M28 18 L25 15 L26 22 Z" fill="#818cf8" />
-        </svg>
-      `;
-    case 'deathknight':
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 32" class="drop-shadow">
-          <path d="M16 4 L22 9 L21 21 L16 26 L11 21 L10 9 Z" fill="#020617" stroke="#dc2626" stroke-width="1.5" />
-          <path d="M13 7 L16 11 L19 7" stroke="#ef4444" stroke-width="1.5" fill="none" />
-          <circle cx="13" cy="15" r="2" fill="#ef4444" />
-          <circle cx="19" cy="15" r="2" fill="#ef4444" />
-          <line x1="12" y1="21" x2="20" y2="21" stroke="#dc2626" stroke-width="2" />
-        </svg>
-      `;
-    case 'wyvern':
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 32" class="drop-shadow">
-          <path d="M3 13 Q10 4 16 10 Q22 4 29 13 Q24 22 16 19 Q8 22 3 13 Z" fill="#b91c1c" />
-          <circle cx="16" cy="15" r="5" fill="#7f1d1d" />
-          <circle cx="14" cy="14" r="1.5" fill="#facc15" />
-          <circle cx="18" cy="14" r="1.5" fill="#facc15" />
-          <path d="M16 18 L13 25 L16 23 L19 25 Z" fill="#ef4444" />
-        </svg>
-      `;
-    case 'dragon':
-    default:
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 32" class="drop-shadow animate-pulse">
-          <path d="M2 12 Q8 2 16 8 Q24 2 30 12 Q24 24 16 20 Q8 24 2 12 Z" fill="#450a0a" stroke="#ef4444" stroke-width="1.5" />
-          <polygon points="16,4 13,10 19,10" fill="#dc2626" />
-          <circle cx="13" cy="13" r="2" fill="#fbbf24" />
-          <circle cx="13" cy="13" r="0.8" fill="#000000" />
-          <circle cx="19" cy="13" r="2" fill="#fbbf24" />
-          <circle cx="19" cy="13" r="0.8" fill="#000000" />
-          <path d="M12 18 Q16 22 20 18" stroke="#f87171" stroke-width="2" fill="none" />
-        </svg>
-      `;
+export class SiegeManager {
+  static MAX_DAILY_DEFEATS = 2;
+
+  static getProfileId() {
+    try {
+      if (typeof StorageManager !== 'undefined' && StorageManager.getActiveProfileId) {
+        return StorageManager.getActiveProfileId() || 'prof_default';
+      }
+    } catch { /* ignore */ }
+    return 'prof_default';
+  }
+
+  static getConquestKey(profileId = null) {
+    return `vocaquest_siege_conquest_${profileId || this.getProfileId()}`;
+  }
+
+  static getLocalDateStr() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  static getConquestState(profileId = null) {
+    const pid = profileId || this.getProfileId();
+    const key = this.getConquestKey(pid);
+    const today = this.getLocalDateStr();
+
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const set = new Set([0, ...(Array.isArray(parsed.conqueredCities) ? parsed.conqueredCities.map(Number) : [])]);
+        const isToday = parsed.date === today;
+        return {
+          conqueredCities: Array.from(set).sort((a, b) => a - b),
+          date: today,
+          defeatsToday: isToday ? (parsed.defeatsToday || 0) : 0,
+          updatedAt: parsed.updatedAt || Date.now()
+        };
+      }
+    } catch { /* ignore */ }
+
+    const fresh = {
+      conqueredCities: [0],
+      date: today,
+      defeatsToday: 0,
+      updatedAt: Date.now()
+    };
+    this.saveConquestState(fresh, false, pid);
+    return fresh;
+  }
+
+  static saveConquestState(state, syncServer = true, profileId = null) {
+    const pid = profileId || this.getProfileId();
+    const key = this.getConquestKey(pid);
+    const cleanState = {
+      conqueredCities: Array.from(new Set([0, ...(state.conqueredCities || []).map(Number)])).sort((a, b) => a - b),
+      date: state.date || this.getLocalDateStr(),
+      defeatsToday: state.defeatsToday || 0,
+      updatedAt: Date.now()
+    };
+
+    try {
+      localStorage.setItem(key, JSON.stringify(cleanState));
+      IdbBackup.set('conquest_' + pid, cleanState);
+      if (syncServer) {
+        FirebaseSyncManager.uploadSiegeConquest(pid, cleanState);
+      }
+    } catch (e) {
+      console.error('Failed to save conquest state:', e);
+    }
+    return cleanState;
+  }
+
+  static isAdminProfile() {
+    const pid = this.getProfileId();
+    if (pid === 'prof_admin') return true;
+    try {
+      const prof = StorageManager.getActiveProfile?.();
+      if (prof && (prof.name || '').trim().toUpperCase() === 'ADMIN') return true;
+    } catch { /* ignore */ }
+    return false;
+  }
+
+  // performance.js 등 기존 호출부 호환용
+  static getRecord() {
+    const st = this.getConquestState();
+    return {
+      date: st.date,
+      playCount: this.isAdminProfile() ? 0 : st.defeatsToday,
+      defeatsToday: this.isAdminProfile() ? 0 : st.defeatsToday,
+      conqueredCount: Math.max(0, st.conqueredCities.length - 1),
+      bestWave: Math.max(0, st.conqueredCities.length - 1)
+    };
+  }
+
+  static canPlay() {
+    if (this.isAdminProfile()) return true;
+    return this.getConquestState().defeatsToday < this.MAX_DAILY_DEFEATS;
+  }
+
+  static resetPlayCount() {
+    const st = this.getConquestState();
+    st.defeatsToday = 0;
+    return this.saveConquestState(st, true);
+  }
+
+  static recordVictory(cityId) {
+    const st = this.getConquestState();
+    if (!st.conqueredCities.includes(cityId)) {
+      st.conqueredCities.push(cityId);
+    }
+    return this.saveConquestState(st, true);
+  }
+
+  static recordDefeat() {
+    const st = this.getConquestState();
+    if (!this.isAdminProfile()) {
+      st.defeatsToday = (st.defeatsToday || 0) + 1;
+    }
+    return this.saveConquestState(st, true);
+  }
+
+  /**
+   * 모든 단어장의 보병(INFANTRY) 이상 전투 병력을 전부 합산하여 산출
+   * (훈련병은 전투에서 제외)
+   */
+  static getTroopPoolFromWords() {
+    const decks = StorageManager.getDecks ? StorageManager.getDecks() : [];
+    const allWords = decks
+      .flatMap(d => (d && Array.isArray(d.words)) ? d.words : [])
+      .filter(Boolean);
+
+    const counts = {
+      infantry: 0,
+      junior: 0,
+      senior: 0,
+      high: 0,
+      royal: 0,
+      master: 0
+    };
+
+    let combatWordCount = 0;
+    allWords.forEach(w => {
+      const rank = MasteryManager.getWordRank(w);
+      if (rank === RANK_TYPES.RECRUIT) {
+        return; // 훈련병은 전투에서 제외
+      }
+      combatWordCount++;
+      if (rank === RANK_TYPES.INFANTRY) {
+        counts.infantry++;
+      } else if (rank === RANK_TYPES.JUNIOR_KNIGHT) {
+        counts.junior++;
+      } else if (rank === RANK_TYPES.SENIOR_KNIGHT) {
+        counts.senior++;
+      } else if (rank === RANK_TYPES.HIGH_KNIGHT) {
+        counts.high++;
+      } else if (rank === RANK_TYPES.ROYAL_GUARD) {
+        counts.royal++;
+      } else if (rank === RANK_TYPES.MASTER) {
+        counts.master++;
+      }
+    });
+
+    return { counts, totalWords: combatWordCount, allDeckWords: allWords.length, scale: 1 };
   }
 }
 
 export class SiegeGame {
-  constructor() {
-    this.container = null;
-    this.rows = 6;
-    this.cols = 4;
-    this.map = []; // 6x4 타일 배열
-    this.pathCoords = []; // 골짜기 경로 [(r, c), ...]
-    
-    // 병력 풀 (실제 단어 수 1:1 환산)
-    this.soldierPool = {};
-    this.initialPool = {};
-    this.deadPool = {};
-    
-    // 배치 현황: key 'r_c' -> { rankType, count, currentHp, maxHp, lastAtkTime }
-    this.placements = {};
-
-    // 게임 상태
-    this.state = 'IDLE'; // 'PREPARING' | 'BATTLE' | 'WAVE_CLEARED' | 'GAMEOVER'
-    this.wave = 1;
-    this.maxWave = 100;
-    this.castleHp = 100;
-    this.totalKills = 0;
-    this.totalCasualties = 0;
-
-    // 전투 루프 & 몬스터 스폰 큐
-    this.monsters = [];
-    this.spawnQueue = [];
-    this.spawnTimer = null;
-    this.animFrameId = null;
-    this.lastLoopTime = 0;
-    this.lastClashSoundTime = 0;
-    this.lastDamageSoundTime = 0;
-
-    // 드래그 상태
-    this.draggedRank = null;
-    this.draggedTile = null;
-  }
-
   static activeInstance = null;
 
   static closeActiveGame() {
     if (this.activeInstance) {
-      try {
-        this.activeInstance.close();
-      } catch (e) {}
-      this.activeInstance = null;
+      this.activeInstance.close();
     }
   }
 
-  /**
-   * 공성전 모달 열기
-   */
+  static pauseActiveGame() {
+    const inst = this.activeInstance;
+    if (inst && inst.screen === 'battle' && !inst.battleEnded) {
+      inst._manualPause = true;
+      inst.isPaused = true;
+      const pauseBtn = document.getElementById('td-pause-btn');
+      if (pauseBtn) pauseBtn.innerText = '▶️ 재개';
+    }
+  }
+
+  constructor() {
+    this.modalEl = null;
+    this.adj = buildRtkAdjacency();
+    this.selectedCityId = null;
+    this.screen = 'map'; // 'map' | 'battle'
+
+    // 전투 상태
+    this.battleCity = null;
+    this.battlePath = [];
+    this.pathSet = new Set();
+    this.towers = new Map(); // key: `${r}_${c}` -> towerObj
+    this.troops = { infantry: 0, junior: 0, senior: 0, high: 0, royal: 0, master: 0 };
+    this.maxTroops = { infantry: 0, junior: 0, senior: 0, high: 0, royal: 0, master: 0 };
+
+    this.enemies = [];
+    this.allies = [];
+    this.projectiles = [];
+    this.beams = [];
+    this.particles = [];
+
+    this.wave = 1;
+    this.enemiesSpawnedInWave = 0;
+    this.enemiesPerWave = 6;
+    this.enemySpawnTimer = 0;
+    this.allySpawnTimer = 0;
+    this.nextId = 1;
+    this.kills = 0;
+    this.isPaused = false;
+    this._manualPause = false;
+    this.battleEnded = false;
+    this.speedMultiplier = 1;
+    this.rafId = null;
+    this.lastFrameTime = 0;
+
+    // 타워 이미지 프리로드 (로드 완료 시 정적 전장 레이어 갱신)
+    this.towerImages = {};
+    this._bgCanvas = null;
+    this._bgDirty = true;
+    this._canvasW = 0;
+    this._canvasH = 0;
+    this._dpr = 1;
+
+    Object.values(TOWER_DEFS).forEach(def => {
+      const img = new Image();
+      img.onload = () => { this._bgDirty = true; };
+      img.src = def.image;
+      this.towerImages[def.id] = img;
+    });
+
+    this._onResize = () => this.setupBattleCanvas();
+    this._onKeyDown = (e) => {
+      if (e.key === 'Escape' && this.modalEl) {
+        this.confirmClose();
+      }
+    };
+
+    this._onConquestUpdated = () => {
+      if (this.modalEl && this.screen === 'map') {
+        this.renderWorldMap();
+      }
+    };
+  }
+
   open() {
     SiegeGame.activeInstance = this;
-    this.initModalContainer();
-    const canPlay = SiegeManager.canPlay();
-    const record = SiegeManager.getRecord();
-    this.renderLobby(canPlay, record);
+    if (this.modalEl) this.modalEl.remove();
+
+    this.modalEl = document.createElement('div');
+    this.modalEl.id = 'siege-modal-overlay';
+    this.modalEl.className = 'fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-1 sm:p-4 overflow-y-auto';
+    this.modalEl.addEventListener('click', (e) => {
+      if (e.target === this.modalEl) {
+        this.confirmClose();
+      }
+    });
+    document.body.appendChild(this.modalEl);
+
+    window.addEventListener('vocaquest_conquest_updated', this._onConquestUpdated);
+    window.addEventListener('resize', this._onResize);
+    window.addEventListener('keydown', this._onKeyDown);
+
+    // 최신 서버 정복 상태 백그라운드 동기화 후 맵 렌더
+    const pid = SiegeManager.getProfileId();
+    FirebaseSyncManager.downloadSiegeConquest(pid).catch(() => {});
+
+    this.screen = 'map';
+    this.renderWorldMap();
   }
 
-  initModalContainer() {
-    let el = document.getElementById('siege-modal-container');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'siege-modal-container';
-      document.body.appendChild(el);
+  confirmClose() {
+    if (this.screen === 'battle' && !this.battleEnded) {
+      const wasPaused = this.isPaused;
+      this.isPaused = true;
+      if (confirm('진행 중인 타워 디펜스 전투가 있습니다. 정말 창을 닫으시겠습니까?\n(현재 전투는 저장되지 않습니다)')) {
+        this.close();
+      } else {
+        this.isPaused = wasPaused;
+      }
+    } else {
+      this.close();
     }
-    this.container = el;
   }
 
   close() {
+    this.stopBattleLoop();
+    window.removeEventListener('vocaquest_conquest_updated', this._onConquestUpdated);
+    window.removeEventListener('resize', this._onResize);
+    window.removeEventListener('keydown', this._onKeyDown);
+    if (this.modalEl) {
+      this.modalEl.remove();
+      this.modalEl = null;
+    }
     if (SiegeGame.activeInstance === this) {
       SiegeGame.activeInstance = null;
     }
-    this.stopBattleLoop();
-    if (this.container) {
-      this.container.innerHTML = '';
-    }
-    window.dispatchEvent(new CustomEvent('vocaquest_siege_completed'));
-  }
-
-  /**
-   * 단어장 기반 실제 병력 수 계산 (단어 1개 = 실제 병사 1명)
-   */
-  calculateTroopsFromWords(words) {
-    const counts = {
-      [RANK_TYPES.RECRUIT]: 0,
-      [RANK_TYPES.INFANTRY]: 0,
-      [RANK_TYPES.JUNIOR_KNIGHT]: 0,
-      [RANK_TYPES.SENIOR_KNIGHT]: 0,
-      [RANK_TYPES.HIGH_KNIGHT]: 0,
-      [RANK_TYPES.ROYAL_GUARD]: 0,
-      [RANK_TYPES.MASTER]: 0
-    };
-
-    (words || []).forEach(w => {
-      const rank = (w && w.mastery && w.mastery.status) ? w.mastery.status : RANK_TYPES.RECRUIT;
-      if (counts[rank] !== undefined) {
-        counts[rank] += 1; // 단어 1개 = 병사 1명! (*10 제거)
-      } else {
-        counts[RANK_TYPES.RECRUIT] += 1;
-      }
-    });
-
-    return counts;
-  }
-
-  /**
-   * 로비 화면: 오늘 출정 횟수 확인 & 출정 준비
-   */
-  renderLobby(canPlay, record) {
-    const activeDeck = StorageManager.getActiveDeck();
-    const words = (activeDeck && Array.isArray(activeDeck.words)) ? activeDeck.words : [];
-    
-    const ranksCount = this.calculateTroopsFromWords(words);
-    const totalTroops = Object.values(ranksCount).reduce((a, b) => a + b, 0);
-
-    this.container.innerHTML = `
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 select-none">
-        <div class="bg-slate-900 text-white rounded-3xl max-w-xl w-full p-5 sm:p-7 shadow-2xl border-2 border-amber-500/40 relative overflow-hidden flex flex-col max-h-[92vh]">
-          
-          <div class="absolute -right-12 -bottom-12 text-9xl opacity-10 pointer-events-none">
-            🏰
-          </div>
-
-          <!-- 상단 헤더 -->
-          <div class="flex items-start justify-between pb-4 border-b border-slate-800 shrink-0">
-            <div>
-              <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-black border border-amber-500/30 mb-1.5">
-                <span>🛡️</span> <span>공성전 (Siege Defense)</span>
-              </div>
-              <h2 class="text-xl sm:text-2xl font-black text-amber-400 flex items-center gap-2 tracking-tight">
-                <span>🏰 성채 수호 공성전</span>
-              </h2>
-              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                단어장에서 육성한 실제 기사단으로 몰려오는 100웨이브의 마물 대군단으로부터 성채를 지켜내세요!
-              </p>
-            </div>
-            <button id="siege-lobby-close-btn" class="p-2 text-slate-400 hover:text-white text-xl font-bold transition">
-              ✕
-            </button>
-          </div>
-
-          <!-- 본문 스크롤 영역 -->
-          <div class="flex-1 overflow-y-auto py-4 space-y-4 pr-1 text-xs">
-            
-            <!-- 출정 상태 배너 -->
-            <div class="p-4 rounded-2xl bg-gradient-to-r ${canPlay ? 'from-amber-950/60 to-indigo-950/60 border border-amber-500/30' : 'from-slate-800/80 to-slate-800/80 border border-slate-700'} flex items-center justify-between">
-              <div>
-                <span class="text-xs font-bold text-slate-300">오늘 출정 가능 횟수</span>
-                <div class="flex items-center gap-2.5 mt-0.5">
-                  <div class="text-xl font-black ${canPlay ? 'text-amber-400' : 'text-rose-400'}">
-                    ${canPlay ? `${2 - record.playCount} / 2 회 남음` : '오늘 출정 횟수 소진 (0 / 2회)'}
-                  </div>
-                  <button id="siege-reset-count-btn" class="px-2.5 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-[11px] font-bold transition flex items-center gap-1 active:scale-95 cursor-pointer" title="출정 횟수를 즉시 2회로 초기화합니다">
-                    <span>🔄</span> <span>횟수 충전</span>
-                  </button>
-                </div>
-                <p class="text-[10px] text-slate-400 mt-1">매일 현지 시간 자정(00:00)에 2회로 자동 초기화됩니다.</p>
-              </div>
-              <div class="text-right">
-                <span class="text-[10px] text-slate-400 font-bold">역대 최고 기록</span>
-                <div class="text-lg font-black text-purple-300 font-mono">
-                  ${record.bestWave > 0 ? `Wave ${record.bestWave}` : '기록 없음'}
-                </div>
-              </div>
-            </div>
-
-            <!-- 현재 보유 실제 병력 (단어장 1:1 연동) -->
-            <div class="p-4 rounded-2xl bg-slate-800/70 border border-slate-700 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-slate-200 flex items-center gap-1.5">
-                  <span>⚔️</span> <span>단어장 보유 병력 (총 ${totalTroops}명)</span>
-                </span>
-                <span class="text-[11px] text-emerald-400 font-semibold">단어 1개 = 병사 1명 실시간 연동</span>
-              </div>
-
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                ${Object.entries(ranksCount).map(([rank, count]) => {
-                  const spec = SOLDIER_SPECS[rank];
-                  return `
-                    <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-700/80">
-                      <div class="text-xl">${spec.icon}</div>
-                      <div class="font-bold text-[11px] text-slate-300 mt-0.5">${spec.name}</div>
-                      <div class="text-sm font-black text-amber-400 font-mono">${count}명</div>
-                      <div class="text-[9px] text-slate-400">공 ${spec.atk} / 체 ${spec.hp}</div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-
-            <!-- 전투 규칙 요약 안내 -->
-            <div class="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-900/50 space-y-1.5 leading-relaxed text-[11px] text-indigo-200">
-              <h4 class="font-black text-indigo-300 flex items-center gap-1">
-                <span>📜</span> <span>공성전 규칙 안내</span>
-              </h4>
-              <ul class="list-disc list-inside space-y-1 text-slate-300">
-                <li><strong>4x6 골짜기 전장</strong>: 상단 입구에서 하단 성채까지 이어지는 일방향 골짜기 길에만 병사를 배치할 수 있습니다.</li>
-                <li><strong>10명 단위 드래그 & 원클릭 증원</strong>: 10명씩 드래그하여 배치하고, 배치된 타일을 <strong>원클릭</strong>하면 대기열에서 10명씩 즉시 추가 증원됩니다.</li>
-                <li><strong>바글바글 웨이브 군단</strong>: 적 마물들이 떼를 지어 고속으로 밀고 내려옵니다. 한 웨이브를 막아내면 즉시 다음 웨이브가 이어집니다!</li>
-                <li><strong>10웨이브 단위 전장 변경 & 50% 부활</strong>: 10, 20, 30... 웨이브 클리어 시 새로운 지형이 열리고 전사자의 절반이 명예롭게 부활합니다!</li>
-              </ul>
-            </div>
-
-          </div>
-
-          <!-- 하단 출정 버튼 -->
-          <div class="pt-4 border-t border-slate-800 flex items-center justify-between shrink-0">
-            <span class="text-xs text-slate-400">단어장: <strong class="text-slate-200">${activeDeck ? activeDeck.name : '기본 단어장'}</strong></span>
-            <div class="flex items-center gap-2">
-              ${!canPlay ? `
-                <button id="siege-reset-and-start-btn"
-                  class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-black text-sm shadow-md transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
-                  <span>🔄</span> <span>횟수 충전 후 출정</span>
-                </button>
-              ` : `
-                <button id="siege-start-prep-btn"
-                  class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black shadow-lg shadow-amber-500/25 text-sm transition flex items-center gap-2 active:scale-95 cursor-pointer">
-                  <span>⚔️</span> <span>공성전 출정하기</span>
-                </button>
-              `}
-            </div>
-          </div>
-
-        </div>
-      </div>
-    `;
-
-    const closeBtn = document.getElementById('siege-lobby-close-btn');
-    if (closeBtn) closeBtn.onclick = () => this.close();
-
-    const resetCountBtn = document.getElementById('siege-reset-count-btn');
-    if (resetCountBtn) {
-      resetCountBtn.onclick = () => {
-        SiegeManager.resetPlayCount();
-        this.open();
-      };
-    }
-
-    const resetAndStartBtn = document.getElementById('siege-reset-and-start-btn');
-    if (resetAndStartBtn) {
-      resetAndStartBtn.onclick = () => {
-        SiegeManager.resetPlayCount();
-        this.startPreparationPhase(ranksCount);
-      };
-    }
-
-    const startBtn = document.getElementById('siege-start-prep-btn');
-    if (startBtn) {
-      startBtn.onclick = () => {
-        this.startPreparationPhase(ranksCount);
-      };
-    }
-  }
-
-  /**
-   * 출정 준비 단계 시작: 맵 생성 및 배치 모드 진입
-   */
-  startPreparationPhase(ranksCount) {
-    this.soldierPool = { ...ranksCount };
-    this.initialPool = { ...ranksCount };
-    this.deadPool = {
-      [RANK_TYPES.RECRUIT]: 0,
-      [RANK_TYPES.INFANTRY]: 0,
-      [RANK_TYPES.JUNIOR_KNIGHT]: 0,
-      [RANK_TYPES.SENIOR_KNIGHT]: 0,
-      [RANK_TYPES.HIGH_KNIGHT]: 0,
-      [RANK_TYPES.ROYAL_GUARD]: 0,
-      [RANK_TYPES.MASTER]: 0
-    };
-    this.placements = {};
-    this.castleHp = 100;
-    this.wave = 1;
-    this.totalKills = 0;
-    this.totalCasualties = 0;
-    this.state = 'PREPARING';
-
-    this.generateNewMap();
-    this.renderBattleArena();
-  }
-
-  /**
-   * 4x6 무루프 일방향 골짜기 지도 생성
-   */
-  generateNewMap() {
-    this.map = Array(this.rows).fill(null).map(() => Array(this.cols).fill('M')); // M: 산지, V: 골짜기
-    this.pathCoords = [];
-
-    const startCol = Math.floor(Math.random() * this.cols);
-    const endCol = Math.floor(Math.random() * this.cols);
-
-    let currR = 0;
-    let currC = startCol;
-    this.pathCoords.push([currR, currC]);
-    this.map[currR][currC] = 'V';
-
-    while (currR < this.rows - 1) {
-      const remainingRows = (this.rows - 1) - currR;
-      const colDist = endCol - currC;
-
-      const actions = [];
-      actions.push('DOWN');
-      actions.push('DOWN');
-
-      if (colDist > 0 && currC < this.cols - 1) actions.push('RIGHT');
-      else if (colDist < 0 && currC > 0) actions.push('LEFT');
-      else {
-        if (currC > 0) actions.push('LEFT');
-        if (currC < this.cols - 1) actions.push('RIGHT');
-      }
-
-      if (remainingRows <= 1 && colDist !== 0) {
-        actions.length = 0;
-        actions.push(colDist > 0 ? 'RIGHT' : 'LEFT');
-      }
-
-      const act = actions[Math.floor(Math.random() * actions.length)];
-      if (act === 'DOWN') {
-        currR += 1;
-      } else if (act === 'LEFT' && currC > 0) {
-        currC -= 1;
-      } else if (act === 'RIGHT' && currC < this.cols - 1) {
-        currC += 1;
-      } else {
-        currR += 1;
-      }
-
-      const already = this.pathCoords.some(([r, c]) => r === currR && c === currC);
-      if (!already) {
-        this.pathCoords.push([currR, currC]);
-        this.map[currR][currC] = 'V';
-      }
-    }
-
-    if (currC !== endCol) {
-      const step = endCol > currC ? 1 : -1;
-      while (currC !== endCol) {
-        currC += step;
-        const already = this.pathCoords.some(([r, c]) => r === this.rows - 1 && c === currC);
-        if (!already) {
-          this.pathCoords.push([this.rows - 1, currC]);
-          this.map[this.rows - 1][currC] = 'V';
-        }
-      }
-    }
-  }
-
-  /**
-   * 메인 전투 및 배치 아레나 렌더링
-   */
-  renderBattleArena() {
-    const isPrep = this.state === 'PREPARING' || this.state === 'WAVE_CLEARED';
-    const startCoord = this.pathCoords[0];
-    const endCoord = this.pathCoords[this.pathCoords.length - 1];
-
-    this.container.innerHTML = `
-      <style>
-        @keyframes monster-swarm-walk {
-          0% { transform: translate(var(--jx), var(--jy)) rotate(-5deg) scale(0.95); }
-          50% { transform: translate(var(--jx), calc(var(--jy) - 3px)) rotate(5deg) scale(1.05); }
-          100% { transform: translate(var(--jx), var(--jy)) rotate(-5deg) scale(0.95); }
-        }
-        @keyframes battle-tile-shake {
-          0% { transform: translate(0, 0); }
-          20% { transform: translate(-2px, 1.5px); }
-          40% { transform: translate(2px, -1.5px); }
-          60% { transform: translate(-1.5px, -1px); }
-          80% { transform: translate(1.5px, 1px); }
-          100% { transform: translate(0, 0); }
-        }
-        @keyframes clash-sparks {
-          0% { transform: scale(0.7) rotate(-15deg); opacity: 0.4; }
-          50% { transform: scale(1.4) rotate(15deg); opacity: 1; filter: drop-shadow(0 0 10px #f59e0b); }
-          100% { transform: scale(0.9) rotate(-5deg); opacity: 0.6; }
-        }
-        @keyframes soldier-thrust {
-          0%, 100% { transform: scale(1) translateY(0); }
-          50% { transform: scale(1.15) translateY(-4px); }
-        }
-        @keyframes float-damage {
-          0% { opacity: 1; transform: translateY(0) scale(0.8); }
-          40% { opacity: 1; transform: translateY(-16px) scale(1.2); }
-          100% { opacity: 0; transform: translateY(-32px) scale(0.9); }
-        }
-      </style>
-
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/92 backdrop-blur-md animate-in fade-in select-none overflow-hidden">
-        <div class="bg-slate-900 text-white rounded-3xl max-w-4xl w-full h-[96vh] p-3 sm:p-5 shadow-2xl border border-slate-700 flex flex-col justify-between">
-          
-          <!-- 상단 상태 정보 바 -->
-          <div class="flex items-center justify-between pb-2.5 border-b border-slate-800 shrink-0">
-            <div class="flex items-center gap-2">
-              <span class="text-xl">🏰</span>
-              <div>
-                <h3 class="text-sm sm:text-base font-black text-amber-400 flex items-center gap-2">
-                  <span>성채 공성전</span>
-                  <span class="px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 text-xs font-bold border border-indigo-800 font-mono">
-                    Wave ${this.wave} / ${this.maxWave}
-                  </span>
-                </h3>
-              </div>
-            </div>
-
-            <!-- 성채 내구도 및 처치 통계 -->
-            <div class="flex items-center gap-2 sm:gap-4 text-xs font-bold">
-              <div class="flex items-center gap-1.5 bg-slate-800 px-3 py-1 rounded-xl border border-slate-700">
-                <span class="text-rose-400">❤️ 성채:</span>
-                <span id="siege-castle-hp" class="text-sm font-mono font-black text-white">${this.castleHp}</span>
-                <span class="text-[10px] text-slate-400">/ 100</span>
-              </div>
-              <div class="flex items-center gap-1.5 bg-slate-800 px-3 py-1 rounded-xl border border-slate-700">
-                <span class="text-amber-400">⚔️ 처치:</span>
-                <span id="siege-total-kills" class="text-sm font-mono font-black text-white">${this.totalKills}</span>
-              </div>
-              <button id="siege-exit-btn" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition font-bold text-xs" title="전투 포기 및 나가기">
-                ✕ 나가기
-              </button>
-            </div>
-          </div>
-
-          <!-- 메인 전장: 좌측 4x6 맵 + 우측 병력/몬스터 패널 -->
-          <div class="flex-1 flex flex-col md:flex-row items-center justify-center gap-4 py-2 min-h-0 overflow-hidden">
-            
-            <!-- 4x6 전장 맵 컨테이너 -->
-            <div class="relative bg-slate-950 p-2 sm:p-3 rounded-2xl border-2 border-slate-800 shadow-inner flex flex-col items-center justify-center shrink-0">
-              <div id="siege-grid" class="grid grid-cols-4 gap-1.5 sm:gap-2">
-                ${this.map.map((rowArr, r) => 
-                  rowArr.map((type, c) => {
-                    const isStart = startCoord[0] === r && startCoord[1] === c;
-                    const isEnd = endCoord[0] === r && endCoord[1] === c;
-                    const isValley = type === 'V';
-                    const placementKey = `${r}_${c}`;
-                    const placed = this.placements[placementKey];
-
-                    let tileBg = 'bg-stone-800/80 border-stone-700 text-stone-500';
-                    if (isValley) {
-                      tileBg = 'bg-amber-950/40 border-amber-800/50 hover:border-amber-500/80 cursor-pointer';
-                    }
-                    if (isStart) {
-                      tileBg = 'bg-rose-950/50 border-rose-600/70';
-                    }
-                    if (isEnd) {
-                      tileBg = 'bg-indigo-950/60 border-indigo-500/80';
-                    }
-
-                    return `
-                      <div class="siege-tile relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 ${tileBg} flex flex-col items-center justify-center transition-all overflow-hidden select-none"
-                        data-r="${r}" data-c="${c}" data-type="${isValley ? 'valley' : 'mountain'}">
-                        
-                        <!-- 배경 지형 아이콘 / 라벨 -->
-                        ${!isValley ? `
-                          <span class="text-xl opacity-35 pointer-events-none">⛰️</span>
-                        ` : isStart ? `
-                          <div class="absolute top-1 text-[9px] font-black text-rose-400 bg-rose-950/90 px-1 rounded pointer-events-none z-10">입구 👹</div>
-                        ` : isEnd ? `
-                          <div class="absolute bottom-1 text-[9px] font-black text-indigo-300 bg-indigo-950/90 px-1 rounded pointer-events-none z-10">성채 🏰</div>
-                        ` : ''}
-
-                        <!-- 배치된 병사 표시 -->
-                        ${placed ? `
-                          <div class="tile-soldier-unit relative z-20 flex flex-col items-center justify-center pointer-events-none transition-transform duration-150">
-                            <span class="text-xl sm:text-2xl">${SOLDIER_SPECS[placed.rankType].icon}</span>
-                            <div class="flex items-center gap-1 mt-0.5">
-                              <span class="text-[10px] font-black px-1.5 py-0.2 rounded-full bg-slate-900/90 text-amber-300 font-mono border border-amber-500/40">
-                                ${placed.count}명
-                              </span>
-                            </div>
-                            <!-- 타일 아군 체력 게이지 -->
-                            <div class="w-12 sm:w-14 h-1 bg-black/80 rounded-full overflow-hidden mt-1 border border-slate-700">
-                              <div class="tile-hp-bar h-full bg-emerald-500 transition-all duration-100" style="width: ${(placed.currentHp / placed.maxHp) * 100}%"></div>
-                            </div>
-                          </div>
-                        ` : isValley && isPrep ? `
-                          <span class="text-[9px] text-amber-500/50 font-bold pointer-events-none">클릭 증원</span>
-                        ` : ''}
-
-                        <!-- 교전 중 중앙 칼부림 & 불꽃 스파크 레이어 -->
-                        <div class="tile-clash-layer absolute inset-0 z-35 pointer-events-none flex items-center justify-center hidden">
-                          <div class="clash-icon text-2xl drop-shadow-lg" style="animation: clash-sparks 0.3s infinite alternate;">⚔️💥</div>
-                        </div>
-
-                        <!-- 몬스터 스웜 레이어 (바글바글 떼지어 내려오는 레이아웃) -->
-                        <div class="tile-monsters-layer absolute inset-0 z-30 pointer-events-none flex items-center justify-center overflow-visible"></div>
-
-                        <!-- 타격 효과 및 부유 데미지 오버레이 -->
-                        <div class="tile-fx-overlay absolute inset-0 z-40 pointer-events-none hidden"></div>
-                      </div>
-                    `;
-                  }).join('')
-                ).join('')}
-              </div>
-
-              <!-- 화염 오버레이 (성채 함락 시 활성화) -->
-              <div id="siege-flame-overlay" class="absolute inset-0 z-50 bg-rose-950/80 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center hidden animate-in fade-in">
-                <div class="text-7xl animate-bounce">🔥🏰🔥</div>
-                <h4 class="text-xl font-black text-rose-400 mt-2">성채가 함락되었습니다!</h4>
-              </div>
-            </div>
-
-            <!-- 우측 컨트롤 패널: 웨이브 마물 정보 & 배치 안내 -->
-            <div class="flex-1 flex flex-col justify-between max-w-sm w-full h-full min-h-0 bg-slate-950/60 p-3 sm:p-4 rounded-2xl border border-slate-800 space-y-3">
-              
-              <!-- 이번 웨이브 몬스터 대군단 정보 -->
-              <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-black text-amber-400 flex items-center gap-1.5">
-                    <span>👹</span> <span>Wave ${this.wave} 침공 군단</span>
-                  </span>
-                  <span class="text-[11px] font-mono text-slate-400">
-                    ${this.getThemeForWave(this.wave).name}
-                  </span>
-                </div>
-
-                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 text-xs">
-                  <div class="flex items-center justify-between text-slate-300">
-                    <span>침공 마물 수:</span>
-                    <strong class="text-rose-400 font-mono text-sm">${this.calculateMonsterCountForWave(this.wave)} 마리 대군단</strong>
-                  </div>
-                  <div class="flex items-center justify-between text-slate-300">
-                    <span>마물 능력치:</span>
-                    <span class="text-slate-400">HP ${this.getThemeForWave(this.wave).hp + this.wave * 12} / 공 ${this.getThemeForWave(this.wave).atk + Math.floor(this.wave * 2)}</span>
-                  </div>
-                  <div class="flex items-center justify-between text-slate-300">
-                    <span>침공 속도:</span>
-                    <span class="text-amber-400 font-bold">초고속 돌진 ⚡</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 배치 안내 팁 -->
-              <div class="p-3 rounded-xl bg-indigo-950/30 border border-indigo-900/40 text-[11px] text-indigo-200 leading-relaxed space-y-1">
-                <div class="font-bold text-amber-300 flex items-center gap-1">
-                  <span>💡</span> <span>편리한 원클릭 조작법</span>
-                </div>
-                <div>• 하단의 병사를 골짜기로 <strong>드래그</strong>하거나, 골짜기 타일을 <strong>원클릭</strong>하면 10명씩 바로 증원됩니다.</div>
-                <div>• 한 골짜기에는 같은 종류의 병사만 배치 가능합니다.</div>
-                <div>• 타일 우클릭 시 해당 타일의 병사가 대기열로 회수됩니다.</div>
-              </div>
-
-              <!-- 전투 개시 / 자동 배치 버튼 -->
-              <div class="pt-2 border-t border-slate-800 flex gap-2">
-                <button id="siege-auto-deploy-btn" ${isPrep ? '' : 'disabled'}
-                  class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition border border-slate-700">
-                  ⚡ 자동 균등 배치
-                </button>
-                <button id="siege-start-battle-btn" ${isPrep ? '' : 'disabled'}
-                  class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black text-xs shadow-lg shadow-amber-500/25 transition">
-                  ⚔️ 전투 개시!
-                </button>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- 하단 병력 대기열 트레이 (실제 단어 1:1 인원수) -->
-          <div id="siege-soldier-tray" class="bg-slate-950/80 p-2.5 rounded-2xl border border-slate-800 shrink-0">
-            <div class="flex items-center justify-between pb-1.5 px-1">
-              <span class="text-[11px] font-bold text-slate-400 flex items-center gap-1.5">
-                <span>🛡️</span> <span>출정 대기 병력 (타일 원클릭 또는 드래그 시 10명씩 배치)</span>
-              </span>
-              <span class="text-[10px] text-slate-500">배치된 타일 우클릭: 대기열 회수</span>
-            </div>
-
-            <div class="flex items-center gap-2 overflow-x-auto py-1">
-              ${Object.entries(SOLDIER_SPECS).map(([rank, spec]) => {
-                const count = this.soldierPool[rank] || 0;
-                return `
-                  <div class="soldier-card shrink-0 px-3 py-1.5 rounded-xl bg-slate-900 border ${count > 0 ? 'border-slate-700 hover:border-amber-500 cursor-grab active:cursor-grabbing' : 'border-slate-800 opacity-40'} flex items-center gap-2 select-none"
-                    draggable="${count > 0 && isPrep}" data-rank="${rank}">
-                    <span class="text-lg">${spec.icon}</span>
-                    <div>
-                      <div class="text-[11px] font-bold text-slate-200">${spec.name}</div>
-                      <div class="text-xs font-black font-mono ${count > 0 ? 'text-amber-400' : 'text-slate-500'}">${count}명</div>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-
-        </div>
-      </div>
-    `;
-
-    this.bindArenaEvents();
-  }
-
-  /**
-   * 전장 이벤트 바인딩 (원클릭 증원, 드래그배치, 우클릭 회수)
-   */
-  bindArenaEvents() {
-    const exitBtn = document.getElementById('siege-exit-btn');
-    if (exitBtn) {
-      exitBtn.onclick = () => {
-        if (confirm('공성전을 종료하고 나가시겠습니까? (현재 진행 기록은 소멸됩니다)')) {
-          this.close();
-        }
-      };
-    }
-
-    const startBtn = document.getElementById('siege-start-battle-btn');
-    if (startBtn) {
-      startBtn.onclick = () => {
-        this.startWaveBattle();
-      };
-    }
-
-    const autoBtn = document.getElementById('siege-auto-deploy-btn');
-    if (autoBtn) {
-      autoBtn.onclick = () => {
-        this.autoDeployTroops();
-      };
-    }
-
-    // 드래그 앤 드롭: 대기열 카드
-    const cards = this.container.querySelectorAll('.soldier-card');
-    cards.forEach(card => {
-      card.addEventListener('dragstart', (e) => {
-        if (this.state !== 'PREPARING' && this.state !== 'WAVE_CLEARED') return;
-        this.draggedRank = card.dataset.rank;
-        this.draggedTile = null;
-        e.dataTransfer.setData('text/plain', this.draggedRank);
-      });
-    });
-
-    // 타일 이벤트 바인딩
-    const tiles = this.container.querySelectorAll('.siege-tile');
-    tiles.forEach(tile => {
-      const r = parseInt(tile.dataset.r, 10);
-      const c = parseInt(tile.dataset.c, 10);
-      const type = tile.dataset.type;
-
-      // 원클릭 증원 이벤트 (요청사항 반영: 원클릭으로 10명씩 증가)
-      tile.addEventListener('click', (e) => {
-        if (this.state !== 'PREPARING' && this.state !== 'WAVE_CLEARED') return;
-        if (type !== 'valley') return;
-
-        const key = `${r}_${c}`;
-        const placed = this.placements[key];
-        if (placed) {
-          // 이미 배치된 타일 클릭 시: 같은 종류 10명 증원!
-          this.reinforceTile(r, c);
-        } else {
-          // 빈 타일 클릭 시: 현재 가장 많이 남아있는 병종 10명 스마트 배치!
-          const bestRank = this.getBestAvailableRank();
-          if (bestRank) {
-            this.deployToTile(r, c, bestRank);
-          }
-        }
-      });
-
-      // 우클릭: 병사 회수 (배치 취소)
-      tile.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        if (this.state !== 'PREPARING' && this.state !== 'WAVE_CLEARED') return;
-        this.withdrawFromTile(r, c);
-      });
-
-      tile.addEventListener('dragover', (e) => {
-        e.preventDefault();
-      });
-
-      tile.addEventListener('drop', (e) => {
-        e.preventDefault();
-        if (this.state !== 'PREPARING' && this.state !== 'WAVE_CLEARED') return;
-        if (type !== 'valley') return;
-
-        if (this.draggedRank) {
-          this.deployToTile(r, c, this.draggedRank);
-        }
-      });
-    });
-
-    // 대기열 트레이로 드롭 시 배치 취소
-    const tray = document.getElementById('siege-soldier-tray');
-    if (tray) {
-      tray.addEventListener('dragover', (e) => e.preventDefault());
-      tray.addEventListener('drop', (e) => {
-        e.preventDefault();
-        if (this.draggedTile) {
-          this.withdrawFromTile(this.draggedTile.r, this.draggedTile.c);
-        }
-      });
-    }
-  }
-
-  getBestAvailableRank() {
-    const ranks = [
-      RANK_TYPES.MASTER,
-      RANK_TYPES.ROYAL_GUARD,
-      RANK_TYPES.HIGH_KNIGHT,
-      RANK_TYPES.SENIOR_KNIGHT,
-      RANK_TYPES.JUNIOR_KNIGHT,
-      RANK_TYPES.INFANTRY,
-      RANK_TYPES.RECRUIT
-    ];
-    for (const r of ranks) {
-      if ((this.soldierPool[r] || 0) > 0) return r;
-    }
-    return null;
-  }
-
-  /**
-   * 골짜기 타일에 병사 10명 배치
-   */
-  deployToTile(r, c, rankType) {
-    const key = `${r}_${c}`;
-    const current = this.placements[key];
-
-    if (current && current.rankType !== rankType) {
-      alert(`이미 ${SOLDIER_SPECS[current.rankType].name}가 배치된 골짜기입니다. 다른 종류의 병사는 배치할 수 없습니다.`);
-      return;
-    }
-
-    const available = this.soldierPool[rankType] || 0;
-    if (available <= 0) {
-      alert(`배치 가능한 ${SOLDIER_SPECS[rankType].name}가 없습니다.`);
-      return;
-    }
-
-    // 10명 단위 배치 (10명 미만 남았으면 남은 전원 배치)
-    const toDeploy = Math.min(10, available);
-    this.soldierPool[rankType] -= toDeploy;
-
-    const spec = SOLDIER_SPECS[rankType];
-    if (!current) {
-      this.placements[key] = {
-        rankType,
-        count: toDeploy,
-        currentHp: toDeploy * spec.hp,
-        maxHp: toDeploy * spec.hp,
-        lastAtkTime: 0
-      };
-    } else {
-      current.count += toDeploy;
-      current.maxHp += toDeploy * spec.hp;
-      current.currentHp += toDeploy * spec.hp;
-    }
-
-    this.renderBattleArena();
-  }
-
-  /**
-   * 원클릭 10명 증원
-   */
-  reinforceTile(r, c) {
-    const key = `${r}_${c}`;
-    const placed = this.placements[key];
-    if (!placed) return;
-
-    const rankType = placed.rankType;
-    const available = this.soldierPool[rankType] || 0;
-    if (available <= 0) {
-      return;
-    }
-
-    const toDeploy = Math.min(10, available);
-    this.soldierPool[rankType] -= toDeploy;
-
-    const spec = SOLDIER_SPECS[rankType];
-    placed.count += toDeploy;
-    placed.maxHp += toDeploy * spec.hp;
-    placed.currentHp += toDeploy * spec.hp;
-
-    this.renderBattleArena();
-  }
-
-  /**
-   * 타일에서 병사 회수 (배치 취소)
-   */
-  withdrawFromTile(r, c) {
-    const key = `${r}_${c}`;
-    const placed = this.placements[key];
-    if (!placed) return;
-
-    this.soldierPool[placed.rankType] = (this.soldierPool[placed.rankType] || 0) + placed.count;
-    delete this.placements[key];
-    this.renderBattleArena();
-  }
-
-  /**
-   * 자동 균등 배치
-   */
-  autoDeployTroops() {
-    const valleyCoords = [...this.pathCoords];
-    const emptyValleys = valleyCoords.filter(([r, c]) => !this.placements[`${r}_${c}`]);
-
-    const rankPriority = [
-      RANK_TYPES.MASTER,
-      RANK_TYPES.ROYAL_GUARD,
-      RANK_TYPES.HIGH_KNIGHT,
-      RANK_TYPES.SENIOR_KNIGHT,
-      RANK_TYPES.JUNIOR_KNIGHT,
-      RANK_TYPES.INFANTRY,
-      RANK_TYPES.RECRUIT
-    ];
-
-    let targetIdx = emptyValleys.length - 1; // 성채 앞부터 배치
-    rankPriority.forEach(rank => {
-      while ((this.soldierPool[rank] || 0) > 0 && targetIdx >= 0) {
-        const [r, c] = emptyValleys[targetIdx];
-        this.deployToTile(r, c, rank);
-        targetIdx--;
-      }
-    });
-
-    this.renderBattleArena();
-  }
-
-  getThemeForWave(wave) {
-    const tierIdx = Math.min(MONSTER_THEMES.length - 1, Math.floor((wave - 1) / 10));
-    return MONSTER_THEMES[tierIdx];
-  }
-
-  calculateMonsterCountForWave(wave) {
-    // 바글바글 쏟아져 나오는 웨이브 느낌: 18마리부터 시작하여 웨이브마다 3.5마리씩 추가!
-    return 18 + Math.floor(wave * 3.5);
-  }
-
-  playBattleClashSound() {
-    const now = performance.now();
-    if (!this.lastClashSoundTime || now - this.lastClashSoundTime > 160) {
-      this.lastClashSoundTime = now;
-      SoundManager.playTone('clash');
-    }
-  }
-
-  playDamageSound() {
-    const now = performance.now();
-    if (!this.lastDamageSoundTime || now - this.lastDamageSoundTime > 220) {
-      this.lastDamageSoundTime = now;
-      SoundManager.playTone('hit_damage');
-    }
-  }
-
-  /**
-   * 웨이브 전투 개시
-   */
-  startWaveBattle() {
-    // 배치된 병사가 1명이라도 있는지 확인
-    const totalPlaced = Object.values(this.placements).reduce((acc, p) => acc + p.count, 0);
-    if (totalPlaced <= 0) {
-      alert('전장에 배치된 병사가 없습니다! 골짜기에 병사를 10명 이상 배치한 후 시작하세요.');
-      return;
-    }
-
-    // 전쟁 나팔 사운드 울림!
-    SoundManager.playTone('war_horn');
-
-    this.state = 'BATTLE';
-    this.renderBattleArena();
-
-    const theme = this.getThemeForWave(this.wave);
-    const mobCount = this.calculateMonsterCountForWave(this.wave);
-
-    // 몬스터 스폰 큐 생성 (바글바글 Swarm 지터 좌표 부여)
-    this.spawnQueue = [];
-    this.monsters = [];
-
-    for (let i = 0; i < mobCount; i++) {
-      this.spawnQueue.push({
-        id: `mob_${this.wave}_${i}`,
-        name: theme.name,
-        type: theme.type,
-        hp: theme.hp + this.wave * 12,
-        maxHp: theme.hp + this.wave * 12,
-        atk: theme.atk + Math.floor(this.wave * 2),
-        speed: theme.speed,
-        pathIndex: 0,
-        progress: 0,
-        lastAtkTime: 0,
-        jitterX: Math.round((Math.random() - 0.5) * 28), // 떼지어 몰려오는 좌우 지터
-        jitterY: Math.round((Math.random() - 0.5) * 22), // 떼지어 몰려오는 상하 지터
-        animSpeed: (0.35 + Math.random() * 0.2).toFixed(2),
-        animDelay: (Math.random() * 0.3).toFixed(2)
-      });
-    }
-
-    // 초고속 스폰 간격 (200ms ~ 280ms로 쉴 새 없이 우르르 쏟아져 나옴)
-    const spawnInterval = Math.max(180, 320 - this.wave * 3);
-    this.spawnTimer = setInterval(() => {
-      if (this.spawnQueue.length > 0) {
-        this.monsters.push(this.spawnQueue.shift());
-      } else {
-        clearInterval(this.spawnTimer);
-        this.spawnTimer = null;
-      }
-    }, spawnInterval);
-
-    this.lastLoopTime = performance.now();
-    this.animFrameId = requestAnimationFrame((t) => this.battleLoop(t));
-  }
-
-  battleLoop(timestamp) {
-    if (this.state !== 'BATTLE') return;
-
-    const dt = Math.min(100, timestamp - this.lastLoopTime);
-    this.lastLoopTime = timestamp;
-
-    this.updateBattleState(dt, timestamp);
-    this.renderBattleFrame();
-
-    // 성채 파괴 체크
-    if (this.castleHp <= 0) {
-      this.triggerGameOver();
-      return;
-    }
-
-    // 이번 웨이브 클리어 조건
-    if (this.spawnQueue.length === 0 && this.monsters.length === 0) {
-      this.handleWaveClear();
-      return;
-    }
-
-    this.animFrameId = requestAnimationFrame((t) => this.battleLoop(t));
-  }
-
-  /**
-   * 전투 프레임 계산 (몬스터 돌진, 아군/적군 난전 교전)
-   */
-  updateBattleState(dt, now) {
-    const endIdx = this.pathCoords.length - 1;
-
-    for (let i = this.monsters.length - 1; i >= 0; i--) {
-      const mob = this.monsters[i];
-      const [currR, currC] = this.pathCoords[mob.pathIndex];
-      const key = `${currR}_${currC}`;
-      const placed = this.placements[key];
-
-      if (placed && placed.count > 0 && placed.currentHp > 0) {
-        // 교전 중: 아군 공격
-        const spec = SOLDIER_SPECS[placed.rankType];
-        if (now - (placed.lastAtkTime || 0) >= spec.atkSpeed) {
-          placed.lastAtkTime = now;
-          const damage = placed.count * spec.atk;
-          mob.hp -= damage;
-          this.triggerTileFx(currR, currC, 'attack', damage);
-        }
-
-        // 몬스터의 반격 (850ms 주기)
-        if (now - (mob.lastAtkTime || 0) >= 850) {
-          mob.lastAtkTime = now;
-          placed.currentHp -= mob.atk;
-          this.triggerTileFx(currR, currC, 'damage', mob.atk);
-
-          // 병사 사망 체크 (1인당 체력 단위로 사망)
-          const newCount = Math.ceil(placed.currentHp / spec.hp);
-          if (newCount < placed.count) {
-            const lost = placed.count - Math.max(0, newCount);
-            placed.count = Math.max(0, newCount);
-            this.deadPool[placed.rankType] = (this.deadPool[placed.rankType] || 0) + lost;
-            this.totalCasualties += lost;
-          }
-
-          if (placed.count <= 0 || placed.currentHp <= 0) {
-            delete this.placements[key];
-          }
-        }
-      } else {
-        // 전진: 골짜기를 따라 고속 돌진
-        mob.progress += (mob.speed * dt) / 1000;
-        if (mob.progress >= 1.0) {
-          mob.progress = 0;
-          mob.pathIndex++;
-
-          // 성채 도달 체크
-          if (mob.pathIndex >= endIdx) {
-            this.castleHp = Math.max(0, this.castleHp - 10);
-            this.monsters.splice(i, 1);
-            this.triggerTileFx(this.pathCoords[endIdx][0], this.pathCoords[endIdx][1], 'castle_hit', 10);
-            continue;
-          }
-        }
-      }
-
-      // 몬스터 사망 체크
-      if (mob.hp <= 0) {
-        this.monsters.splice(i, 1);
-        this.totalKills++;
-      }
-    }
-  }
-
-  /**
-   * 화면 프레임 렌더링 (몬스터 스웜, 실시간 교전 애니메이션 및 체력 바 DOM 업데이트)
-   */
-  renderBattleFrame() {
-    const hpEl = document.getElementById('siege-castle-hp');
-    const killsEl = document.getElementById('siege-total-kills');
-    if (hpEl) hpEl.innerText = this.castleHp;
-    if (killsEl) killsEl.innerText = this.totalKills;
-
-    const tiles = this.container.querySelectorAll('.siege-tile');
-    tiles.forEach(tile => {
-      const r = parseInt(tile.dataset.r, 10);
-      const c = parseInt(tile.dataset.c, 10);
-      const layer = tile.querySelector('.tile-monsters-layer');
-      const hpBar = tile.querySelector('.tile-hp-bar');
-      const clashLayer = tile.querySelector('.tile-clash-layer');
-      const soldierUnit = tile.querySelector('.tile-soldier-unit');
-      const key = `${r}_${c}`;
-      const placed = this.placements[key];
-
-      if (hpBar && placed) {
-        hpBar.style.width = `${Math.max(0, (placed.currentHp / placed.maxHp) * 100)}%`;
-      }
-
-      const mobsOnTile = this.monsters.filter(m => {
-        const coord = this.pathCoords[m.pathIndex];
-        return coord && coord[0] === r && coord[1] === c;
-      });
-
-      // 딱 몹과 부딪혔을 때: 교전 중 효과 애니메이션 활성화!
-      const isClashing = placed && placed.count > 0 && mobsOnTile.length > 0;
-
-      if (isClashing) {
-        tile.classList.add('battle-tile-shake', 'border-rose-500', 'shadow-lg', 'shadow-rose-500/50');
-        if (clashLayer) clashLayer.classList.remove('hidden');
-        if (soldierUnit) soldierUnit.style.animation = 'soldier-thrust 0.35s infinite ease-in-out';
-      } else {
-        tile.classList.remove('battle-tile-shake', 'border-rose-500', 'shadow-lg', 'shadow-rose-500/50');
-        if (clashLayer) clashLayer.classList.add('hidden');
-        if (soldierUnit) soldierUnit.style.animation = '';
-      }
-
-      if (layer) {
-        if (mobsOnTile.length > 0) {
-          // 바글바글하게 떼를 지어 흔들거리며 내려오는 몬스터 캐릭터 그래픽
-          layer.innerHTML = mobsOnTile.map(m => `
-            <div class="absolute flex flex-col items-center pointer-events-none"
-              style="--jx:${m.jitterX}px; --jy:${m.jitterY}px; animation: monster-swarm-walk ${m.animSpeed}s infinite ease-in-out ${m.animDelay}s;">
-              ${getMonsterCharacterSVG(m.type, this.wave, 24)}
-              <div class="w-6 h-0.5 bg-black/90 rounded-full overflow-hidden mt-0.5">
-                <div class="h-full bg-rose-500" style="width: ${(m.hp / m.maxHp) * 100}%"></div>
-              </div>
-            </div>
-          `).join('');
-        } else {
-          layer.innerHTML = '';
-        }
-      }
-    });
-  }
-
-  triggerTileFx(r, c, type, val) {
-    const tile = this.container.querySelector(`.siege-tile[data-r="${r}"][data-c="${c}"]`);
-    if (!tile) return;
-    const fx = tile.querySelector('.tile-fx-overlay');
-    if (!fx) return;
-
-    if (type === 'attack') {
-      this.playBattleClashSound();
-      fx.innerHTML = `
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span class="text-xs sm:text-sm font-black text-amber-300 font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style="animation: float-damage 0.45s ease-out forwards;">💥-${val}</span>
-        </div>
-      `;
-    } else if (type === 'damage') {
-      this.playDamageSound();
-      fx.innerHTML = `
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span class="text-xs sm:text-sm font-black text-rose-500 font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style="animation: float-damage 0.45s ease-out forwards;">🩸-${val}</span>
-        </div>
-      `;
-    } else if (type === 'castle_hit') {
-      SoundManager.playTone('explosion');
-      fx.innerHTML = `
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span class="text-sm sm:text-base font-black text-red-500 font-mono drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]" style="animation: float-damage 0.6s ease-out forwards;">🔥 성채 피격! -${val}</span>
-        </div>
-      `;
-    }
-
-    fx.classList.remove('hidden');
-    setTimeout(() => {
-      if (fx) fx.classList.add('hidden');
-    }, 450);
-  }
-
-  /**
-   * 웨이브 클리어 처리
-   */
-  handleWaveClear() {
-    this.stopBattleLoop();
-
-    // 웨이브 클리어 팡파레 사운드 울림!
-    SoundManager.playTone('wave_clear');
-
-    if (this.wave >= this.maxWave) {
-      this.triggerVictory();
-      return;
-    }
-
-    const nextWave = this.wave + 1;
-
-    // 10웨이브 단위: 새 맵 생성 & 50% 부활 & 재배치
-    if (this.wave % 10 === 0) {
-      this.handleDecadeMapShift(nextWave);
-    } else {
-      // 일반 웨이브 클리어: 모달 닫으면 즉시 다음 웨이브 시작!
-      this.state = 'WAVE_CLEARED';
-      this.wave = nextWave;
-      this.showWaveClearModal(this.wave - 1, () => {
-        this.startWaveBattle();
-      });
-    }
-  }
-
-  /**
-   * 웨이브 클리어 팝업 (확인 누르면 지체 없이 즉시 다음 웨이브 전투 개시!)
-   */
-  showWaveClearModal(clearedWave, onNextWave) {
-    const modal = document.createElement('div');
-    modal.id = 'siege-wave-clear-modal';
-    modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in select-none';
-    modal.innerHTML = `
-      <div class="bg-slate-900 text-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-2 border-emerald-500/60 text-center">
-        <div class="text-5xl mb-2 animate-bounce">🎉⚔️</div>
-        <h4 class="text-xl font-black text-emerald-400">Wave ${clearedWave} 클리어!</h4>
-        <p class="text-xs text-slate-300 mt-1">마물 대군단을 성공적으로 막아냈습니다!</p>
-        
-        <div class="my-4 p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-400 space-y-1">
-          <div>다음 침공: <strong class="text-amber-400 font-mono">Wave ${clearedWave + 1}</strong></div>
-          <div class="text-[11px] text-slate-500">확인을 누르면 즉시 다음 웨이브가 시작됩니다.</div>
-        </div>
-
-        <button id="siege-next-wave-btn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-sm shadow-lg shadow-emerald-500/30 transition transform active:scale-95">
-          다음 웨이브 즉시 시작 ⚔️
-        </button>
-      </div>
-    `;
-    this.container.appendChild(modal);
-
-    const btn = document.getElementById('siege-next-wave-btn');
-    if (btn) {
-      btn.onclick = () => {
-        modal.remove();
-        if (typeof onNextWave === 'function') {
-          onNextWave();
-        }
-      };
-    }
-  }
-
-  /**
-   * 10웨이브 단위: 새 맵 생성 & 50% 부활 & 재배치
-   */
-  handleDecadeMapShift(nextWave) {
-    this.state = 'PREPARING';
-    this.wave = nextWave;
-
-    // 사망한 병사의 50% 부활
-    let totalRevived = 0;
-    Object.keys(this.deadPool).forEach(rank => {
-      const dead = this.deadPool[rank] || 0;
-      if (dead > 0) {
-        const revived = Math.ceil(dead * 0.5);
-        this.soldierPool[rank] = (this.soldierPool[rank] || 0) + revived;
-        this.deadPool[rank] = Math.max(0, dead - revived);
-        totalRevived += revived;
-      }
-    });
-
-    // 배치된 병사들도 대기열로 안전 회수
-    Object.values(this.placements).forEach(p => {
-      this.soldierPool[p.rankType] = (this.soldierPool[p.rankType] || 0) + p.count;
-    });
-    this.placements = {};
-
-    this.generateNewMap();
-
-    alert(`✨ [지형 변경 & 50% 부활]\nWave ${this.wave - 1} 돌파 기념으로 새로운 전장이 열리고,\n전사자 중 ${totalRevived}명이 명예롭게 부활했습니다!\n\n새로운 골짜기 지형에 병사를 재배치하세요!`);
-    this.renderBattleArena();
-  }
-
-  /**
-   * 성채 함락 & 게임 오버 연출
-   */
-  triggerGameOver() {
-    this.stopBattleLoop();
-    this.state = 'GAMEOVER';
-
-    const flame = document.getElementById('siege-flame-overlay');
-    if (flame) flame.classList.remove('hidden');
-
-    const result = SiegeManager.recordBattleResult(this.wave, this.totalKills, this.totalCasualties);
-
-    setTimeout(() => {
-      this.renderGameOverModal(result);
-    }, 1800);
-  }
-
-  renderGameOverModal(result) {
-    this.container.innerHTML = `
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in select-none">
-        <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-rose-500/50 text-center relative overflow-hidden">
-          
-          <div class="text-6xl mb-3 animate-bounce">🔥🏰🔥</div>
-          <h3 class="text-2xl font-black text-rose-500 tracking-tight">성채가 함락되었습니다...</h3>
-          <p class="text-xs text-slate-400 mt-1">마물 대군단의 파상공세를 막아내지 못하고 성채가 불타올랐습니다.</p>
-
-          <div class="my-5 p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
-            <div class="flex justify-between items-center text-slate-300">
-              <span>최종 도달 웨이브:</span>
-              <span class="font-black text-amber-400 font-mono text-base">Wave ${this.wave} / ${this.maxWave}</span>
-            </div>
-            <div class="flex justify-between items-center text-slate-300">
-              <span>처치한 마물 군단:</span>
-              <span class="font-black text-emerald-400 font-mono">${this.totalKills} 마리</span>
-            </div>
-            <div class="flex justify-between items-center text-slate-300">
-              <span>명예롭게 전사한 병사:</span>
-              <span class="font-black text-rose-400 font-mono">${this.totalCasualties} 명</span>
-            </div>
-            ${result.isNewRecord ? `
-              <div class="pt-2 border-t border-slate-800 text-purple-400 font-black text-xs animate-pulse">
-                👑 새로운 최고 방어 기록 달성!
-              </div>
-            ` : `
-              <div class="pt-2 border-t border-slate-800 text-slate-400 text-[11px]">
-                역대 최고 기록: Wave ${result.bestWave}
-              </div>
-            `}
-          </div>
-
-          <div class="flex gap-2">
-            <button id="siege-done-btn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white font-bold text-xs transition">
-              대시보드로 복귀
-            </button>
-          </div>
-
-        </div>
-      </div>
-    `;
-
-    const btn = document.getElementById('siege-done-btn');
-    if (btn) btn.onclick = () => this.close();
-  }
-
-  triggerVictory() {
-    this.stopBattleLoop();
-    this.state = 'GAMEOVER';
-    const result = SiegeManager.recordBattleResult(100, this.totalKills, this.totalCasualties);
-
-    this.container.innerHTML = `
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in select-none">
-        <div class="bg-slate-900 text-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-amber-500/80 text-center">
-          <div class="text-6xl mb-3">👑🏰🎉</div>
-          <h3 class="text-2xl font-black text-amber-400 tracking-tight">100웨이브 최종 방어 성공!</h3>
-          <p class="text-xs text-slate-300 mt-1">왕국의 성채가 마물들의 대침공을 완전히 물리쳤습니다!</p>
-          <div class="my-5 p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1.5">
-            <div>총 처치 몬스터: <strong class="text-emerald-400 font-mono">${this.totalKills}</strong> 마리</div>
-            <div>기사단 전사자: <strong class="text-rose-400 font-mono">${this.totalCasualties}</strong> 명</div>
-          </div>
-          <button id="siege-victory-done-btn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-indigo-600 text-white font-black text-xs transition">
-            영광을 안고 대시보드로 복귀
-          </button>
-        </div>
-      </div>
-    `;
-
-    const btn = document.getElementById('siege-victory-done-btn');
-    if (btn) btn.onclick = () => this.close();
   }
 
   stopBattleLoop() {
-    if (this.animFrameId) {
-      cancelAnimationFrame(this.animFrameId);
-      this.animFrameId = null;
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
     }
-    if (this.spawnTimer) {
-      clearInterval(this.spawnTimer);
-      this.spawnTimer = null;
+    if (this._canvasObserver) {
+      this._canvasObserver.disconnect();
+      this._canvasObserver = null;
     }
+  }
+
+  isAttackable(cityId, conqueredSet) {
+    if (conqueredSet.has(cityId)) return false;
+    const neighbors = this.adj[cityId];
+    if (!neighbors) return false;
+    for (const nb of neighbors) {
+      if (conqueredSet.has(nb)) return true;
+    }
+    return false;
+  }
+
+  getDifficultyMultiplier(conqueredCount) {
+    return 1 + conqueredCount * 0.08;
+  }
+
+  // =========================================================================
+  // 1. 삼국지 9 50도시 월드맵 화면
+  // =========================================================================
+  renderWorldMap() {
+    if (!this.modalEl) return;
+    this.stopBattleLoop();
+    this.screen = 'map';
+
+    const state = SiegeManager.getConquestState();
+    const isAdmin = SiegeManager.isAdminProfile();
+    const conqueredSet = new Set(state.conqueredCities);
+    const conqueredCount = Math.max(0, conqueredSet.size - 1);
+    const defeatsLeft = isAdmin ? 99 : Math.max(0, SiegeManager.MAX_DAILY_DEFEATS - state.defeatsToday);
+    const diffMult = this.getDifficultyMultiplier(conqueredCount).toFixed(2);
+    const troopInfo = SiegeManager.getTroopPoolFromWords();
+
+    // 선택된 도시가 유효하지 않거나 이미 점령됐다면 첫 번째 침공 가능 도시 자동 선택
+    if (!this.selectedCityId || !this.isAttackable(this.selectedCityId, conqueredSet)) {
+      const firstAttackable = RTK_CITIES.find(c => c.id !== 0 && this.isAttackable(c.id, conqueredSet));
+      this.selectedCityId = firstAttackable ? firstAttackable.id : null;
+    }
+
+    const selectedCity = this.selectedCityId ? RTK_CITIES[this.selectedCityId] : null;
+    const heartsHtml = isAdmin
+      ? '∞'
+      : Array.from({ length: SiegeManager.MAX_DAILY_DEFEATS })
+          .map((_, i) => i < defeatsLeft ? '❤️' : '🖤')
+          .join('');
+
+    this.modalEl.innerHTML = `
+      <div class="w-full max-w-5xl bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[96vh]">
+        <!-- 상단 헤더 -->
+        <div class="px-4 py-3 bg-slate-950/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">🗺️</span>
+            <div>
+              <h2 class="text-sm sm:text-base font-black text-white">삼국지 50성 천하통일 타워디펜스</h2>
+              <p class="text-[11px] text-slate-400">우측 최상단 <strong class="text-amber-400">나의 왕국</strong>에서 연결된 도시를 침공해 성문을 함락하세요!</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-emerald-400">
+              점령: <span class="font-mono">${conqueredCount} / 50</span>
+            </div>
+            <div class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-amber-400">
+              적 난이도: <span class="font-mono">${diffMult}x</span>
+            </div>
+            <div class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-rose-300" title="하루 2패 시 종료 (자정 12시 리셋, 승리 시 무제한 계속 가능)">
+              남은 패배 기회: <span>${heartsHtml}</span> ${isAdmin ? '(ADMIN 무제한)' : `(${defeatsLeft}/2)`}
+            </div>
+            <button id="siege-close-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+              ✕ 닫기
+            </button>
+          </div>
+        </div>
+
+        <!-- 보유 병력 요약 바 -->
+        <div class="px-4 py-2 bg-slate-900/90 border-b border-slate-800 flex items-center gap-2 overflow-x-auto text-[11px]">
+          <span class="font-bold text-slate-400 shrink-0">⚔️ 전체 단어장 전투 병력(총 ${troopInfo.totalWords}명 · 훈련병 제외):</span>
+          ${RANK_POOL_META.map(m => `
+            <span class="px-2 py-0.5 rounded-lg border ${m.bg} ${m.color} font-bold shrink-0">
+              ${m.label} <span class="font-mono">${troopInfo.counts[m.key]}</span>
+            </span>
+          `).join('')}
+        </div>
+
+        <!-- 삼국지 9 실사 지형 월드맵 -->
+        <div class="relative flex-1 bg-slate-950 overflow-hidden flex items-center justify-center min-h-[260px]">
+          <div class="relative w-full max-w-4xl aspect-[1000/562]">
+            <img src="assets/images/rtk_world_map.jpg" alt="삼국지 대륙 지도" class="w-full h-full object-cover block select-none pointer-events-none" />
+            <div class="absolute inset-0 bg-slate-950/15 pointer-events-none"></div>
+            <svg id="siege-rtk-svg" viewBox="0 0 1000 562" class="absolute inset-0 w-full h-full select-none"></svg>
+          </div>
+        </div>
+
+        <!-- 하단 출정 컨트롤 바 -->
+        <div class="px-4 py-3 bg-slate-950/95 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          ${conqueredCount >= 50 ? `
+            <div class="text-sm font-black text-amber-400">
+              🏆 축하합니다! 삼국지 50개 도시를 모두 통일했습니다!
+            </div>
+            <button id="siege-reset-world-btn" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-black transition">
+              🔄 천하통일 새 회차 시작
+            </button>
+          ` : selectedCity ? `
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/50 flex items-center justify-center text-xl">🏯</div>
+              <div>
+                <div class="text-sm font-black text-white">
+                  목표: <span class="text-rose-400">${selectedCity.name}</span>
+                  <span class="text-xs font-normal text-slate-400 ml-1">(${selectedCity.region})</span>
+                </div>
+                <div class="text-xs text-slate-400">
+                  적 난이도 <strong class="text-amber-400">${diffMult}x</strong> · 승리를 거두면 계속 다음 성으로 진격할 수 있습니다!
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 ml-auto">
+              ${defeatsLeft > 0 ? `
+                <button id="siege-attack-btn" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-black text-sm shadow-lg shadow-rose-500/30 transition transform active:scale-95 flex items-center gap-2">
+                  <span>⚔️</span>
+                  <span>${selectedCity.name} 공격하기</span>
+                </button>
+              ` : `
+                <div class="px-4 py-2 rounded-xl bg-rose-950/60 border border-rose-700 text-rose-300 text-xs font-bold">
+                  오늘 패배 횟수(2/2) 소진 · 밤 12시에 초기화됩니다
+                </div>
+              `}
+            </div>
+          ` : `
+            <div class="text-xs text-slate-400">공격 가능한 인접 도시를 선택하세요.</div>
+          `}
+        </div>
+      </div>
+    `;
+
+    this.drawWorldMapSvg(conqueredSet);
+
+    document.getElementById('siege-close-btn')?.addEventListener('click', () => this.close());
+    document.getElementById('siege-attack-btn')?.addEventListener('click', () => {
+      if (selectedCity && SiegeManager.canPlay()) {
+        this.startBattle(selectedCity);
+      }
+    });
+    document.getElementById('siege-reset-world-btn')?.addEventListener('click', () => {
+      if (confirm('50성 점령 기록을 초기화하고 새 회차를 시작할까요?')) {
+        SiegeManager.saveConquestState({
+          conqueredCities: [0],
+          date: SiegeManager.getLocalDateStr(),
+          defeatsToday: state.defeatsToday
+        }, true);
+        this.renderWorldMap();
+      }
+    });
+  }
+
+  drawWorldMapSvg(conqueredSet) {
+    const svg = document.getElementById('siege-rtk-svg');
+    if (!svg) return;
+
+    const ns = 'http://www.w3.org/2000/svg';
+    let html = `
+      <style>
+        @keyframes rtkPulse { 0%, 100% { r: 12; opacity: 0.95; } 50% { r: 17; opacity: 0.25; } }
+        .rtk-pulse { animation: rtkPulse 1.5s ease-in-out infinite; }
+        .rtk-label { paint-order: stroke; stroke: rgba(15,23,42,0.92); stroke-width: 3px; stroke-linejoin: round; }
+      </style>
+    `;
+
+    // 도로망 그리기
+    RTK_EDGES.forEach(([a, b]) => {
+      const ca = RTK_CITIES[a];
+      const cb = RTK_CITIES[b];
+      const both = conqueredSet.has(a) && conqueredSet.has(b);
+      const one = conqueredSet.has(a) || conqueredSet.has(b);
+
+      html += `<line x1="${ca.x}" y1="${ca.y}" x2="${cb.x}" y2="${cb.y}" stroke="rgba(15,23,42,0.65)" stroke-width="${(both || one) ? 4.2 : 2.6}" />`;
+      if (both) {
+        html += `<line x1="${ca.x}" y1="${ca.y}" x2="${cb.x}" y2="${cb.y}" stroke="#34d399" stroke-width="2.6" />`;
+      } else if (one) {
+        html += `<line x1="${ca.x}" y1="${ca.y}" x2="${cb.x}" y2="${cb.y}" stroke="#fb7185" stroke-width="2.2" stroke-dasharray="5 4" />`;
+      } else {
+        html += `<line x1="${ca.x}" y1="${ca.y}" x2="${cb.x}" y2="${cb.y}" stroke="#cbd5e1" stroke-width="1.3" stroke-opacity="0.5" />`;
+      }
+    });
+
+    // 도시 마커
+    RTK_CITIES.forEach(c => {
+      const isHome = c.id === 0;
+      const isConq = conqueredSet.has(c.id);
+      const canAtk = this.isAttackable(c.id, conqueredSet);
+      const isSel = this.selectedCityId === c.id;
+
+      html += `<g class="rtk-city-btn cursor-pointer" data-city-id="${c.id}">`;
+      if (canAtk) {
+        html += `<circle cx="${c.x}" cy="${c.y}" r="13" fill="none" stroke="${isSel ? '#fde047' : '#fb7185'}" stroke-width="${isSel ? 3 : 2}" class="rtk-pulse" />`;
+      }
+      if (isSel) {
+        html += `<circle cx="${c.x}" cy="${c.y}" r="12" fill="none" stroke="#fde047" stroke-width="2.5" />`;
+      }
+
+      const fill = isHome ? '#f59e0b' : isConq ? '#10b981' : canAtk ? '#f43f5e' : '#334155';
+      const stroke = isHome ? '#fef3c7' : isConq ? '#d1fae5' : canAtk ? '#ffe4e6' : '#94a3b8';
+      const r = isHome ? 11 : (isSel ? 9 : 7);
+
+      html += `<circle cx="${c.x}" cy="${c.y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${isHome ? 2.5 : 1.8}" />`;
+
+      const textFill = isHome ? '#fde68a' : isSel ? '#fef08a' : canAtk ? '#fecdd3' : isConq ? '#a7f3d0' : '#f1f5f9';
+      html += `<text x="${c.x}" y="${c.y + (isHome ? 23 : 18)}" text-anchor="middle" font-size="${isHome ? 11 : 9.5}" font-weight="800" fill="${textFill}" class="rtk-label">${isHome ? '👑 나의 왕국' : c.name}</text>`;
+      html += `</g>`;
+    });
+
+    svg.innerHTML = html;
+
+    svg.querySelectorAll('.rtk-city-btn').forEach(el => {
+      el.addEventListener('click', () => {
+        const cid = parseInt(el.dataset.cityId, 10);
+        if (this.isAttackable(cid, conqueredSet)) {
+          this.selectedCityId = cid;
+          this.renderWorldMap();
+        }
+      });
+    });
+  }
+
+  // =========================================================================
+  // 2. 6x8 타워 디펜스 + 아군 성문 진격 전장
+  // =========================================================================
+  startBattle(city) {
+    this.stopBattleLoop();
+    this.screen = 'battle';
+    this.battleCity = city;
+    this.battlePath = getCityBattlePath(city.id);
+    this.pathSet = new Set(this.battlePath.map(([r, c]) => `${r}_${c}`));
+
+    // 길이 아닌 땅의 절반(50%)을 랜덤하게 바위산(건설 불가)으로 지정
+    const nonPathTiles = [];
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 6; c++) {
+        const k = `${r}_${c}`;
+        if (!this.pathSet.has(k)) nonPathTiles.push(k);
+      }
+    }
+    nonPathTiles.sort(() => Math.random() - 0.5);
+    const rockCount = Math.floor(nonPathTiles.length / 2);
+    this.rockSet = new Set(nonPathTiles.slice(0, rockCount));
+
+    const state = SiegeManager.getConquestState();
+    const conqueredCount = Math.max(0, state.conqueredCities.length - 1);
+    this.conqueredCount = conqueredCount;
+    this.diffMult = this.getDifficultyMultiplier(conqueredCount);
+
+    const pool = SiegeManager.getTroopPoolFromWords();
+    this.troops = { ...pool.counts };
+    this.maxTroops = { ...pool.counts };
+    this.towers = new Map();
+
+    this.enemies = [];
+    this.allies = [];
+    this.projectiles = [];
+    this.beams = [];
+    this.particles = [];
+
+    this.wave = 1;
+    this.prepTimeLeft = 3000; // 전투 시작 전 3초 타워 배치 준비 시간
+    this.enemyQueue = this.buildStageEnemyQueue(conqueredCount);
+    this.enemySpawnTimer = 200; // 준비 시간 종료 직후 즉시 출격
+    this.allySpawnTimer = 1400;
+    this.nextId = 1;
+    this.kills = 0;
+    this.isPaused = false;
+    this._manualPause = false;
+    this.battleEnded = false;
+    this.speedMultiplier = 1;
+
+    // 새 전투마다 캔버스 크기/컨텍스트/배경 캐시 초기화
+    this._canvasW = 0;
+    this._canvasH = 0;
+    this._ctx = null;
+    this._unitSprites = null;
+    this._bgDirty = true;
+
+    this.renderBattleScreen();
+    this.setupBattleCanvas();
+    this.updateEnemyQueueUI();
+    this.lastFrameTime = performance.now();
+    this.loop(this.lastFrameTime);
+  }
+
+  /**
+   * 스테이지 전체 적 웨이브 대기열 생성 (적 규모 2배 확대, 2~3마리 동시/연속 행군)
+   */
+  buildStageEnemyQueue(conqueredCount) {
+    const queue = [];
+    const extra = Math.floor(conqueredCount / 6);
+
+    // Wave 1: 기존 대비 2배 규모
+    const w1Count = (8 + extra) * 2;
+    for (let i = 0; i < w1Count; i++) {
+      const kind = i % 3 === 2 ? 'fast' : 'normal';
+      const batchOffset = (i % 2 === 1) ? 0.22 : 0;
+      const delayMs = (i % 2 === 0) ? 130 : 420;
+      queue.push({ kind, wave: 1, delayMs, batchOffset });
+    }
+
+    // Wave 2: 기존 대비 2배 규모 (3마리 연속 행군)
+    const w2Count = (10 + extra) * 2;
+    for (let i = 0; i < w2Count; i++) {
+      const kind = i % 4 === 3 ? 'heavy' : (i % 3 === 1 ? 'fast' : 'normal');
+      const isBurstStart = i === 0;
+      const delayMs = isBurstStart ? 1500 : (i % 3 === 0 ? 450 : 120);
+      queue.push({ kind, wave: 2, delayMs, batchOffset: (i % 3) * 0.18 });
+    }
+
+    // Wave 3: 기존 대비 2배 규모 + 보스 2배
+    const w3Count = (11 + extra) * 2;
+    for (let i = 0; i < w3Count; i++) {
+      const kind = i % 4 === 2 ? 'heavy' : (i % 2 === 1 ? 'fast' : 'normal');
+      const delayMs = i === 0 ? 1600 : (i % 3 === 0 ? 420 : 110);
+      queue.push({ kind, wave: 3, delayMs, batchOffset: (i % 3) * 0.18 });
+    }
+
+    const bossCount = (conqueredCount >= 15 ? 2 : 1) * 2;
+    for (let b = 0; b < bossCount; b++) {
+      queue.push({ kind: 'boss', wave: 3, delayMs: b === 0 ? 500 : 380, batchOffset: b * 0.22 });
+    }
+
+    return queue;
+  }
+
+  setupBattleCanvas() {
+    const canvas = document.getElementById('td-canvas');
+    if (!canvas) return;
+
+    const syncSize = () => {
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      // 6:8 정사각형 셀 비율 강제 유지
+      const w = Math.max(300, Math.round(rect.width * dpr));
+      const h = Math.max(400, Math.round(rect.height * dpr));
+      if (this._canvasW !== w || this._canvasH !== h || this._dpr !== dpr || canvas.width !== w || canvas.height !== h || !this._ctx) {
+        this._canvasW = w;
+        this._canvasH = h;
+        this._dpr = dpr;
+        canvas.width = w;
+        canvas.height = h;
+        this._ctx = canvas.getContext('2d', { alpha: false });
+        this._unitSprites = null;
+        this._bgDirty = true;
+      }
+    };
+
+    syncSize();
+
+    if (!this._canvasObserver && typeof ResizeObserver !== 'undefined') {
+      this._canvasObserver = new ResizeObserver(() => syncSize());
+      this._canvasObserver.observe(canvas);
+    }
+  }
+
+  buildUnitSprites(cellW, dpr) {
+    const makeSprite = (sizePx, drawFn) => {
+      const c = document.createElement('canvas');
+      c.width = sizePx;
+      c.height = sizePx;
+      const sctx = c.getContext('2d');
+      drawFn(sctx, sizePx);
+      return c;
+    };
+
+    const allySize = Math.max(24, Math.round(cellW * 0.56));
+    const enemySize = Math.max(28, Math.round(cellW * 0.60));
+    const bossSize = Math.max(36, Math.round(cellW * 0.78));
+
+    this._unitSprites = {
+      ally: makeSprite(allySize, (sctx, s) => {
+        const cx = s / 2;
+        const r = s * 0.36;
+        sctx.fillStyle = '#0ea5e9';
+        sctx.beginPath();
+        sctx.arc(cx, cx, r, 0, Math.PI * 2);
+        sctx.fill();
+        sctx.strokeStyle = '#e0f2fe';
+        sctx.lineWidth = Math.max(1.5, 1.5 * dpr);
+        sctx.stroke();
+        sctx.textAlign = 'center';
+        sctx.textBaseline = 'middle';
+        sctx.font = `${Math.round(s * 0.45)}px sans-serif`;
+        sctx.fillText('⚔️', cx, cx + 1);
+      }),
+      enemy: makeSprite(enemySize, (sctx, s) => {
+        const cx = s / 2;
+        sctx.textAlign = 'center';
+        sctx.textBaseline = 'middle';
+        sctx.font = `${Math.round(s * 0.56)}px sans-serif`;
+        sctx.fillText('👾', cx, cx + 1);
+      }),
+      fast: makeSprite(enemySize, (sctx, s) => {
+        const cx = s / 2;
+        sctx.textAlign = 'center';
+        sctx.textBaseline = 'middle';
+        sctx.font = `${Math.round(s * 0.56)}px sans-serif`;
+        sctx.fillText('🐺', cx, cx + 1);
+      }),
+      heavy: makeSprite(enemySize, (sctx, s) => {
+        const cx = s / 2;
+        sctx.textAlign = 'center';
+        sctx.textBaseline = 'middle';
+        sctx.font = `${Math.round(s * 0.56)}px sans-serif`;
+        sctx.fillText('🛡️', cx, cx + 1);
+      }),
+      boss: makeSprite(bossSize, (sctx, s) => {
+        const cx = s / 2;
+        sctx.textAlign = 'center';
+        sctx.textBaseline = 'middle';
+        sctx.font = `${Math.round(s * 0.62)}px sans-serif`;
+        sctx.fillText('👹', cx, cx + 1);
+      })
+    };
+  }
+
+  renderBattleScreen() {
+    if (!this.modalEl) return;
+
+    this.modalEl.innerHTML = `
+      <div class="w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[97vh]">
+        <!-- 상단 전장 HUD -->
+        <div class="px-3 sm:px-4 py-2.5 bg-slate-950 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-300 text-xs font-black">
+              ⚔️ ${this.battleCity.name} 공략전
+            </span>
+            <span class="text-xs font-mono text-amber-400 font-bold">
+              난이도 ${this.diffMult.toFixed(2)}x
+            </span>
+            <span id="td-wave-label" class="text-xs font-mono text-slate-300 font-bold">
+              Wave 1/3
+            </span>
+            <span id="td-kills-label" class="text-xs font-mono text-emerald-400 font-bold">
+              처치 0
+            </span>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button id="td-speed-btn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-black border border-slate-700 transition">
+              ⏩ 1x
+            </button>
+            <button id="td-pause-btn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+              ⏸ 일시정지
+            </button>
+            <button id="td-retreat-btn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/60 text-rose-300 text-xs font-bold border border-slate-700 transition">
+              🏳️ 후퇴
+            </button>
+            <button id="td-close-btn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- 보유 병력 실시간 잔량 바 -->
+        <div id="td-troops-bar" class="px-3 py-1.5 bg-slate-900/95 border-b border-slate-800 flex items-center gap-1.5 overflow-x-auto text-[11px]"></div>
+
+        <!-- 6x8 전장 + 우측 남은 적 목록 -->
+        <div class="relative flex-1 bg-slate-950 flex flex-col items-center justify-center p-2 overflow-hidden">
+          <div id="td-prep-banner" class="mb-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/60 text-amber-300 text-[11px] font-black flex items-center gap-2">
+            <span>⏳ 전투 준비 중 (<span id="td-prep-sec">3.0</span>초) — 초록 칸(+)에 타워를 미리 배치하세요!</span>
+            <button id="td-start-now-btn" class="px-2 py-0.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] transition">⚡ 바로 시작</button>
+          </div>
+          <div id="td-guide-banner" class="hidden text-[11px] text-slate-400 mb-1.5 text-center">
+            초록 칸(+)을 터치해 타워를 지으세요! (⛰️ 바위산 건설 불가) · <strong class="text-sky-400">아군 병사</strong>가 <strong class="text-rose-400">적 성문</strong>에 도착하면 승리!
+          </div>
+          <div class="flex items-stretch justify-center gap-2 sm:gap-3 w-full max-w-2xl">
+            <div class="relative shrink-0 rounded-2xl overflow-hidden border-2 border-slate-700 shadow-2xl bg-slate-900" style="width: min(74vw, 390px, calc((92vh - 155px) * 0.75)); aspect-ratio: 6 / 8;">
+              <canvas id="td-canvas" class="w-full h-full block cursor-pointer touch-manipulation"></canvas>
+              <!-- 타워 건설/관리 팝업 컨테이너 -->
+              <div id="td-slot-popover" class="hidden absolute inset-0 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 z-20"></div>
+              <!-- 승패 결과 오버레이 -->
+              <div id="td-result-overlay" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-30"></div>
+            </div>
+
+            <!-- 우측 남은 적 순서 패널 -->
+            <div class="w-24 sm:w-36 shrink-0 bg-slate-900/95 border border-slate-700/80 rounded-2xl p-2 flex flex-col overflow-hidden" style="max-height: min(calc(74vw * 4 / 3), 520px, calc(92vh - 155px));">
+              <div class="pb-1.5 mb-1.5 border-b border-slate-800 text-center">
+                <div class="text-[11px] font-black text-rose-400">남은 적</div>
+                <div id="td-remaining-count" class="text-sm font-black font-mono text-white">0</div>
+              </div>
+              <div id="td-enemy-queue-list" class="flex-1 overflow-y-auto space-y-1 pr-0.5 text-[11px]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.updateTroopsBar();
+    this.bindBattleEvents();
+  }
+
+  updateTroopsBar() {
+    const bar = document.getElementById('td-troops-bar');
+    if (!bar) return;
+    bar.innerHTML = RANK_POOL_META.map(m => `
+      <span class="px-2 py-0.5 rounded-lg border ${m.bg} ${m.color} font-bold shrink-0">
+        ${m.short} <span class="font-mono">${this.troops[m.key]}/${this.maxTroops[m.key]}</span>
+      </span>
+    `).join('');
+  }
+
+  bindBattleEvents() {
+    const speedBtn = document.getElementById('td-speed-btn');
+    speedBtn?.addEventListener('click', () => {
+      const nextMap = { 1: 2, 2: 3, 3: 4, 4: 1 };
+      this.speedMultiplier = nextMap[this.speedMultiplier] || 1;
+      speedBtn.innerText = `⏩ ${this.speedMultiplier}x`;
+    });
+
+    const pauseBtn = document.getElementById('td-pause-btn');
+    pauseBtn?.addEventListener('click', () => {
+      this.isPaused = !this.isPaused;
+      this._manualPause = this.isPaused;
+      pauseBtn.innerText = this.isPaused ? '▶️ 재개' : '⏸ 일시정지';
+    });
+
+    document.getElementById('td-retreat-btn')?.addEventListener('click', () => {
+      if (this.battleEnded) {
+        this.renderWorldMap();
+        return;
+      }
+      if (confirm('전투에서 후퇴하고 월드맵으로 돌아갈까요? (패배 횟수가 차감되지 않습니다)')) {
+        this.renderWorldMap();
+      }
+    });
+
+    document.getElementById('td-close-btn')?.addEventListener('click', () => {
+      this.confirmClose();
+    });
+
+    document.getElementById('td-start-now-btn')?.addEventListener('click', () => {
+      this.prepTimeLeft = 0;
+      document.getElementById('td-prep-banner')?.classList.add('hidden');
+      document.getElementById('td-guide-banner')?.classList.remove('hidden');
+    });
+
+    const canvas = document.getElementById('td-canvas');
+    if (canvas) {
+      canvas.addEventListener('click', (e) => {
+        if (this.battleEnded) return;
+        const rect = canvas.getBoundingClientRect();
+        const xRatio = (e.clientX - rect.left) / rect.width;
+        const yRatio = (e.clientY - rect.top) / rect.height;
+        const c = Math.max(0, Math.min(5, Math.floor(xRatio * 6)));
+        const r = Math.max(0, Math.min(7, Math.floor(yRatio * 8)));
+        this.handleTileTap(r, c);
+      });
+    }
+  }
+
+  handleTileTap(r, c) {
+    const key = `${r}_${c}`;
+    if (this.pathSet.has(key) || (this.rockSet && this.rockSet.has(key))) return; // 길과 바위산에는 건설 불가
+
+    const existing = this.towers.get(key);
+    const popover = document.getElementById('td-slot-popover');
+    if (!popover) return;
+
+    this.isPaused = true;
+    const pauseBtn = document.getElementById('td-pause-btn');
+    if (pauseBtn) pauseBtn.innerText = '▶️ 재개';
+
+    if (existing) {
+      const def = TOWER_DEFS[existing.type];
+      const rankMeta = RANK_POOL_META.find(m => m.key === existing.rankKey);
+      popover.innerHTML = `
+        <div class="w-full max-w-xs bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-2xl space-y-3 text-center">
+          <img src="${def.image}" alt="${def.name}" class="w-20 h-20 mx-auto rounded-xl object-cover border border-slate-600" />
+          <div>
+            <h4 class="text-base font-black text-white">${def.name}</h4>
+            <p class="text-xs text-slate-400">${def.desc} · 투입: ${rankMeta?.label || ''} ${existing.cost}명</p>
+          </div>
+          <div class="flex gap-2">
+            <button id="td-demolish-btn" class="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black transition">
+              🔨 철거 (병력 ${existing.cost}명 반환)
+            </button>
+            <button id="td-pop-close-btn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+              닫기
+            </button>
+          </div>
+        </div>
+      `;
+      popover.classList.remove('hidden');
+
+      document.getElementById('td-demolish-btn')?.addEventListener('click', () => {
+        this.troops[existing.rankKey] += existing.cost;
+        this.towers.delete(key);
+        this._bgDirty = true;
+        this.updateTroopsBar();
+        SoundManager.playTone('flip');
+        this.closePopover();
+      });
+      document.getElementById('td-pop-close-btn')?.addEventListener('click', () => this.closePopover());
+      return;
+    }
+
+    // 빈 슬롯: 건설 가능한 타워 목록 표시 (가장 높은 등급/적은 병력 우선 자동 선택)
+    const cardsHtml = Object.values(TOWER_DEFS).map(def => {
+      // 사용 가능한 최고 등급 찾기 (RANK_POOL_META 순서가 마스터 -> 훈련병 순)
+      let bestChoice = null;
+      const rankChoices = [];
+      for (const m of RANK_POOL_META) {
+        const cost = def.costs[m.key];
+        if (cost !== undefined) {
+          const canAfford = this.troops[m.key] >= cost;
+          rankChoices.push({ ...m, cost, canAfford });
+          if (!bestChoice && canAfford) {
+            bestChoice = { rankKey: m.key, label: m.label, cost };
+          }
+        }
+      }
+
+      const canBuild = Boolean(bestChoice);
+      return `
+        <button data-tower-id="${def.id}" data-rank-key="${bestChoice ? bestChoice.rankKey : ''}" data-cost="${bestChoice ? bestChoice.cost : 0}"
+          class="td-build-card w-full p-2 rounded-xl border text-left flex items-center gap-2.5 transition ${canBuild ? 'bg-slate-800/90 hover:bg-slate-700 border-slate-600 cursor-pointer' : 'bg-slate-900/60 border-slate-800 opacity-50 cursor-not-allowed'}" ${canBuild ? '' : 'disabled'}>
+          <img src="${def.image}" alt="${def.name}" class="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-700" />
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-xs font-black text-white truncate">${def.name}</span>
+              ${bestChoice ? `
+                <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold shrink-0">
+                  ${bestChoice.label} ${bestChoice.cost}명
+                </span>
+              ` : `
+                <span class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-bold shrink-0">병력 부족</span>
+              `}
+            </div>
+            <div class="text-[10px] text-slate-400 truncate">${def.desc}</div>
+            <div class="flex flex-wrap gap-1 mt-1">
+              ${rankChoices.map(rc => `
+                <span class="text-[9px] font-mono px-1 rounded ${rc.canAfford ? 'bg-slate-700 text-slate-200' : 'bg-slate-900 text-slate-500'}">
+                  ${rc.short}:${rc.cost}
+                </span>
+              `).join('')}
+            </div>
+          </div>
+        </button>
+      `;
+    }).join('');
+
+    popover.innerHTML = `
+      <div class="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-2xl p-3 shadow-2xl flex flex-col max-h-[85%]">
+        <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-800">
+          <h4 class="text-xs font-black text-white">🏰 타워 건설 (${r + 1}행 ${c + 1}열)</h4>
+          <button id="td-pop-close-btn" class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:text-white text-xs font-bold">✕</button>
+        </div>
+        <div class="space-y-1.5 overflow-y-auto pr-1">
+          ${cardsHtml}
+        </div>
+      </div>
+    `;
+    popover.classList.remove('hidden');
+
+    popover.querySelectorAll('.td-build-card').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tid = btn.dataset.towerId;
+        const rankKey = btn.dataset.rankKey;
+        const cost = parseInt(btn.dataset.cost, 10);
+        if (!tid || !rankKey || isNaN(cost) || this.troops[rankKey] < cost) return;
+
+        this.troops[rankKey] -= cost;
+        this.towers.set(key, {
+          r, c,
+          type: tid,
+          rankKey,
+          cost,
+          cooldown: 0,
+          magicToggle: 0 // 0: 얼음, 1: 번개 교대 발사
+        });
+        this._bgDirty = true;
+        this.updateTroopsBar();
+        SoundManager.playTone('correct');
+        this.closePopover();
+      });
+    });
+
+    document.getElementById('td-pop-close-btn')?.addEventListener('click', () => this.closePopover());
+  }
+
+  closePopover() {
+    const popover = document.getElementById('td-slot-popover');
+    if (popover) popover.classList.add('hidden');
+    this.isPaused = false;
+    const pauseBtn = document.getElementById('td-pause-btn');
+    if (pauseBtn) pauseBtn.innerText = '⏸ 일시정지';
+  }
+
+  // =========================================================================
+  // 3. 전투 시뮬레이션 루프 (적 스폰, 아군 진격, 타워 공격, 승패 판정)
+  // =========================================================================
+  loop(now) {
+    if (!this.modalEl || this.screen !== 'battle') return;
+    const rawDt = Math.min(40, Math.max(0, now - this.lastFrameTime));
+    this.lastFrameTime = now;
+
+    if (!this.battleEnded) {
+      if (this.prepTimeLeft > 0 && !this._manualPause) {
+        this.prepTimeLeft = Math.max(0, this.prepTimeLeft - rawDt);
+        const secEl = document.getElementById('td-prep-sec');
+        if (secEl) secEl.innerText = (this.prepTimeLeft / 1000).toFixed(1);
+        if (this.prepTimeLeft <= 0) {
+          document.getElementById('td-prep-banner')?.classList.add('hidden');
+          document.getElementById('td-guide-banner')?.classList.remove('hidden');
+        }
+      } else if (this.prepTimeLeft <= 0 && !this.isPaused) {
+        // 균형 잡힌 기본 속도(1.4x) + 1x~4x 배속 지원 (서브스텝 상한 4회로 CPU 부하 최소화)
+        const totalDt = rawDt * 1.4 * this.speedMultiplier;
+        const steps = Math.min(4, Math.max(1, Math.ceil(totalDt / 25)));
+        const subDt = totalDt / steps;
+        for (let s = 0; s < steps; s++) {
+          if (this.battleEnded) break;
+          this.updateBattle(subDt);
+        }
+      }
+    }
+
+    this.drawBattleCanvas();
+    if (this._queueUiDirty) {
+      this.updateEnemyQueueUI(false);
+    }
+
+    if (!this.battleEnded) {
+      this.rafId = requestAnimationFrame((t) => this.loop(t));
+    }
+  }
+
+  updateBattle(dt) {
+    const pathLen = this.battlePath.length;
+
+    // 1. 적 몬스터 대기열 순차/동시 스폰 (상단 성문 r=0)
+    if (this.enemyQueue.length > 0) {
+      this.enemySpawnTimer -= dt;
+      while (this.enemyQueue.length > 0 && this.enemySpawnTimer <= 0) {
+        const nextSpec = this.enemyQueue.shift();
+        if (nextSpec.wave !== this.wave) {
+          this.wave = nextSpec.wave;
+          const waveEl = document.getElementById('td-wave-label');
+          if (waveEl) waveEl.innerText = `Wave ${this.wave}/3`;
+        }
+        this.spawnEnemy(nextSpec);
+        this.updateEnemyQueueUI();
+
+        if (this.enemyQueue.length > 0) {
+          const upcoming = this.enemyQueue[0];
+          this.enemySpawnTimer += (upcoming.delayMs || 300) / Math.sqrt(this.diffMult);
+        } else {
+          this.enemySpawnTimer = 999999;
+        }
+      }
+    }
+
+    // 2. 아군 진격 병사 스폰 (적 전멸 시 즉시 돌격)
+    this.allySpawnTimer -= dt;
+    if (this.allySpawnTimer <= 0 || (this.enemyQueue.length === 0 && this.enemies.length === 0 && this.allies.length === 0)) {
+      this.allies.push({
+        id: this.nextId++,
+        progress: pathLen - 1,
+        speed: 1.55
+      });
+      this.allySpawnTimer = 4200;
+    }
+
+    // 대기열과 맵의 적이 모두 소탕되면 아군 병사 성문 돌격 가속
+    const allEnemiesCleared = this.enemyQueue.length === 0 && this.enemies.length === 0;
+    if (allEnemiesCleared) {
+      this.allies.forEach(a => { a.speed = 4.8; });
+    }
+
+    // 3. 적 이동 및 상태이상(화상, 얼음 둔화, 번개 기절) 처리
+    for (let i = this.enemies.length - 1; i >= 0; i--) {
+      const e = this.enemies[i];
+      if (e.burnTimer > 0) {
+        e.burnTimer -= dt;
+        e.hp -= (e.burnDps * dt) / 1000;
+      }
+      if (e.stunTimer > 0) {
+        e.stunTimer -= dt;
+      } else {
+        let spd = e.baseSpeed;
+        if (e.slowTimer > 0) {
+          e.slowTimer -= dt;
+          spd *= 0.52;
+        }
+        e.progress += (spd * dt) / 1000;
+      }
+
+      if (e.hp <= 0) {
+        e._dead = true;
+        this.kills++;
+        const killsEl = document.getElementById('td-kills-label');
+        if (killsEl) killsEl.innerText = `처치 ${this.kills}`;
+        this.spawnBurst(e.progress, '#fbbf24');
+        this.enemies.splice(i, 1);
+        this._queueUiDirty = true;
+        continue;
+      }
+
+      // 적이 하단 아군 전초기지(pathLen - 1)에 도달하면 패배!
+      if (e.progress >= pathLen - 1.05) {
+        this.finishBattle(false);
+        return;
+      }
+
+      // 1회만 월드 좌표 계산해 타워 타겟팅/투사체/렌더링에서 재사용
+      const pos = this.getPathWorldPos(e.progress);
+      e._r = pos.r;
+      e._c = pos.c;
+    }
+
+    // 4. 아군 진격 병사 이동 및 적 충돌 / 성문 도착 승리 판정
+    for (let i = this.allies.length - 1; i >= 0; i--) {
+      const a = this.allies[i];
+      a.progress -= (a.speed * dt) / 1000;
+
+      // 적과 만나면 소멸 (공격력/방어력 없음)
+      let hitEnemy = false;
+      for (let j = 0; j < this.enemies.length; j++) {
+        if (Math.abs(this.enemies[j].progress - a.progress) < 0.38) {
+          hitEnemy = true;
+          break;
+        }
+      }
+      if (hitEnemy) {
+        this.spawnBurst(a.progress, '#38bdf8');
+        this.allies.splice(i, 1);
+        continue;
+      }
+
+      // 상단 적 성문(0)에 도달하면 승리!
+      if (a.progress <= 0.15) {
+        this.finishBattle(true);
+        return;
+      }
+    }
+
+    // 5. 타워 공격 로직 (제곱 거리 비교 & 사전 계산 좌표로 할당 최소화)
+    const enemyCount = this.enemies.length;
+    if (enemyCount > 0) {
+      for (const tower of this.towers.values()) {
+        const def = TOWER_DEFS[tower.type];
+        tower.cooldown -= dt;
+        if (tower.cooldown > 0) continue;
+
+        const rangeSq = def.range * def.range;
+        const inRange = [];
+        for (let i = 0; i < enemyCount; i++) {
+          const e = this.enemies[i];
+          const dc = e._c - tower.c;
+          const dr = e._r - tower.r;
+          if (dc * dc + dr * dr <= rangeSq) {
+            inRange.push(e);
+          }
+        }
+        if (inRange.length === 0) continue;
+
+        inRange.sort((a, b) => b.progress - a.progress); // 가장 전초기지에 가까운 적 우선
+        tower.cooldown = def.cooldownMs;
+
+        if (def.effect === 'dragon_laser') {
+          const limit = Math.min(5, inRange.length);
+          for (let k = 0; k < limit; k++) {
+            const enemy = inRange[k];
+            enemy.hp -= def.damage;
+            this.beams.push({
+              fromR: tower.r, fromC: tower.c,
+              toR: enemy._r, toC: enemy._c,
+              color: '#fde047',
+              life: 240, maxLife: 240
+            });
+          }
+          SoundManager.playTone('td_laser');
+        } else if (def.effect === 'light_triple') {
+          const limit = Math.min(3, inRange.length);
+          for (let k = 0; k < limit; k++) {
+            this.fireProjectile(tower, inRange[k], def.damage, '#fde047', 'light');
+          }
+          SoundManager.playTone('td_arrow');
+        } else if (def.effect === 'fire_twin') {
+          const t1 = inRange[0];
+          const t2 = inRange[1] || t1;
+          this.fireProjectile(tower, t1, def.damage, '#fb923c', 'fire');
+          this.fireProjectile(tower, t2, def.damage, '#fb923c', 'fire');
+          SoundManager.playTone('td_fire');
+        } else if (def.effect === 'frost_shock') {
+          const mode = tower.magicToggle === 0 ? 'frost' : 'shock';
+          tower.magicToggle = 1 - tower.magicToggle;
+          const color = mode === 'frost' ? '#38bdf8' : '#c084fc';
+          this.fireProjectile(tower, inRange[0], def.damage, color, mode);
+          SoundManager.playTone('td_magic');
+        } else {
+          this.fireProjectile(tower, inRange[0], def.damage, def.accent, 'arrow');
+          SoundManager.playTone('td_arrow');
+        }
+      }
+    } else {
+      for (const tower of this.towers.values()) {
+        if (tower.cooldown > 0) tower.cooldown = Math.max(0, tower.cooldown - dt);
+      }
+    }
+
+    // 6. 투사체 이동 및 명중 처리 (O(1) 직접 참조)
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      const p = this.projectiles[i];
+      const target = p.target;
+      if (!target || target._dead || target.hp <= 0) {
+        this.projectiles.splice(i, 1);
+        continue;
+      }
+      const dx = target._c - p.c;
+      const dy = target._r - p.r;
+      const distSq = dx * dx + dy * dy;
+      const step = (p.speed * dt) / 1000;
+      p.angle = Math.atan2(dy, dx);
+
+      if (distSq <= step * step) {
+        target.hp -= p.damage;
+        SoundManager.playTone('td_hit');
+        if (p.kind === 'fire') {
+          target.burnTimer = 3000;
+          target.burnDps = 10;
+        } else if (p.kind === 'frost') {
+          target.slowTimer = 2500;
+        } else if (p.kind === 'shock') {
+          target.stunTimer = 750;
+        }
+        this.projectiles.splice(i, 1);
+      } else {
+        const invDist = 1 / Math.sqrt(distSq);
+        p.c += dx * invDist * step;
+        p.r += dy * invDist * step;
+      }
+    }
+
+    // 7. 빔 & 파티클 감쇠
+    for (let i = this.beams.length - 1; i >= 0; i--) {
+      this.beams[i].life -= dt;
+      if (this.beams[i].life <= 0) this.beams.splice(i, 1);
+    }
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      this.particles[i].life -= dt;
+      if (this.particles[i].life <= 0) this.particles.splice(i, 1);
+    }
+  }
+
+  spawnEnemy(spec) {
+    const kind = spec?.kind || 'normal';
+    const wave = spec?.wave || this.wave;
+    const isBoss = kind === 'boss';
+    // 적 에너지(HP) 2배 상향
+    const baseHp = (52 + wave * 24) * 2 * this.diffMult;
+    const hpMult = isBoss ? 3.4 : kind === 'heavy' ? 1.9 : kind === 'fast' ? 0.72 : 1.0;
+    const speedMult = isBoss ? 0.78 : kind === 'heavy' ? 0.78 : kind === 'fast' ? 1.55 : 1.05;
+
+    // 점령 영토 10개 미만(0~9개)까지는 초반 적응을 위해 적 체력 및 이동 속도 절반(0.5x) 적용
+    const earlyStageMult = (this.conqueredCount || 0) < 10 ? 0.5 : 1.0;
+    const hp = baseHp * hpMult * earlyStageMult;
+    const speed = 1.32 * speedMult * (1 + Math.min(0.45, (this.diffMult - 1) * 0.15)) * earlyStageMult;
+
+    const spawnPos = this.getPathWorldPos(spec?.batchOffset || 0);
+    this.enemies.push({
+      id: this.nextId++,
+      kind,
+      wave,
+      progress: spec?.batchOffset || 0,
+      _r: spawnPos.r,
+      _c: spawnPos.c,
+      _dead: false,
+      hp,
+      maxHp: hp,
+      baseSpeed: speed,
+      isBoss,
+      burnTimer: 0,
+      burnDps: 0,
+      slowTimer: 0,
+      stunTimer: 0
+    });
+    this._queueUiDirty = true;
+  }
+
+  /**
+   * 지도 우측 남은 적 순서 패널 갱신 (200ms 스로틀링으로 DOM 리플로우 최소화)
+   */
+  updateEnemyQueueUI(force = false) {
+    const now = performance.now();
+    const totalRemaining = this.enemies.length + this.enemyQueue.length;
+    if (!force && totalRemaining > 0 && this._lastQueueUiAt && now - this._lastQueueUiAt < 200) {
+      return;
+    }
+    this._lastQueueUiAt = now;
+    this._queueUiDirty = false;
+
+    const countEl = document.getElementById('td-remaining-count');
+    const listEl = document.getElementById('td-enemy-queue-list');
+    if (!countEl || !listEl) return;
+
+    countEl.innerText = `${totalRemaining}체`;
+
+    if (totalRemaining === 0) {
+      listEl.innerHTML = `<div class="text-center text-emerald-400 font-bold py-4 text-[11px]">적 전멸!<br>성문 돌격 중!</div>`;
+      return;
+    }
+
+    const metaMap = {
+      normal: { icon: '👾', label: '일반', cls: 'bg-rose-950/50 border-rose-800/60 text-rose-200' },
+      fast:   { icon: '🐺', label: '질풍', cls: 'bg-sky-950/50 border-sky-800/60 text-sky-200' },
+      heavy:  { icon: '🛡️', label: '철갑', cls: 'bg-amber-950/50 border-amber-800/60 text-amber-200' },
+      boss:   { icon: '👹', label: '보스', cls: 'bg-purple-950/70 border-purple-500/70 text-purple-200 font-black' }
+    };
+
+    const rows = [];
+    // 현재 맵 위에서 진격 중인 적들
+    this.enemies.slice(0, 12).forEach(e => {
+      const m = metaMap[e.kind] || metaMap.normal;
+      rows.push(`
+        <div class="flex items-center justify-between gap-1 px-1.5 py-1 rounded-lg border ${m.cls}">
+          <span class="flex items-center gap-1 truncate">
+            <span>${m.icon}</span>
+            <span class="truncate">${m.label}</span>
+          </span>
+          <span class="text-[9px] text-emerald-400 font-bold shrink-0">출전</span>
+        </div>
+      `);
+    });
+
+    // 앞으로 나올 대기열 적들 (최대 30개까지 순서대로 표시)
+    const maxPreview = 30 - rows.length;
+    this.enemyQueue.slice(0, Math.max(0, maxPreview)).forEach(q => {
+      const m = metaMap[q.kind] || metaMap.normal;
+      rows.push(`
+        <div class="flex items-center justify-between gap-1 px-1.5 py-1 rounded-lg border border-slate-800 bg-slate-950/70 text-slate-300">
+          <span class="flex items-center gap-1 truncate">
+            <span>${m.icon}</span>
+            <span class="truncate">${m.label}</span>
+          </span>
+          <span class="text-[9px] font-mono text-slate-500 shrink-0">W${q.wave}</span>
+        </div>
+      `);
+    });
+
+    if (totalRemaining > 30) {
+      rows.push(`<div class="text-center text-[10px] text-slate-500 py-1">+ 외 ${totalRemaining - 30}체 대기</div>`);
+    }
+
+    listEl.innerHTML = rows.join('');
+  }
+
+  fireProjectile(tower, targetEnemy, damage, color, kind) {
+    this.projectiles.push({
+      r: tower.r,
+      c: tower.c,
+      target: targetEnemy,
+      damage,
+      color,
+      kind,
+      angle: Math.atan2(targetEnemy._r - tower.r, targetEnemy._c - tower.c),
+      speed: 8.2
+    });
+  }
+
+  spawnBurst(progress, color) {
+    const pos = this.getPathWorldPos(progress);
+    this.particles.push({ r: pos.r, c: pos.c, color, life: 320, maxLife: 320 });
+  }
+
+  getPathWorldPos(progress) {
+    const maxIdx = this.battlePath.length - 1;
+    const clamped = Math.max(0, Math.min(maxIdx, progress));
+    const idx = Math.floor(clamped);
+    const frac = clamped - idx;
+    const [r1, c1] = this.battlePath[idx];
+    const [r2, c2] = this.battlePath[Math.min(maxIdx, idx + 1)];
+    return {
+      r: r1 + (r2 - r1) * frac,
+      c: c1 + (c2 - c1) * frac
+    };
+  }
+
+  finishBattle(isVictory) {
+    this.battleEnded = true;
+    this.stopBattleLoop();
+
+    const overlay = document.getElementById('td-result-overlay');
+    if (!overlay) return;
+
+    if (isVictory) {
+      const updated = SiegeManager.recordVictory(this.battleCity.id);
+      const conqueredCount = Math.max(0, updated.conqueredCities.length - 1);
+      SoundManager.playTone('fanfare');
+      if (typeof window.confetti === 'function') {
+        window.confetti({ particleCount: 110, spread: 80, origin: { y: 0.6 } });
+      }
+
+      overlay.innerHTML = `
+        <div class="bg-slate-900 border-2 border-emerald-500 rounded-3xl p-6 text-center max-w-xs w-full shadow-2xl space-y-3">
+          <div class="text-5xl">🚩</div>
+          <h3 class="text-xl font-black text-emerald-400">${this.battleCity.name} 함락 성공!</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            아군 병사가 적 성문에 무사히 도달했습니다!<br>
+            점령 영토: <strong class="text-white">${conqueredCount} / 50</strong> (승리 시 계속 진격 가능!)
+          </p>
+          <button id="td-res-map-btn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-sm shadow-lg">
+            🗺️ 월드맵으로 (계속 진격)
+          </button>
+        </div>
+      `;
+    } else {
+      const updated = SiegeManager.recordDefeat();
+      const isAdmin = SiegeManager.isAdminProfile();
+      const left = isAdmin ? 99 : Math.max(0, SiegeManager.MAX_DAILY_DEFEATS - updated.defeatsToday);
+      SoundManager.playTone('wrong');
+
+      overlay.innerHTML = `
+        <div class="bg-slate-900 border-2 border-rose-500 rounded-3xl p-6 text-center max-w-xs w-full shadow-2xl space-y-3">
+          <div class="text-5xl">💀</div>
+          <h3 class="text-xl font-black text-rose-400">전초기지 방어 실패</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            적이 아군 전초기지에 도달했습니다.<br>
+            ${isAdmin ? '<strong class="text-amber-400">ADMIN 무제한 도전 가능</strong>' : `오늘 남은 패배 기회: <strong class="text-amber-400">${left} / 2</strong> (자정 12시 초기화)`}
+          </p>
+          <div class="flex flex-col gap-2">
+            ${left > 0 ? `
+              <button id="td-res-retry-btn" class="w-full py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-sm">
+                🔄 ${this.battleCity.name} 다시 도전
+              </button>
+            ` : ''}
+            <button id="td-res-map-btn" class="w-full py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm">
+              🗺️ 월드맵으로 돌아가기
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    overlay.classList.remove('hidden');
+    document.getElementById('td-res-map-btn')?.addEventListener('click', () => this.renderWorldMap());
+    document.getElementById('td-res-retry-btn')?.addEventListener('click', () => this.startBattle(this.battleCity));
+  }
+
+  // =========================================================================
+  // 4. 6x8 전장 고해상도 캔버스 렌더링 (정적 배경 오프스크린 캐시로 60fps 보장)
+  // =========================================================================
+  rebuildStaticBgCanvas() {
+    const w = this._canvasW;
+    const h = this._canvasH;
+    const dpr = this._dpr;
+    if (!w || !h) return;
+
+    if (!this._bgCanvas) {
+      this._bgCanvas = document.createElement('canvas');
+    }
+    this._bgCanvas.width = w;
+    this._bgCanvas.height = h;
+    const ctx = this._bgCanvas.getContext('2d');
+    const cellW = w / 6;
+    const cellH = h / 8;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // 1. 타일 그리기 (길 vs 바위산[건설불가] vs 타워 배치 가능 슬롯 명확히 구분)
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 6; c++) {
+        const x = c * cellW;
+        const y = r * cellH;
+        const key = `${r}_${c}`;
+        const isPath = this.pathSet.has(key);
+        const isRock = this.rockSet && this.rockSet.has(key);
+
+        if (isPath) {
+          ctx.fillStyle = '#443627';
+          ctx.fillRect(x, y, cellW, cellH);
+          ctx.strokeStyle = '#786146';
+          ctx.lineWidth = Math.max(1, dpr);
+          ctx.strokeRect(x + 1, y + 1, cellW - 2, cellH - 2);
+        } else if (isRock) {
+          // 바위산 장애물 (타워 건설 불가)
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(x, y, cellW, cellH);
+          ctx.strokeStyle = '#334155';
+          ctx.lineWidth = Math.max(1, dpr);
+          ctx.strokeRect(x + 1, y + 1, cellW - 2, cellH - 2);
+
+          // 바위산 봉우리 벡터 그래픽
+          ctx.fillStyle = '#475569';
+          ctx.beginPath();
+          ctx.moveTo(x + cellW * 0.14, y + cellH * 0.80);
+          ctx.lineTo(x + cellW * 0.42, y + cellH * 0.24);
+          ctx.lineTo(x + cellW * 0.65, y + cellH * 0.56);
+          ctx.lineTo(x + cellW * 0.88, y + cellH * 0.80);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = '#64748b';
+          ctx.beginPath();
+          ctx.moveTo(x + cellW * 0.45, y + cellH * 0.80);
+          ctx.lineTo(x + cellW * 0.66, y + cellH * 0.34);
+          ctx.lineTo(x + cellW * 0.88, y + cellH * 0.80);
+          ctx.closePath();
+          ctx.fill();
+
+          // 산 정상 하이라이트
+          ctx.fillStyle = '#94a3b8';
+          ctx.beginPath();
+          ctx.moveTo(x + cellW * 0.42, y + cellH * 0.24);
+          ctx.lineTo(x + cellW * 0.35, y + cellH * 0.38);
+          ctx.lineTo(x + cellW * 0.49, y + cellH * 0.38);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.fillStyle = (r + c) % 2 === 0 ? '#143326' : '#183c2d';
+          ctx.fillRect(x, y, cellW, cellH);
+          ctx.strokeStyle = 'rgba(52, 211, 153, 0.22)';
+          ctx.lineWidth = Math.max(1, dpr);
+          ctx.strokeRect(x + 2, y + 2, cellW - 4, cellH - 4);
+
+          if (!this.towers.has(key)) {
+            ctx.fillStyle = 'rgba(110, 231, 183, 0.25)';
+            ctx.font = `bold ${Math.round(cellW * 0.34)}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('+', x + cellW / 2, y + cellH / 2);
+          }
+        }
+      }
+    }
+
+    // 2. 길 중심선 (유도 점선)
+    ctx.save();
+    ctx.strokeStyle = 'rgba(253, 224, 71, 0.28)';
+    ctx.lineWidth = Math.max(2, dpr * 1.8);
+    ctx.setLineDash([6 * dpr, 6 * dpr]);
+    ctx.beginPath();
+    this.battlePath.forEach(([r, c], idx) => {
+      const px = (c + 0.5) * cellW;
+      const py = (r + 0.5) * cellH;
+      if (idx === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    });
+    ctx.stroke();
+    ctx.restore();
+
+    // 3. 상단 적 성문 & 하단 아군 전초기지 마커
+    const [gr, gc] = this.battlePath[0];
+    const [br, bc] = this.battlePath[this.battlePath.length - 1];
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `${Math.round(cellW * 0.52)}px sans-serif`;
+    ctx.fillText('🏯', (gc + 0.5) * cellW, (gr + 0.5) * cellH);
+    ctx.fillText('🛡️', (bc + 0.5) * cellW, (br + 0.5) * cellH);
+
+    // 4. 건설된 타워 스프라이트 (정적 캐시에 1회만 그림)
+    for (const tower of this.towers.values()) {
+      const x = tower.c * cellW;
+      const y = tower.r * cellH;
+      const img = this.towerImages[tower.type];
+      const pad = Math.round(cellW * 0.08);
+
+      if (img && img.complete && img.naturalWidth > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(x + pad, y + pad, cellW - pad * 2, cellH - pad * 2, 8 * dpr);
+        ctx.clip();
+        ctx.drawImage(img, x + pad, y + pad, cellW - pad * 2, cellH - pad * 2);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = TOWER_DEFS[tower.type].accent;
+        ctx.fillRect(x + pad, y + pad, cellW - pad * 2, cellH - pad * 2);
+      }
+    }
+
+    this._bgDirty = false;
+  }
+
+  drawBattleCanvas() {
+    const canvas = document.getElementById('td-canvas');
+    if (!canvas) return;
+    if (!this._canvasW || !this._canvasH) {
+      this.setupBattleCanvas();
+    }
+    if (this._bgDirty) {
+      this.rebuildStaticBgCanvas();
+    }
+
+    const w = this._canvasW;
+    const h = this._canvasH;
+    const dpr = this._dpr;
+    const ctx = this._ctx || canvas.getContext('2d', { alpha: false });
+    const cellW = w / 6;
+    const cellH = h / 8;
+
+    if (!this._unitSprites) {
+      this.buildUnitSprites(cellW, dpr);
+    }
+
+    if (this._bgCanvas) {
+      ctx.drawImage(this._bgCanvas, 0, 0);
+    }
+
+    // 5. 드래곤 타워 다중 광선 황금 레이저 빔
+    this.beams.forEach(b => {
+      const alpha = Math.max(0, b.life / b.maxLife);
+      const x1 = (b.fromC + 0.5) * cellW;
+      const y1 = (b.fromR + 0.5) * cellH;
+      const x2 = (b.toC + 0.5) * cellW;
+      const y2 = (b.toR + 0.5) * cellH;
+
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = `rgba(245, 158, 11, ${alpha * 0.45})`;
+      ctx.lineWidth = 8 * dpr * alpha;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      ctx.strokeStyle = `rgba(254, 249, 195, ${alpha})`;
+      ctx.lineWidth = 2.6 * dpr * alpha;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // 6. 아군 진격 병사 (오프스크린 스프라이트 고속 복사)
+    const allySpr = this._unitSprites.ally;
+    const allyHalf = allySpr.width / 2;
+    for (let i = 0; i < this.allies.length; i++) {
+      const pos = this.getPathWorldPos(this.allies[i].progress);
+      const ax = (pos.c + 0.5) * cellW;
+      const ay = (pos.r + 0.5) * cellH;
+      ctx.drawImage(allySpr, ax - allyHalf, ay - allyHalf);
+    }
+
+    // 7. 적 몬스터 & 체력바 (이모지 fillText 제거 → 캐시된 비트맵 스프라이트로 60~120fps 유지)
+    const enemySpr = this._unitSprites.enemy;
+    const fastSpr = this._unitSprites.fast || enemySpr;
+    const heavySpr = this._unitSprites.heavy || enemySpr;
+    const bossSpr = this._unitSprites.boss;
+    const bw = cellW * 0.56;
+    const bh = 4 * dpr;
+
+    for (let i = 0; i < this.enemies.length; i++) {
+      const e = this.enemies[i];
+      const ex = (e._c + 0.5) * cellW;
+      const ey = (e._r + 0.5) * cellH;
+      const radius = cellW * (e.isBoss ? 0.30 : 0.21);
+
+      ctx.fillStyle = e.stunTimer > 0 ? '#a855f7' : e.slowTimer > 0 ? '#38bdf8' : e.isBoss ? '#991b1b' : e.kind === 'fast' ? '#0284c7' : e.kind === 'heavy' ? '#b45309' : '#e11d48';
+      ctx.beginPath();
+      ctx.arc(ex, ey, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = e.burnTimer > 0 ? '#fb923c' : '#ffe4e6';
+      ctx.lineWidth = 1.5 * dpr;
+      ctx.stroke();
+
+      const spr = e.isBoss ? bossSpr : e.kind === 'fast' ? fastSpr : e.kind === 'heavy' ? heavySpr : enemySpr;
+      ctx.drawImage(spr, ex - spr.width / 2, ey - spr.height / 2);
+
+      // 체력 바
+      const bx = ex - bw / 2;
+      const by = ey - radius - 6 * dpr;
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillRect(bx, by, bw, bh);
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(bx, by, bw * Math.max(0, e.hp / e.maxHp), bh);
+    }
+
+    // 8. 사실적인 화살 및 마법 투사체 렌더링
+    this.projectiles.forEach(p => {
+      const px = (p.c + 0.5) * cellW;
+      const py = (p.r + 0.5) * cellH;
+      const ang = p.angle || 0;
+
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(ang);
+
+      if (p.kind === 'frost') {
+        // 얼음 결정 창
+        ctx.fillStyle = '#38bdf8';
+        ctx.strokeStyle = '#e0f2fe';
+        ctx.lineWidth = 1.2 * dpr;
+        ctx.beginPath();
+        ctx.moveTo(9 * dpr, 0);
+        ctx.lineTo(-2 * dpr, 4 * dpr);
+        ctx.lineTo(-8 * dpr, 0);
+        ctx.lineTo(-2 * dpr, -4 * dpr);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else if (p.kind === 'shock') {
+        // 지그재그 번개 창
+        ctx.strokeStyle = '#e879f9';
+        ctx.lineWidth = 2.4 * dpr;
+        ctx.beginPath();
+        ctx.moveTo(-9 * dpr, -2 * dpr);
+        ctx.lineTo(-2 * dpr, 3 * dpr);
+        ctx.lineTo(3 * dpr, -3 * dpr);
+        ctx.lineTo(9 * dpr, 0);
+        ctx.stroke();
+      } else {
+        // 화살 (기본 / 빠른 / 불화살 / 빛의 화살)
+        const len = 10 * dpr;
+        const isFire = p.kind === 'fire';
+        const isLight = p.kind === 'light';
+
+        // 꼬리 깃털 (Fletching)
+        ctx.strokeStyle = isFire ? '#fdba74' : isLight ? '#fef08a' : '#e2e8f0';
+        ctx.lineWidth = 1.4 * dpr;
+        ctx.beginPath();
+        ctx.moveTo(-len, 0);
+        ctx.lineTo(-len - 3.5 * dpr, -3 * dpr);
+        ctx.moveTo(-len, 0);
+        ctx.lineTo(-len - 3.5 * dpr, 3 * dpr);
+        ctx.stroke();
+
+        // 화살대 (Shaft)
+        ctx.strokeStyle = isLight ? '#fde047' : isFire ? '#ea580c' : '#d6b37c';
+        ctx.lineWidth = 2 * dpr;
+        ctx.beginPath();
+        ctx.moveTo(-len, 0);
+        ctx.lineTo(len * 0.65, 0);
+        ctx.stroke();
+
+        // 화살촉 (Arrowhead)
+        ctx.fillStyle = isFire ? '#ef4444' : isLight ? '#ffffff' : '#cbd5e1';
+        ctx.beginPath();
+        ctx.moveTo(len + 2 * dpr, 0);
+        ctx.lineTo(len * 0.35, -3.4 * dpr);
+        ctx.lineTo(len * 0.35, 3.4 * dpr);
+        ctx.closePath();
+        ctx.fill();
+
+        // 불화살 화염 오라
+        if (isFire) {
+          ctx.fillStyle = 'rgba(253, 224, 71, 0.85)';
+          ctx.beginPath();
+          ctx.arc(len * 0.7, 0, 3 * dpr, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      ctx.restore();
+    });
+
+    // 9. 폭발/소멸 파티클
+    this.particles.forEach(pt => {
+      const alpha = Math.max(0, pt.life / pt.maxLife);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = pt.color;
+      ctx.lineWidth = 2 * dpr;
+      ctx.beginPath();
+      ctx.arc((pt.c + 0.5) * cellW, (pt.r + 0.5) * cellH, cellW * 0.28 * (1.2 - alpha), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    });
   }
 }

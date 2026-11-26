@@ -1,11 +1,11 @@
 // js/performance.js
 // 단어별 학습 성과 대시보드 및 나의 왕국(영지 발전 & 기사단 승급) 모듈
 
-import { StorageManager } from './storage.js?v=20261126_01';
-import { SoundManager } from './tts.js?v=20261126_01';
-import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261126_01';
-import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261126_01';
-import { SiegeGame, SiegeManager } from './games/siege.js?v=20261126_01';
+import { StorageManager } from './storage.js?v=20261126_02';
+import { SoundManager } from './tts.js?v=20261126_02';
+import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261126_02';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261126_02';
+import { SiegeGame, SiegeManager } from './games/siege.js?v=20261126_02';
 
 export class PerformanceView {
   constructor(containerId) {
@@ -78,24 +78,24 @@ export class PerformanceView {
         <div id="perf-siege-banner-card" class="cursor-pointer bg-gradient-to-r from-amber-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-5 sm:p-7 shadow-2xl border-4 border-amber-500/70 hover:border-amber-400 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 transition transform hover:scale-[1.01] active:scale-[0.99]">
           <div class="space-y-2 relative z-10">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/30 text-amber-300 text-xs font-black border border-amber-400 shadow-sm animate-pulse">
-              <span>⚔️</span> <span>일일 2회 한정 성채 수호 공성전</span>
+              <span>🗺️</span> <span>삼국지 50성 천하통일 타워디펜스</span>
             </div>
             <h3 class="text-2xl sm:text-3xl font-black text-amber-400 flex flex-wrap items-center gap-3 tracking-tight">
-              <span>🏰 성채 수호 공성전</span>
+              <span>🏰 삼국지 공성 타워디펜스</span>
               <span class="text-xs sm:text-sm px-3 py-1 rounded-full font-bold ${canPlaySiege ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400' : 'bg-rose-500/25 text-rose-300 border border-rose-400'}">
-                ${canPlaySiege ? `오늘 남은 출정: ${2 - siegeRecord.playCount}/2회` : '오늘 출정 완료 (0/2회)'}
+                ${canPlaySiege ? `남은 패배 기회: ${2 - siegeRecord.playCount}/2회` : '오늘 패배 소진 (0/2회)'}
               </span>
             </h3>
             <p class="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
-              단어장에서 육성한 기사단으로 <strong>4×6 골짜기 전장</strong>에서 몰려오는 <strong>100웨이브 마물 군단</strong>을 막아내세요!<br class="hidden sm:inline">
-              매일 <strong>새벽 12시(00:00) 초기화</strong>되며, 10웨이브마다 지형이 바뀌고 전사자의 50%가 부활합니다.
+              단어장에서 육성한 기사단으로 <strong>6×8 구불구불 전장</strong>에 6종 타워를 세워 <strong>50개 삼국지 도시</strong>를 정복하세요!<br class="hidden sm:inline">
+              이기면 계속 진격할 수 있으며, 하루 2번 패배 시 밤 12시(자정)에 기회가 초기화됩니다.
             </p>
           </div>
 
           <div class="flex items-center gap-3 shrink-0 relative z-10">
             <div class="bg-black/50 backdrop-blur-md rounded-2xl px-4 py-3 border border-amber-500/30 text-center min-w-[100px]">
-              <div class="text-[10px] text-slate-400 font-bold">역대 최고 기록</div>
-              <div class="text-xl font-black text-amber-300 font-mono">${siegeRecord.bestWave > 0 ? `Wave ${siegeRecord.bestWave}` : '기록 없음'}</div>
+              <div class="text-[10px] text-slate-400 font-bold">점령 영토</div>
+              <div class="text-xl font-black text-amber-300 font-mono">${siegeRecord.conqueredCount || 0} / 50</div>
             </div>
             <button id="perf-open-siege-btn" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-black text-sm sm:text-base shadow-xl shadow-amber-500/40 transition flex items-center gap-2">
               <span>⚔️</span> <span>공성전 출정</span>

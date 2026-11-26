@@ -2,8 +2,8 @@
 // VocaQuest 로컬 우선 체크포인트 동기화 모듈 (Local-First Checkpoint Sync)
 // 실시간 리스너(onSnapshot)를 배제하고, 명시적 시점([학습 끝], 프로필 변경, 수동 새로고침)에만 단발성으로 안전하게 통신합니다.
 
-import { db, isFirebaseConfigured } from './firebaseConfig.js?v=20261126_01';
-import { AdminLogger } from './adminLogger.js?v=20261126_01';
+import { db, isFirebaseConfigured } from './firebaseConfig.js?v=20261126_02';
+import { AdminLogger } from './adminLogger.js?v=20261126_02';
 import { 
   collection, 
   doc, 
@@ -24,10 +24,22 @@ export class FirebaseSyncManager {
   }
 
   /**
+   * 미학습 기본 상태(점수 0, 훈련병, 학습 이력 없음)인지 판별
+   */
+  static isUnstudiedDefault(entry) {
+    if (!entry || typeof entry !== 'object') return true;
+    if (entry.memorized || (entry.wrongCount || 0) > 0) return false;
+    const m = entry.mastery;
+    if (!m) return true;
+    return !m.firstSeen && (m.score || 0) === 0 && (!m.status || m.status === 'recruit') && (m.masterTier || 0) === 0;
+  }
+
+  /**
    * 단어 성취도 엔트리의 최종 수정 시각(ms) 추출
    */
   static getEntryTimestamp(entry) {
     if (!entry || typeof entry !== 'object') return 0;
+    if (this.isUnstudiedDefault(entry)) return 0;
     if (entry.mastery && typeof entry.mastery.updatedAt === 'number') {
       return entry.mastery.updatedAt;
     }
@@ -39,7 +51,7 @@ export class FirebaseSyncManager {
 
   /**
    * 두 성취도 맵(local, remote)을 단어별 최신 updatedAt 기준으로 안전하게 병합
-   * 구버전 기기의 옛날 데이터가 최신 기기의 높은 등급/점수를 덮어쓰는 것을 방지합니다.
+   * 구버전 기기의 옛날 데이터나 미학습 기본값이 최신 기기의 학습 성과를 덮어쓰는 것을 방지합니다.
    */
   static mergeProfileProgressData(localData = {}, remoteData = {}) {
     const merged = {};
@@ -57,6 +69,17 @@ export class FirebaseSyncManager {
       } else if (!l && r) {
         merged[wordId] = r;
       } else if (l && r) {
+        const lUnstudied = this.isUnstudiedDefault(l);
+        const rUnstudied = this.isUnstudiedDefault(r);
+        if (lUnstudied && !rUnstudied) {
+          merged[wordId] = r;
+          continue;
+        }
+        if (!lUnstudied && rUnstudied) {
+          merged[wordId] = l;
+          continue;
+        }
+
         const lTs = this.getEntryTimestamp(l);
         const rTs = this.getEntryTimestamp(r);
         if (rTs > lTs) {
@@ -104,6 +127,7 @@ export class FirebaseSyncManager {
         const activeId = this._storageManager.getActiveProfileId();
         if (activeId) {
           await this.downloadProfileProgress(activeId, this._storageManager, { fromInit: true });
+          await this.downloadSiegeConquest(activeId);
         }
       } catch (e) {
         AdminLogger.log('ERROR', '초기 자동 병합 실패', e.message);
@@ -486,8 +510,14 @@ export class FirebaseSyncManager {
       this.isSyncing = true;
       const progressData = storageManager.getProfileData(activeProf.id);
       
-      // 1. 현재 프로필 성과 서버 안전 병합 저장
+      // 1. 현재 프로필 성과 및 영토 정복 상태 서버 안전 병합 저장
       await this.uploadProfileProgress(activeProf.id, progressData, null, storageManager);
+      const localConqRaw = localStorage.getItem(`vocaquest_siege_conquest_${activeProf.id}`);
+      if (localConqRaw) {
+        try {
+          await this.uploadSiegeConquest(activeProf.id, JSON.parse(localConqRaw));
+        } catch { /* ignore */ }
+      }
       this._dirtyProfileIds.delete(activeProf.id);
       this._dirtyWordIdsByProfile.delete(activeProf.id);
 
@@ -524,11 +554,91 @@ export class FirebaseSyncManager {
       });
     }
 
-    // 2. 새 프로필의 최신 성과 서버에서 다운로드
+    // 2. 새 프로필의 최신 성과 및 정복 영토 서버에서 다운로드
     if (newProfileId) {
       this.downloadProfileProgress(newProfileId, storageManager).catch(err => {
         console.warn(`[FirebaseSync] 새 프로필(${newProfileId}) 다운로드 경고:`, err);
       });
+      this.downloadSiegeConquest(newProfileId).catch(err => {
+        console.warn(`[FirebaseSync] 새 프로필(${newProfileId}) 영토 다운로드 경고:`, err);
+      });
+    }
+  }
+
+  /**
+   * ==========================================
+   * 4-1. 삼국지 50왕국 정복 영토 & 일일 패배 횟수 동기화
+   * ==========================================
+   */
+  static mergeConquestData(localObj, remoteObj) {
+    const l = localObj || {};
+    const r = remoteObj || {};
+    const conqueredSet = new Set([0]);
+    (Array.isArray(l.conqueredCities) ? l.conqueredCities : []).forEach(id => conqueredSet.add(Number(id)));
+    (Array.isArray(r.conqueredCities) ? r.conqueredCities : []).forEach(id => conqueredSet.add(Number(id)));
+
+    const lDate = l.date || '';
+    const rDate = r.date || '';
+    let date = lDate >= rDate ? lDate : rDate;
+    let defeatsToday = 0;
+
+    if (lDate && lDate === rDate) {
+      defeatsToday = Math.max(l.defeatsToday || 0, r.defeatsToday || 0);
+    } else if (lDate > rDate) {
+      defeatsToday = l.defeatsToday || 0;
+    } else {
+      defeatsToday = r.defeatsToday || 0;
+    }
+
+    return {
+      conqueredCities: Array.from(conqueredSet).sort((a, b) => a - b),
+      date,
+      defeatsToday,
+      updatedAt: Math.max(l.updatedAt || 0, r.updatedAt || 0, Date.now())
+    };
+  }
+
+  static async uploadSiegeConquest(profileId, localData) {
+    if (!db || !profileId) return { success: false, error: 'DB 미연결' };
+    try {
+      const docRef = doc(db, 'conquestData', profileId);
+      const snap = await getDoc(docRef);
+      const remoteData = snap.exists() ? (snap.data() || {}) : {};
+      const merged = this.mergeConquestData(localData, remoteData);
+
+      await setDoc(docRef, merged, { merge: true });
+      localStorage.setItem(`vocaquest_siege_conquest_${profileId}`, JSON.stringify(merged));
+      AdminLogger.log('SYNC', `왕국 정복 영토(${merged.conqueredCities.length - 1}/50) 동기화 완료`, { profileId });
+      return { success: true, data: merged };
+    } catch (e) {
+      AdminLogger.log('ERROR', '왕국 정복 영토 업로드 실패', e.message);
+      return { success: false, error: e.message };
+    }
+  }
+
+  static async downloadSiegeConquest(profileId) {
+    if (!db || !profileId) return { success: false, error: 'DB 미연결' };
+    try {
+      const docRef = doc(db, 'conquestData', profileId);
+      const snap = await getDoc(docRef);
+      const key = `vocaquest_siege_conquest_${profileId}`;
+      let localData = {};
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) localData = JSON.parse(raw) || {};
+      } catch { /* ignore */ }
+
+      if (snap.exists()) {
+        const remoteData = snap.data() || {};
+        const merged = this.mergeConquestData(localData, remoteData);
+        localStorage.setItem(key, JSON.stringify(merged));
+        window.dispatchEvent(new CustomEvent('vocaquest_conquest_updated', { detail: { profileId, data: merged } }));
+        AdminLogger.log('SYNC', `왕국 정복 영토(${merged.conqueredCities.length - 1}/50) 서버 병합 완료`, { profileId });
+        return { success: true, data: merged };
+      }
+      return { success: true, data: localData };
+    } catch (e) {
+      return { success: false, error: e.message };
     }
   }
 
@@ -546,7 +656,7 @@ export class FirebaseSyncManager {
           await setDoc(doc(db, 'profiles', p.id), { ...p, updatedAt: Date.now() }, { merge: true });
           const pData = storageManager.getProfileData(p.id) || {};
           if (Object.keys(pData).length > 0) {
-            await setDoc(doc(db, 'profileData', p.id), pData, { merge: true });
+            await this.uploadProfileProgress(p.id, pData, null, storageManager);
           }
         }
       }

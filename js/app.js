@@ -1,21 +1,21 @@
 // js/app.js
 // VocaQuest 메인 앱 컨트롤러, 라우터 및 전역 단어장(Deck) 선택 관리
 
-import { StorageManager } from './storage.js?v=20261126_01';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261126_01';
-import { IdbBackup } from './idbBackup.js?v=20261126_01';
-import { AdminLogger } from './adminLogger.js?v=20261126_01';
-import { SoundManager } from './tts.js?v=20261126_01';
-import { FlashcardGame } from './games/flashcard.js?v=20261126_01';
-import { QuizGame } from './games/quiz.js?v=20261126_01';
-import { MatchGame } from './games/match.js?v=20261126_01';
-import { ScrambleGame } from './games/scramble.js?v=20261126_01';
-import { SpeedDropGame } from './games/speed-drop.js?v=20261126_01';
-import { RoyalExamGame } from './games/royal-exam.js?v=20261126_01';
-import { WordManager } from './wordManager.js?v=20261126_01';
-import { PerformanceView } from './performance.js?v=20261126_01';
-import { AdminManager } from './admin.js?v=20261126_01';
-import { SiegeGame } from './games/siege.js?v=20261126_01';
+import { StorageManager } from './storage.js?v=20261126_02';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261126_02';
+import { IdbBackup } from './idbBackup.js?v=20261126_02';
+import { AdminLogger } from './adminLogger.js?v=20261126_02';
+import { SoundManager } from './tts.js?v=20261126_02';
+import { FlashcardGame } from './games/flashcard.js?v=20261126_02';
+import { QuizGame } from './games/quiz.js?v=20261126_02';
+import { MatchGame } from './games/match.js?v=20261126_02';
+import { ScrambleGame } from './games/scramble.js?v=20261126_02';
+import { SpeedDropGame } from './games/speed-drop.js?v=20261126_02';
+import { RoyalExamGame } from './games/royal-exam.js?v=20261126_02';
+import { WordManager } from './wordManager.js?v=20261126_02';
+import { PerformanceView } from './performance.js?v=20261126_02';
+import { AdminManager } from './admin.js?v=20261126_02';
+import { SiegeGame } from './games/siege.js?v=20261126_02';
 
 class App {
   constructor() {
@@ -67,13 +67,13 @@ class App {
       }
     }, 50);
 
-    // 브라우저 탭/화면 전환(백그라운드 진입) 감지 시 게임 정지 + 로컬/Firebase 즉시 백업
+    // 브라우저 탭/화면 전환(백그라운드 진입) 감지 시 일반 게임 정지 + 공성전은 일시정지 유지 + 즉시 백업
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         AdminLogger.log('EVENT', '앱 백그라운드 진입(visibilitychange) → 즉시 백업 실행');
         StorageManager.flushPendingProfileSaves();
         FirebaseSyncManager.flushDirtySync(StorageManager);
-        this.stopAllGames();
+        this.stopAllGames({ keepSiegeOpen: true });
         // 퀴즈나 배틀 중 백그라운드로 전환되었다가 돌아올 때를 대비해 상태를 대기 화면으로 정리
         if (this.currentTab === 'quiz') {
           this.quizGame.init();
@@ -127,10 +127,10 @@ class App {
       this.renderDeckSelector();
     });
 
-    // Firebase 원격 학습 성취도 실시간 업데이트 감지 (초기 로드에서 원격 갱신이 있으면 현재 탭도 즉시 반영)
+    // Firebase 원격 학습 성취도 실시간 업데이트 감지 (원격 갱신이 있으면 현재 탭도 즉시 반영)
     window.addEventListener('vocaquest_progress_updated', (e) => {
       this.updateStats();
-      if (e.detail && e.detail.fromInit && e.detail.hasRemoteUpdates) {
+      if (e.detail && e.detail.hasRemoteUpdates) {
         this.reloadCurrentTab();
       }
     });
@@ -581,7 +581,8 @@ class App {
   /**
    * 진행 중인 모든 게임의 타이머, 애니메이션 루프 및 효과음 완전 종료
    */
-  stopAllGames() {
+  stopAllGames(options = {}) {
+    const keepSiegeOpen = Boolean(options && options.keepSiegeOpen);
     // 1. 사지선다 스피드 퀴즈 카운트다운 타이머 정지
     if (this.quizGame && typeof this.quizGame.stop === 'function') {
       this.quizGame.stop();
@@ -602,9 +603,13 @@ class App {
     if (this.royalExamGame && typeof this.royalExamGame.stop === 'function') {
       this.royalExamGame.stop();
     }
-    // 5. 공성전 배틀 루프 정지 및 모달 닫기
-    if (typeof SiegeGame !== 'undefined' && typeof SiegeGame.closeActiveGame === 'function') {
-      SiegeGame.closeActiveGame();
+    // 5. 공성전 처리: Alt-Tab 등 화면 전환 시에는 닫지 않고 일시정지만 수행
+    if (typeof SiegeGame !== 'undefined') {
+      if (keepSiegeOpen && typeof SiegeGame.pauseActiveGame === 'function') {
+        SiegeGame.pauseActiveGame();
+      } else if (typeof SiegeGame.closeActiveGame === 'function') {
+        SiegeGame.closeActiveGame();
+      }
     }
     // 6. 현재 재생 중인 TTS 및 오디오 정지
     if (typeof SoundManager !== 'undefined' && typeof SoundManager.stop === 'function') {
