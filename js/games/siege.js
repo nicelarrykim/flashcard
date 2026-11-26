@@ -2,15 +2,15 @@
 // VocaQuest 삼국지 9 50도시 정복전 & 6x8 타워 디펜스 모듈
 // - 우측 최상단 '나의 왕국'에서 길로 연결된 50개 삼국지 도시를 정복
 // - 6x8 구불구불한 전장: 적(상단 성문 -> 하단 전초기지) vs 아군 진격병(하단 전초기지 -> 상단 성문)
-// - 아군 진격병이 적을 피해 성문에 도달하면 승리(무제한 연승 가능), 적이 전초기지 도달 시 패배(1일 2패 제한, 자정 리셋)
+// - 아군 진격병이 적을 피해 성문에 도달하면 승리(무제한 연승 가능), 적이 전초기지 도달 시 패배(1일 4패 제한, 자정 리셋)
 // - 점령 영토 및 일일 패배 횟수 Firebase / IndexedDB 동기화
 
-import { StorageManager } from '../storage.js?v=20261126_02';
-import { SoundManager } from '../tts.js?v=20261126_02';
-import { MasteryManager, RANK_TYPES } from '../mastery.js?v=20261126_02';
-import { FirebaseSyncManager } from '../firebaseSync.js?v=20261126_02';
-import { IdbBackup } from '../idbBackup.js?v=20261126_02';
-import { RTK_CITIES, RTK_EDGES, buildRtkAdjacency, getCityBattlePath } from './rtkMapData.js?v=20261126_02';
+import { StorageManager } from '../storage.js?v=20261127_01';
+import { SoundManager } from '../tts.js?v=20261127_01';
+import { MasteryManager, RANK_TYPES } from '../mastery.js?v=20261127_01';
+import { FirebaseSyncManager } from '../firebaseSync.js?v=20261127_01';
+import { IdbBackup } from '../idbBackup.js?v=20261127_01';
+import { RTK_CITIES, RTK_EDGES, buildRtkAdjacency, getCityBattlePath } from './rtkMapData.js?v=20261127_01';
 
 // 6종 방어 타워 정의 및 등급별 병력 소모 매트릭스 (훈련병 제외, 보병부터 전투 참가)
 export const TOWER_DEFS = {
@@ -98,7 +98,7 @@ export const RANK_POOL_META = [
 ];
 
 export class SiegeManager {
-  static MAX_DAILY_DEFEATS = 2;
+  static MAX_DAILY_DEFEATS = 4;
 
   static getProfileId() {
     try {
@@ -476,8 +476,8 @@ export class SiegeGame {
             <div class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-amber-400">
               적 난이도: <span class="font-mono">${diffMult}x</span>
             </div>
-            <div class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-rose-300" title="하루 2패 시 종료 (자정 12시 리셋, 승리 시 무제한 계속 가능)">
-              남은 패배 기회: <span>${heartsHtml}</span> ${isAdmin ? '(ADMIN 무제한)' : `(${defeatsLeft}/2)`}
+            <div class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-rose-300" title="하루 ${SiegeManager.MAX_DAILY_DEFEATS}패 시 종료 (자정 12시 리셋, 승리 시 무제한 계속 가능)">
+              남은 패배 기회: <span>${heartsHtml}</span> ${isAdmin ? '(ADMIN 무제한)' : `(${defeatsLeft}/${SiegeManager.MAX_DAILY_DEFEATS})`}
             </div>
             <button id="siege-close-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
               ✕ 닫기
@@ -534,7 +534,7 @@ export class SiegeGame {
                 </button>
               ` : `
                 <div class="px-4 py-2 rounded-xl bg-rose-950/60 border border-rose-700 text-rose-300 text-xs font-bold">
-                  오늘 패배 횟수(2/2) 소진 · 밤 12시에 초기화됩니다
+                  오늘 패배 횟수(${SiegeManager.MAX_DAILY_DEFEATS}/${SiegeManager.MAX_DAILY_DEFEATS}) 소진 · 밤 12시에 초기화됩니다
                 </div>
               `}
             </div>
@@ -1370,10 +1370,11 @@ export class SiegeGame {
     const hpMult = isBoss ? 3.4 : kind === 'heavy' ? 1.9 : kind === 'fast' ? 0.72 : 1.0;
     const speedMult = isBoss ? 0.78 : kind === 'heavy' ? 0.78 : kind === 'fast' ? 1.55 : 1.05;
 
-    // 점령 영토 10개 미만(0~9개)까지는 초반 적응을 위해 적 체력 및 이동 속도 절반(0.5x) 적용
-    const earlyStageMult = (this.conqueredCount || 0) < 10 ? 0.5 : 1.0;
-    const hp = baseHp * hpMult * earlyStageMult;
-    const speed = 1.32 * speedMult * (1 + Math.min(0.45, (this.diffMult - 1) * 0.15)) * earlyStageMult;
+    // 점령 영토 10개 미만(0~9개)까지는 초반 적응을 위해 적 체력 절반(0.5x), 이동 속도 추가 절반(0.25x) 적용
+    const earlyHpMult = (this.conqueredCount || 0) < 10 ? 0.5 : 1.0;
+    const earlySpeedMult = (this.conqueredCount || 0) < 10 ? 0.25 : 1.0;
+    const hp = baseHp * hpMult * earlyHpMult;
+    const speed = 1.32 * speedMult * (1 + Math.min(0.45, (this.diffMult - 1) * 0.15)) * earlySpeedMult;
 
     const spawnPos = this.getPathWorldPos(spec?.batchOffset || 0);
     this.enemies.push({
@@ -1534,7 +1535,7 @@ export class SiegeGame {
           <h3 class="text-xl font-black text-rose-400">전초기지 방어 실패</h3>
           <p class="text-xs text-slate-300 leading-relaxed">
             적이 아군 전초기지에 도달했습니다.<br>
-            ${isAdmin ? '<strong class="text-amber-400">ADMIN 무제한 도전 가능</strong>' : `오늘 남은 패배 기회: <strong class="text-amber-400">${left} / 2</strong> (자정 12시 초기화)`}
+            ${isAdmin ? '<strong class="text-amber-400">ADMIN 무제한 도전 가능</strong>' : `오늘 남은 패배 기회: <strong class="text-amber-400">${left} / ${SiegeManager.MAX_DAILY_DEFEATS}</strong> (자정 12시 초기화)`}
           </p>
           <div class="flex flex-col gap-2">
             ${left > 0 ? `

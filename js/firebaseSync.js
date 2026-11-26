@@ -2,8 +2,8 @@
 // VocaQuest 로컬 우선 체크포인트 동기화 모듈 (Local-First Checkpoint Sync)
 // 실시간 리스너(onSnapshot)를 배제하고, 명시적 시점([학습 끝], 프로필 변경, 수동 새로고침)에만 단발성으로 안전하게 통신합니다.
 
-import { db, isFirebaseConfigured } from './firebaseConfig.js?v=20261126_02';
-import { AdminLogger } from './adminLogger.js?v=20261126_02';
+import { db, isFirebaseConfigured } from './firebaseConfig.js?v=20261127_01';
+import { AdminLogger } from './adminLogger.js?v=20261127_01';
 import { 
   collection, 
   doc, 
