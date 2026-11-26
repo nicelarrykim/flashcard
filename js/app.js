@@ -31,8 +31,7 @@ class App {
   }
 
   init() {
-    // ADMIN 프로필 자동 확보 및 활성 상태 반영
-    StorageManager.ensureAdminProfile();
+    // ADMIN 활성 여부 즉시 반영
     AdminLogger.updateAdminState(StorageManager.getActiveProfile());
 
     // 왕실근위대 2일 초과 자동 강등 확인
@@ -53,9 +52,9 @@ class App {
     setTimeout(async () => {
       IdbBackup.requestPersistentStorage();
       const backupRes = await IdbBackup.syncOrRestore(StorageManager);
+      StorageManager.ensureAdminProfile();
+      AdminLogger.updateAdminState(StorageManager.getActiveProfile());
       if (backupRes && backupRes.restored) {
-        StorageManager.ensureAdminProfile();
-        AdminLogger.updateAdminState(StorageManager.getActiveProfile());
         this.updateStats();
         this.updateActiveProfileBadge();
         this.reloadCurrentTab();

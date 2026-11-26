@@ -111,6 +111,27 @@
           <span id="active-profile-name" class="max-w-[60px] sm:max-w-[85px] truncate">기본 학습자</span>
           <span class="text-[10px] text-amber-600 dark:text-amber-400 font-extrabold">👑</span>
         </div>
+        <script>
+          // 모듈 로드 전 즉시 이전 활성 프로필을 표시해 '기본 학습자' 깜빡임 방지
+          (function () {
+            try {
+              var activeId = localStorage.getItem('vocaquest_active_profile_v1');
+              var rawProfiles = localStorage.getItem('vocaquest_profiles_v1');
+              if (rawProfiles) {
+                var profiles = JSON.parse(rawProfiles);
+                if (Array.isArray(profiles) && profiles.length > 0) {
+                  var found = profiles.find(function (p) { return p && p.id === activeId; }) || profiles[0];
+                  if (found) {
+                    var avEl = document.getElementById('active-profile-avatar');
+                    var nmEl = document.getElementById('active-profile-name');
+                    if (avEl && found.avatar) avEl.textContent = found.avatar;
+                    if (nmEl && found.name) nmEl.textContent = found.name;
+                  }
+                }
+              }
+            } catch (e) {}
+          })();
+        </script>
 
         <!-- 🏁 [학습 끝] 버튼 (클릭 시 현재 성과 Firebase 저장 & 최신 단어장 동기화) -->
         <button id="header-finish-study-btn" class="flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-95 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-black shadow-md shadow-emerald-500/20 transition shrink-0 cursor-pointer" title="오늘 학습을 마치고 서버에 현재 성과를 저장합니다">
