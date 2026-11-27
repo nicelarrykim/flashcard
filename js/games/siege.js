@@ -5,12 +5,12 @@
 // - 아군 진격병이 적을 피해 성문에 도달하면 승리(무제한 연승 가능), 적이 전초기지 도달 시 패배(1일 4패 제한, 자정 리셋)
 // - 점령 영토 및 일일 패배 횟수 Firebase / IndexedDB 동기화
 
-import { StorageManager } from '../storage.js?v=20261127_02';
-import { SoundManager } from '../tts.js?v=20261127_02';
-import { MasteryManager, RANK_TYPES } from '../mastery.js?v=20261127_02';
-import { FirebaseSyncManager } from '../firebaseSync.js?v=20261127_02';
-import { IdbBackup } from '../idbBackup.js?v=20261127_02';
-import { RTK_CITIES, RTK_EDGES, buildRtkAdjacency, getCityBattlePath } from './rtkMapData.js?v=20261127_02';
+import { StorageManager } from '../storage.js?v=20261127_03';
+import { SoundManager } from '../tts.js?v=20261127_03';
+import { MasteryManager, RANK_TYPES } from '../mastery.js?v=20261127_03';
+import { FirebaseSyncManager } from '../firebaseSync.js?v=20261127_03';
+import { IdbBackup } from '../idbBackup.js?v=20261127_03';
+import { RTK_CITIES, RTK_EDGES, buildRtkAdjacency, getCityBattlePath } from './rtkMapData.js?v=20261127_03';
 
 // 6종 방어 타워 정의 및 등급별 병력 소모 매트릭스 (훈련병 제외, 보병부터 전투 참가)
 export const TOWER_DEFS = {

@@ -1,11 +1,11 @@
 // js/data/elementaryWords50.js
-// 초등 필수 영단어 250개 (초등 3학년 기초 50단어 + 초등 4~5학년 확장 200단어)
+// 초등 필수 영단어 500개 (초등 기초 250단어 + 확장 250단어)
 // 정확한 발음기호 및 실제 원어민 오디오 음성 100% 탑재
 
 export const ELEMENTARY_WORDS_50_DECK = {
   id: "deck_elementary_50",
   name: "초급단어50",
-  description: "초등 필수 영단어 250개 (기초 50단어 + 심화 200단어, 원어민 발음 및 발음기호 포함)",
+  description: "초등 필수 영단어 500개 (기초 250단어 + 확장 250단어, 소문자 통일·원어민 발음 포함)",
   createdAt: 1732291200000,
   imagePosition: "meaning",
   words: [
@@ -4756,6 +4756,4756 @@ export const ELEMENTARY_WORDS_50_DECK = {
             "초등4-5학년"
         ],
         "level": "intermediate",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_251",
+        "number": 251,
+        "word": "head",
+        "phonetic": "/hed/",
+        "partOfSpeech": "noun",
+        "meaning": "머리",
+        "example": "Wear a helmet on your head.",
+        "exampleMeaning": "머리에 헬멧을 쓰세요.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=head&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_252",
+        "number": 252,
+        "word": "hair",
+        "phonetic": "/her/",
+        "partOfSpeech": "noun",
+        "meaning": "머리카락",
+        "example": "She brushes her long hair.",
+        "exampleMeaning": "그녀는 긴 머리카락을 빗는다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=hair&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_253",
+        "number": 253,
+        "word": "face",
+        "phonetic": "/feɪs/",
+        "partOfSpeech": "noun",
+        "meaning": "얼굴",
+        "example": "Wash your face with clean water.",
+        "exampleMeaning": "깨끗한 물로 얼굴을 씻어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=face&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_254",
+        "number": 254,
+        "word": "ear",
+        "phonetic": "/ɪr/",
+        "partOfSpeech": "noun",
+        "meaning": "귀",
+        "example": "Rabbits have two long ears.",
+        "exampleMeaning": "토끼는 긴 귀 두 개를 가지고 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=ear&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_255",
+        "number": 255,
+        "word": "tooth",
+        "phonetic": "/tuːθ/",
+        "partOfSpeech": "noun",
+        "meaning": "이, 치아",
+        "example": "Brush every tooth after eating.",
+        "exampleMeaning": "식사 후에 모든 치아를 닦아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=tooth&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_256",
+        "number": 256,
+        "word": "neck",
+        "phonetic": "/nek/",
+        "partOfSpeech": "noun",
+        "meaning": "목",
+        "example": "Giraffes have a very long neck.",
+        "exampleMeaning": "기린은 아주 긴 목을 가지고 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=neck&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_257",
+        "number": 257,
+        "word": "arm",
+        "phonetic": "/ɑːrm/",
+        "partOfSpeech": "noun",
+        "meaning": "팔",
+        "example": "He raised his right arm.",
+        "exampleMeaning": "그는 오른팔을 들었다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=arm&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_258",
+        "number": 258,
+        "word": "leg",
+        "phonetic": "/leɡ/",
+        "partOfSpeech": "noun",
+        "meaning": "다리",
+        "example": "My legs are tired after running.",
+        "exampleMeaning": "달리기 후에 다리가 피곤하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=leg&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_259",
+        "number": 259,
+        "word": "knee",
+        "phonetic": "/niː/",
+        "partOfSpeech": "noun",
+        "meaning": "무릎",
+        "example": "I hurt my knee on the playground.",
+        "exampleMeaning": "나는 운동장에서 무릎을 다쳤다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=knee&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_260",
+        "number": 260,
+        "word": "finger",
+        "phonetic": "/ˈfɪŋɡər/",
+        "partOfSpeech": "noun",
+        "meaning": "손가락",
+        "example": "We have ten fingers on our hands.",
+        "exampleMeaning": "우리는 손에 열 개의 손가락이 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=finger&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_261",
+        "number": 261,
+        "word": "heart",
+        "phonetic": "/hɑːrt/",
+        "partOfSpeech": "noun",
+        "meaning": "심장, 마음",
+        "example": "My heart beats fast when I run.",
+        "exampleMeaning": "달릴 때 내 심장이 빠르게 뛴다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=heart&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_262",
+        "number": 262,
+        "word": "stomach",
+        "phonetic": "/ˈstʌmək/",
+        "partOfSpeech": "noun",
+        "meaning": "배, 위",
+        "example": "My stomach is full after dinner.",
+        "exampleMeaning": "저녁을 먹은 후 배가 부르다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=stomach&type=2",
+        "tags": [
+            "초급단어50",
+            "신체",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_263",
+        "number": 263,
+        "word": "parent",
+        "phonetic": "/ˈperənt/",
+        "partOfSpeech": "noun",
+        "meaning": "부모님",
+        "example": "Listen carefully to your parents.",
+        "exampleMeaning": "부모님 말씀을 주의 깊게 들어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=parent&type=2",
+        "tags": [
+            "초급단어50",
+            "가족",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_264",
+        "number": 264,
+        "word": "brother",
+        "phonetic": "/ˈbrʌðər/",
+        "partOfSpeech": "noun",
+        "meaning": "형, 오빠, 남동생",
+        "example": "My younger brother likes toy cars.",
+        "exampleMeaning": "내 남동생은 장난감 자동차를 좋아한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=brother&type=2",
+        "tags": [
+            "초급단어50",
+            "가족",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_265",
+        "number": 265,
+        "word": "sister",
+        "phonetic": "/ˈsɪstər/",
+        "partOfSpeech": "noun",
+        "meaning": "누나, 언니, 여동생",
+        "example": "My sister reads books every night.",
+        "exampleMeaning": "내 여동생은 매일 밤 책을 읽는다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=sister&type=2",
+        "tags": [
+            "초급단어50",
+            "가족",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_266",
+        "number": 266,
+        "word": "uncle",
+        "phonetic": "/ˈʌŋkl/",
+        "partOfSpeech": "noun",
+        "meaning": "삼촌, 아저씨",
+        "example": "My uncle lives near the sea.",
+        "exampleMeaning": "우리 삼촌은 바다 근처에 사신다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=uncle&type=2",
+        "tags": [
+            "초급단어50",
+            "가족",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_267",
+        "number": 267,
+        "word": "aunt",
+        "phonetic": "/ænt/",
+        "partOfSpeech": "noun",
+        "meaning": "이모, 고모, 숙모",
+        "example": "My aunt baked a sweet pie.",
+        "exampleMeaning": "이모가 달콤한 파이를 구우셨다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=aunt&type=2",
+        "tags": [
+            "초급단어50",
+            "가족",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_268",
+        "number": 268,
+        "word": "cousin",
+        "phonetic": "/ˈkʌzn/",
+        "partOfSpeech": "noun",
+        "meaning": "사촌",
+        "example": "I play soccer with my cousin.",
+        "exampleMeaning": "나는 사촌과 축구를 한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=cousin&type=2",
+        "tags": [
+            "초급단어50",
+            "가족",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_269",
+        "number": 269,
+        "word": "neighbor",
+        "phonetic": "/ˈneɪbər/",
+        "partOfSpeech": "noun",
+        "meaning": "이웃",
+        "example": "Our neighbor is very friendly.",
+        "exampleMeaning": "우리 이웃은 매우 친절하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=neighbor&type=2",
+        "tags": [
+            "초급단어50",
+            "사람",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_270",
+        "number": 270,
+        "word": "child",
+        "phonetic": "/tʃaɪld/",
+        "partOfSpeech": "noun",
+        "meaning": "어린이, 아이",
+        "example": "Every child needs love and care.",
+        "exampleMeaning": "모든 아이는 사랑과 보살핌이 필요하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=child&type=2",
+        "tags": [
+            "초급단어50",
+            "사람",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_271",
+        "number": 271,
+        "word": "kid",
+        "phonetic": "/kɪd/",
+        "partOfSpeech": "noun",
+        "meaning": "아이",
+        "example": "The kids are laughing in the yard.",
+        "exampleMeaning": "아이들이 마당에서 웃고 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=kid&type=2",
+        "tags": [
+            "초급단어50",
+            "사람",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_272",
+        "number": 272,
+        "word": "boy",
+        "phonetic": "/bɔɪ/",
+        "partOfSpeech": "noun",
+        "meaning": "소년, 남자아이",
+        "example": "The boy is riding his bicycle.",
+        "exampleMeaning": "그 소년은 자전거를 타고 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=boy&type=2",
+        "tags": [
+            "초급단어50",
+            "사람",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_273",
+        "number": 273,
+        "word": "girl",
+        "phonetic": "/ɡɜːrl/",
+        "partOfSpeech": "noun",
+        "meaning": "소녀, 여자아이",
+        "example": "The girl is drawing a rainbow.",
+        "exampleMeaning": "그 소녀는 무지개를 그리고 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=girl&type=2",
+        "tags": [
+            "초급단어50",
+            "사람",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_274",
+        "number": 274,
+        "word": "team",
+        "phonetic": "/tiːm/",
+        "partOfSpeech": "noun",
+        "meaning": "팀, 조",
+        "example": "Our team won the school game.",
+        "exampleMeaning": "우리 팀이 학교 경기에서 이겼다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=team&type=2",
+        "tags": [
+            "초급단어50",
+            "사람",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_275",
+        "number": 275,
+        "word": "shirt",
+        "phonetic": "/ʃɜːrt/",
+        "partOfSpeech": "noun",
+        "meaning": "셔츠",
+        "example": "He is wearing a white shirt.",
+        "exampleMeaning": "그는 하얀 셔츠를 입고 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=shirt&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_276",
+        "number": 276,
+        "word": "pants",
+        "phonetic": "/pænts/",
+        "partOfSpeech": "noun",
+        "meaning": "바지",
+        "example": "These blue pants are comfortable.",
+        "exampleMeaning": "이 파란 바지는 편안하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=pants&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_277",
+        "number": 277,
+        "word": "skirt",
+        "phonetic": "/skɜːrt/",
+        "partOfSpeech": "noun",
+        "meaning": "치마",
+        "example": "She bought a pretty yellow skirt.",
+        "exampleMeaning": "그녀는 예쁜 노란 치마를 샀다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=skirt&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_278",
+        "number": 278,
+        "word": "dress",
+        "phonetic": "/dres/",
+        "partOfSpeech": "noun",
+        "meaning": "드레스, 원피스",
+        "example": "She wears a green dress today.",
+        "exampleMeaning": "그녀는 오늘 초록색 원피스를 입었다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=dress&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_279",
+        "number": 279,
+        "word": "coat",
+        "phonetic": "/koʊt/",
+        "partOfSpeech": "noun",
+        "meaning": "코트, 외투",
+        "example": "Put on your warm coat outside.",
+        "exampleMeaning": "밖에서는 따뜻한 외투를 입어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=coat&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_280",
+        "number": 280,
+        "word": "jacket",
+        "phonetic": "/ˈdʒækɪt/",
+        "partOfSpeech": "noun",
+        "meaning": "재킷",
+        "example": "Zip up your jacket in the wind.",
+        "exampleMeaning": "바람이 불 때는 재킷 지퍼를 올려라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=jacket&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_281",
+        "number": 281,
+        "word": "hat",
+        "phonetic": "/hæt/",
+        "partOfSpeech": "noun",
+        "meaning": "모자",
+        "example": "A straw hat blocks the hot sun.",
+        "exampleMeaning": "밀짚모자는 뜨거운 햇빛을 막아준다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=hat&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_282",
+        "number": 282,
+        "word": "cap",
+        "phonetic": "/kæp/",
+        "partOfSpeech": "noun",
+        "meaning": "야구모자, 모자",
+        "example": "He wears a red baseball cap.",
+        "exampleMeaning": "그는 빨간 야구모자를 쓰고 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=cap&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_283",
+        "number": 283,
+        "word": "shoe",
+        "phonetic": "/ʃuː/",
+        "partOfSpeech": "noun",
+        "meaning": "신발",
+        "example": "Tie your left shoe lace tightly.",
+        "exampleMeaning": "왼쪽 신발 끈을 단단히 묶어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=shoe&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_284",
+        "number": 284,
+        "word": "sock",
+        "phonetic": "/sɑːk/",
+        "partOfSpeech": "noun",
+        "meaning": "양말",
+        "example": "I need a clean pair of socks.",
+        "exampleMeaning": "나는 깨끗한 양말 한 켤레가 필요하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=sock&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_285",
+        "number": 285,
+        "word": "glove",
+        "phonetic": "/ɡlʌv/",
+        "partOfSpeech": "noun",
+        "meaning": "장갑",
+        "example": "Wear thick gloves in winter.",
+        "exampleMeaning": "겨울에는 두꺼운 장갑을 껴라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=glove&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_286",
+        "number": 286,
+        "word": "glasses",
+        "phonetic": "/ˈɡlæsɪz/",
+        "partOfSpeech": "noun",
+        "meaning": "안경",
+        "example": "She wears glasses to read clearly.",
+        "exampleMeaning": "그녀는 또렷하게 읽기 위해 안경을 쓴다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=glasses&type=2",
+        "tags": [
+            "초급단어50",
+            "의복",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_287",
+        "number": 287,
+        "word": "meat",
+        "phonetic": "/miːt/",
+        "partOfSpeech": "noun",
+        "meaning": "고기",
+        "example": "Lions eat meat to stay strong.",
+        "exampleMeaning": "사자는 힘을 유지하기 위해 고기를 먹는다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=meat&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_288",
+        "number": 288,
+        "word": "chicken",
+        "phonetic": "/ˈtʃɪkɪn/",
+        "partOfSpeech": "noun",
+        "meaning": "닭고기, 닭",
+        "example": "We had roast chicken for lunch.",
+        "exampleMeaning": "우리는 점심으로 구운 닭고기를 먹었다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=chicken&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_289",
+        "number": 289,
+        "word": "salad",
+        "phonetic": "/ˈsæləd/",
+        "partOfSpeech": "noun",
+        "meaning": "샐러드",
+        "example": "Fresh salad is good for health.",
+        "exampleMeaning": "신선한 샐러드는 건강에 좋다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=salad&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_290",
+        "number": 290,
+        "word": "pizza",
+        "phonetic": "/ˈpiːtsə/",
+        "partOfSpeech": "noun",
+        "meaning": "피자",
+        "example": "We shared a cheese pizza together.",
+        "exampleMeaning": "우리는 함께 치즈 피자를 나눠 먹었다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=pizza&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_291",
+        "number": 291,
+        "word": "sandwich",
+        "phonetic": "/ˈsænwɪtʃ/",
+        "partOfSpeech": "noun",
+        "meaning": "샌드위치",
+        "example": "I packed a ham sandwich for school.",
+        "exampleMeaning": "나는 학교에 햄 샌드위치를 싸 갔다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=sandwich&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_292",
+        "number": 292,
+        "word": "honey",
+        "phonetic": "/ˈhʌni/",
+        "partOfSpeech": "noun",
+        "meaning": "꿀",
+        "example": "Bees make sweet golden honey.",
+        "exampleMeaning": "벌들은 달콤한 황금빛 꿀을 만든다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=honey&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_293",
+        "number": 293,
+        "word": "ice",
+        "phonetic": "/aɪs/",
+        "partOfSpeech": "noun",
+        "meaning": "얼음",
+        "example": "Add some ice to the cold juice.",
+        "exampleMeaning": "차가운 주스에 얼음을 조금 넣어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=ice&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_294",
+        "number": 294,
+        "word": "tea",
+        "phonetic": "/tiː/",
+        "partOfSpeech": "noun",
+        "meaning": "차(음료)",
+        "example": "Grandma drinks green tea slowly.",
+        "exampleMeaning": "할머니는 천천히 녹차를 마신다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=tea&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_295",
+        "number": 295,
+        "word": "peach",
+        "phonetic": "/piːtʃ/",
+        "partOfSpeech": "noun",
+        "meaning": "복숭아",
+        "example": "This pink peach smells very sweet.",
+        "exampleMeaning": "이 분홍 복숭아는 아주 달콤한 냄새가 난다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=peach&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_296",
+        "number": 296,
+        "word": "pear",
+        "phonetic": "/per/",
+        "partOfSpeech": "noun",
+        "meaning": "배(과일)",
+        "example": "A crisp pear is my favorite snack.",
+        "exampleMeaning": "아삭한 배는 내가 가장 좋아하는 간식이다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=pear&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_297",
+        "number": 297,
+        "word": "melon",
+        "phonetic": "/ˈmelən/",
+        "partOfSpeech": "noun",
+        "meaning": "멜론",
+        "example": "Cold melon tastes great in summer.",
+        "exampleMeaning": "차가운 멜론은 여름에 정말 맛있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=melon&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_298",
+        "number": 298,
+        "word": "watermelon",
+        "phonetic": "/ˈwɔːtərmelən/",
+        "partOfSpeech": "noun",
+        "meaning": "수박",
+        "example": "We cut a big green watermelon.",
+        "exampleMeaning": "우리는 큰 초록색 수박을 잘랐다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=watermelon&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_299",
+        "number": 299,
+        "word": "cherry",
+        "phonetic": "/ˈtʃeri/",
+        "partOfSpeech": "noun",
+        "meaning": "체리",
+        "example": "Two red cherries sit on the cake.",
+        "exampleMeaning": "빨간 체리 두 개가 케이크 위에 놓여 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=cherry&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_300",
+        "number": 300,
+        "word": "onion",
+        "phonetic": "/ˈʌnjən/",
+        "partOfSpeech": "noun",
+        "meaning": "양파",
+        "example": "Cutting onions can make you cry.",
+        "exampleMeaning": "양파를 썰면 눈물이 날 수 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=onion&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_301",
+        "number": 301,
+        "word": "corn",
+        "phonetic": "/kɔːrn/",
+        "partOfSpeech": "noun",
+        "meaning": "옥수수",
+        "example": "Yellow corn grows tall in the field.",
+        "exampleMeaning": "노란 옥수수가 밭에서 키가 크게 자란다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=corn&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_302",
+        "number": 302,
+        "word": "bean",
+        "phonetic": "/biːn/",
+        "partOfSpeech": "noun",
+        "meaning": "콩",
+        "example": "Green beans are rich in vitamins.",
+        "exampleMeaning": "풋콩에는 비타민이 풍부하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=bean&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_303",
+        "number": 303,
+        "word": "nut",
+        "phonetic": "/nʌt/",
+        "partOfSpeech": "noun",
+        "meaning": "견과류",
+        "example": "Squirrels hide nuts for the winter.",
+        "exampleMeaning": "다람쥐는 겨울을 위해 견과류를 숨긴다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=nut&type=2",
+        "tags": [
+            "초급단어50",
+            "음식",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_304",
+        "number": 304,
+        "word": "house",
+        "phonetic": "/haʊs/",
+        "partOfSpeech": "noun",
+        "meaning": "집",
+        "example": "Our house has a small red roof.",
+        "exampleMeaning": "우리 집에는 작은 빨간 지붕이 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=house&type=2",
+        "tags": [
+            "초급단어50",
+            "집",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_305",
+        "number": 305,
+        "word": "room",
+        "phonetic": "/ruːm/",
+        "partOfSpeech": "noun",
+        "meaning": "방",
+        "example": "Please keep your room neat.",
+        "exampleMeaning": "방은 항상 깔끔하게 유지해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=room&type=2",
+        "tags": [
+            "초급단어50",
+            "집",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_306",
+        "number": 306,
+        "word": "bed",
+        "phonetic": "/bed/",
+        "partOfSpeech": "noun",
+        "meaning": "침대",
+        "example": "Go to bed before ten o'clock.",
+        "exampleMeaning": "10시 전에 침대에 들어가 자라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=bed&type=2",
+        "tags": [
+            "초급단어50",
+            "집",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_307",
+        "number": 307,
+        "word": "sofa",
+        "phonetic": "/ˈsoʊfə/",
+        "partOfSpeech": "noun",
+        "meaning": "소파",
+        "example": "The cat is sleeping on the sofa.",
+        "exampleMeaning": "고양이가 소파 위에서 자고 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=sofa&type=2",
+        "tags": [
+            "초급단어50",
+            "집",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_308",
+        "number": 308,
+        "word": "table",
+        "phonetic": "/ˈteɪbl/",
+        "partOfSpeech": "noun",
+        "meaning": "탁자, 식탁",
+        "example": "Put the plates on the table.",
+        "exampleMeaning": "접시들을 식탁 위에 올려놓아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=table&type=2",
+        "tags": [
+            "초급단어50",
+            "집",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_309",
+        "number": 309,
+        "word": "lamp",
+        "phonetic": "/læmp/",
+        "partOfSpeech": "noun",
+        "meaning": "전등, 램프",
+        "example": "Turn on the lamp to read.",
+        "exampleMeaning": "책을 읽으려면 램프를 켜라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=lamp&type=2",
+        "tags": [
+            "초급단어50",
+            "집",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_310",
+        "number": 310,
+        "word": "key",
+        "phonetic": "/kiː/",
+        "partOfSpeech": "noun",
+        "meaning": "열쇠",
+        "example": "Do not lose your house key.",
+        "exampleMeaning": "집 열쇠를 잃어버리지 마라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=key&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_311",
+        "number": 311,
+        "word": "cup",
+        "phonetic": "/kʌp/",
+        "partOfSpeech": "noun",
+        "meaning": "컵",
+        "example": "Drink warm cocoa from this cup.",
+        "exampleMeaning": "이 컵으로 따뜻한 코코아를 마셔라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=cup&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_312",
+        "number": 312,
+        "word": "glass",
+        "phonetic": "/ɡlæs/",
+        "partOfSpeech": "noun",
+        "meaning": "유리컵, 유리",
+        "example": "Be careful not to drop the glass.",
+        "exampleMeaning": "유리컵을 떨어뜨리지 않게 조심해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=glass&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_313",
+        "number": 313,
+        "word": "plate",
+        "phonetic": "/pleɪt/",
+        "partOfSpeech": "noun",
+        "meaning": "접시",
+        "example": "Wash the dirty plate after lunch.",
+        "exampleMeaning": "점심 후에 더러운 접시를 씻어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=plate&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_314",
+        "number": 314,
+        "word": "bowl",
+        "phonetic": "/boʊl/",
+        "partOfSpeech": "noun",
+        "meaning": "그릇",
+        "example": "Pour the hot soup into a bowl.",
+        "exampleMeaning": "뜨거운 수프를 그릇에 부어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=bowl&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_315",
+        "number": 315,
+        "word": "spoon",
+        "phonetic": "/spuːn/",
+        "partOfSpeech": "noun",
+        "meaning": "숟가락",
+        "example": "Eat the rice with a clean spoon.",
+        "exampleMeaning": "깨끗한 숟가락으로 밥을 먹어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=spoon&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_316",
+        "number": 316,
+        "word": "fork",
+        "phonetic": "/fɔːrk/",
+        "partOfSpeech": "noun",
+        "meaning": "포크",
+        "example": "Use a fork to eat the salad.",
+        "exampleMeaning": "샐러드를 먹을 때 포크를 사용해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=fork&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_317",
+        "number": 317,
+        "word": "knife",
+        "phonetic": "/naɪf/",
+        "partOfSpeech": "noun",
+        "meaning": "칼",
+        "example": "A sharp knife cuts bread easily.",
+        "exampleMeaning": "날카로운 칼은 빵을 쉽게 자른다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=knife&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_318",
+        "number": 318,
+        "word": "bottle",
+        "phonetic": "/ˈbɑːtl/",
+        "partOfSpeech": "noun",
+        "meaning": "병",
+        "example": "Bring a water bottle on the trip.",
+        "exampleMeaning": "여행에 물병을 가져가라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=bottle&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_319",
+        "number": 319,
+        "word": "towel",
+        "phonetic": "/ˈtaʊəl/",
+        "partOfSpeech": "noun",
+        "meaning": "수건",
+        "example": "Dry your wet hands with a towel.",
+        "exampleMeaning": "젖은 손을 수건으로 닦아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=towel&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_320",
+        "number": 320,
+        "word": "soap",
+        "phonetic": "/soʊp/",
+        "partOfSpeech": "noun",
+        "meaning": "비누",
+        "example": "Wash your hands with soap.",
+        "exampleMeaning": "비누로 손을 씻어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=soap&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_321",
+        "number": 321,
+        "word": "basket",
+        "phonetic": "/ˈbæskɪt/",
+        "partOfSpeech": "noun",
+        "meaning": "바구니",
+        "example": "Put the fresh apples in a basket.",
+        "exampleMeaning": "신선한 사과를 바구니에 담아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=basket&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_322",
+        "number": 322,
+        "word": "blanket",
+        "phonetic": "/ˈblæŋkɪt/",
+        "partOfSpeech": "noun",
+        "meaning": "담요",
+        "example": "A soft blanket keeps you warm.",
+        "exampleMeaning": "부드러운 담요가 너를 따뜻하게 해준다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=blanket&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_323",
+        "number": 323,
+        "word": "pillow",
+        "phonetic": "/ˈpɪloʊ/",
+        "partOfSpeech": "noun",
+        "meaning": "베개",
+        "example": "Rest your head on the soft pillow.",
+        "exampleMeaning": "부드러운 베개에 머리를 기대어 쉬어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=pillow&type=2",
+        "tags": [
+            "초급단어50",
+            "물건",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_324",
+        "number": 324,
+        "word": "pen",
+        "phonetic": "/pen/",
+        "partOfSpeech": "noun",
+        "meaning": "펜",
+        "example": "Write your name with a blue pen.",
+        "exampleMeaning": "파란 펜으로 이름을 써라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=pen&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_325",
+        "number": 325,
+        "word": "eraser",
+        "phonetic": "/ɪˈreɪsər/",
+        "partOfSpeech": "noun",
+        "meaning": "지우개",
+        "example": "Use an eraser to fix mistakes.",
+        "exampleMeaning": "실수를 고칠 때 지우개를 사용해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=eraser&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_326",
+        "number": 326,
+        "word": "ruler",
+        "phonetic": "/ˈruːlər/",
+        "partOfSpeech": "noun",
+        "meaning": "자",
+        "example": "Draw a straight line with a ruler.",
+        "exampleMeaning": "자로 반듯한 선을 그어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=ruler&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_327",
+        "number": 327,
+        "word": "scissors",
+        "phonetic": "/ˈsɪzərz/",
+        "partOfSpeech": "noun",
+        "meaning": "가위",
+        "example": "Cut the paper carefully with scissors.",
+        "exampleMeaning": "가위로 종이를 조심스럽게 잘라라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=scissors&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_328",
+        "number": 328,
+        "word": "glue",
+        "phonetic": "/ɡluː/",
+        "partOfSpeech": "noun",
+        "meaning": "풀, 접착제",
+        "example": "Stick the photo with some glue.",
+        "exampleMeaning": "풀로 사진을 붙여라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=glue&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_329",
+        "number": 329,
+        "word": "paper",
+        "phonetic": "/ˈpeɪpər/",
+        "partOfSpeech": "noun",
+        "meaning": "종이",
+        "example": "Fold the white paper in half.",
+        "exampleMeaning": "하얀 종이를 반으로 접어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=paper&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_330",
+        "number": 330,
+        "word": "notebook",
+        "phonetic": "/ˈnoʊtbʊk/",
+        "partOfSpeech": "noun",
+        "meaning": "공책",
+        "example": "Write new words in your notebook.",
+        "exampleMeaning": "새 단어를 공책에 적어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=notebook&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_331",
+        "number": 331,
+        "word": "crayon",
+        "phonetic": "/ˈkreɪɑːn/",
+        "partOfSpeech": "noun",
+        "meaning": "크레파스",
+        "example": "Color the sky with a blue crayon.",
+        "exampleMeaning": "파란 크레파스로 하늘을 칠해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=crayon&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_332",
+        "number": 332,
+        "word": "paint",
+        "phonetic": "/peɪnt/",
+        "partOfSpeech": "noun",
+        "meaning": "물감, 페인트",
+        "example": "Mix red and yellow paint together.",
+        "exampleMeaning": "빨간 물감과 노란 물감을 섞어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=paint&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_333",
+        "number": 333,
+        "word": "map",
+        "phonetic": "/mæp/",
+        "partOfSpeech": "noun",
+        "meaning": "지도",
+        "example": "Find Korea on the world map.",
+        "exampleMeaning": "세계 지도에서 한국을 찾아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=map&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_334",
+        "number": 334,
+        "word": "test",
+        "phonetic": "/test/",
+        "partOfSpeech": "noun",
+        "meaning": "시험",
+        "example": "Study hard for the English test.",
+        "exampleMeaning": "영어 시험을 위해 열심히 공부해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=test&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_335",
+        "number": 335,
+        "word": "grade",
+        "phonetic": "/ɡreɪd/",
+        "partOfSpeech": "noun",
+        "meaning": "학년, 성적",
+        "example": "She is in the fourth grade.",
+        "exampleMeaning": "그녀는 4학년이다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=grade&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_336",
+        "number": 336,
+        "word": "class",
+        "phonetic": "/klæs/",
+        "partOfSpeech": "noun",
+        "meaning": "수업, 반",
+        "example": "Our math class starts at nine.",
+        "exampleMeaning": "우리 수학 수업은 9시에 시작한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=class&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_337",
+        "number": 337,
+        "word": "word",
+        "phonetic": "/wɜːrd/",
+        "partOfSpeech": "noun",
+        "meaning": "단어, 말",
+        "example": "Learn five new words every day.",
+        "exampleMeaning": "매일 새로운 단어 다섯 개를 배워라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=word&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_338",
+        "number": 338,
+        "word": "page",
+        "phonetic": "/peɪdʒ/",
+        "partOfSpeech": "noun",
+        "meaning": "쪽, 페이지",
+        "example": "Open your book to page ten.",
+        "exampleMeaning": "책 10쪽을 펴세요.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=page&type=2",
+        "tags": [
+            "초급단어50",
+            "학교",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_339",
+        "number": 339,
+        "word": "snake",
+        "phonetic": "/sneɪk/",
+        "partOfSpeech": "noun",
+        "meaning": "뱀",
+        "example": "A green snake slid through grass.",
+        "exampleMeaning": "초록 뱀이 풀숲을 지나갔다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=snake&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_340",
+        "number": 340,
+        "word": "mouse",
+        "phonetic": "/maʊs/",
+        "partOfSpeech": "noun",
+        "meaning": "생쥐",
+        "example": "The tiny mouse ate some cheese.",
+        "exampleMeaning": "작은 생쥐가 치즈를 조금 먹었다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=mouse&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_341",
+        "number": 341,
+        "word": "rat",
+        "phonetic": "/ræt/",
+        "partOfSpeech": "noun",
+        "meaning": "쥐",
+        "example": "A gray rat ran under the box.",
+        "exampleMeaning": "회색 쥐가 상자 아래로 달려갔다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=rat&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_342",
+        "number": 342,
+        "word": "goat",
+        "phonetic": "/ɡoʊt/",
+        "partOfSpeech": "noun",
+        "meaning": "염소",
+        "example": "A white goat climbed the hill.",
+        "exampleMeaning": "하얀 염소가 언덕을 올랐다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=goat&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_343",
+        "number": 343,
+        "word": "camel",
+        "phonetic": "/ˈkæml/",
+        "partOfSpeech": "noun",
+        "meaning": "낙타",
+        "example": "Camels walk across the hot desert.",
+        "exampleMeaning": "낙타는 뜨거운 사막을 가로질러 걷는다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=camel&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_344",
+        "number": 344,
+        "word": "zebra",
+        "phonetic": "/ˈziːbrə/",
+        "partOfSpeech": "noun",
+        "meaning": "얼룩말",
+        "example": "A zebra has black and white stripes.",
+        "exampleMeaning": "얼룩말은 검은색과 흰색 줄무늬가 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=zebra&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_345",
+        "number": 345,
+        "word": "giraffe",
+        "phonetic": "/dʒəˈræf/",
+        "partOfSpeech": "noun",
+        "meaning": "기린",
+        "example": "The tall giraffe eats high leaves.",
+        "exampleMeaning": "키 큰 기린은 높은 나뭇잎을 먹는다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=giraffe&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_346",
+        "number": 346,
+        "word": "hippo",
+        "phonetic": "/ˈhɪpoʊ/",
+        "partOfSpeech": "noun",
+        "meaning": "하마",
+        "example": "The hippo loves to stay in water.",
+        "exampleMeaning": "하마는 물속에 있는 것을 좋아한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=hippo&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_347",
+        "number": 347,
+        "word": "panda",
+        "phonetic": "/ˈpændə/",
+        "partOfSpeech": "noun",
+        "meaning": "판다",
+        "example": "A cute panda eats green bamboo.",
+        "exampleMeaning": "귀여운 판다가 초록 대나무를 먹는다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=panda&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_348",
+        "number": 348,
+        "word": "penguin",
+        "phonetic": "/ˈpeŋɡwɪn/",
+        "partOfSpeech": "noun",
+        "meaning": "펭귄",
+        "example": "Penguins swim fast in icy water.",
+        "exampleMeaning": "펭귄은 얼음물 속에서 빠르게 헤엄친다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=penguin&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_349",
+        "number": 349,
+        "word": "owl",
+        "phonetic": "/aʊl/",
+        "partOfSpeech": "noun",
+        "meaning": "부엉이, 올빼미",
+        "example": "An owl wakes up at night.",
+        "exampleMeaning": "부엉이는 밤에 깨어난다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=owl&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_350",
+        "number": 350,
+        "word": "eagle",
+        "phonetic": "/ˈiːɡl/",
+        "partOfSpeech": "noun",
+        "meaning": "독수리",
+        "example": "The eagle flies high in the sky.",
+        "exampleMeaning": "독수리는 하늘 높이 날아오른다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=eagle&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_351",
+        "number": 351,
+        "word": "swan",
+        "phonetic": "/swɑːn/",
+        "partOfSpeech": "noun",
+        "meaning": "백조",
+        "example": "A white swan glides on the lake.",
+        "exampleMeaning": "하얀 백조가 호수 위를 미끄러지듯 헤엄친다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=swan&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_352",
+        "number": 352,
+        "word": "crab",
+        "phonetic": "/kræb/",
+        "partOfSpeech": "noun",
+        "meaning": "게",
+        "example": "A red crab walks sideways on sand.",
+        "exampleMeaning": "빨간 게가 모래 위를 옆으로 걷는다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=crab&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_353",
+        "number": 353,
+        "word": "shark",
+        "phonetic": "/ʃɑːrk/",
+        "partOfSpeech": "noun",
+        "meaning": "상어",
+        "example": "A big shark lives in the deep sea.",
+        "exampleMeaning": "큰 상어는 깊은 바다에 산다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=shark&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_354",
+        "number": 354,
+        "word": "spider",
+        "phonetic": "/ˈspaɪdər/",
+        "partOfSpeech": "noun",
+        "meaning": "거미",
+        "example": "A spider spins a neat web.",
+        "exampleMeaning": "거미가 깔끔한 거미줄을 친다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=spider&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_355",
+        "number": 355,
+        "word": "worm",
+        "phonetic": "/wɜːrm/",
+        "partOfSpeech": "noun",
+        "meaning": "벌레, 지렁이",
+        "example": "An earthworm lives in soft soil.",
+        "exampleMeaning": "지렁이는 부드러운 흙 속에 산다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=worm&type=2",
+        "tags": [
+            "초급단어50",
+            "동물",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_356",
+        "number": 356,
+        "word": "lake",
+        "phonetic": "/leɪk/",
+        "partOfSpeech": "noun",
+        "meaning": "호수",
+        "example": "We went boating on the calm lake.",
+        "exampleMeaning": "우리는 잔잔한 호수에서 보트를 탔다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=lake&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_357",
+        "number": 357,
+        "word": "sea",
+        "phonetic": "/siː/",
+        "partOfSpeech": "noun",
+        "meaning": "바다",
+        "example": "Blue waves roll across the sea.",
+        "exampleMeaning": "푸른 파도가 바다 위로 밀려온다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=sea&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_358",
+        "number": 358,
+        "word": "beach",
+        "phonetic": "/biːtʃ/",
+        "partOfSpeech": "noun",
+        "meaning": "해변",
+        "example": "Kids build sandcastles on the beach.",
+        "exampleMeaning": "아이들이 해변에서 모래성을 쌓는다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=beach&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_359",
+        "number": 359,
+        "word": "sand",
+        "phonetic": "/sænd/",
+        "partOfSpeech": "noun",
+        "meaning": "모래",
+        "example": "The warm sand feels soft today.",
+        "exampleMeaning": "따뜻한 모래가 오늘 부드럽게 느껴진다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=sand&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_360",
+        "number": 360,
+        "word": "rock",
+        "phonetic": "/rɑːk/",
+        "partOfSpeech": "noun",
+        "meaning": "바위, 돌",
+        "example": "Sit on that flat rock to rest.",
+        "exampleMeaning": "쉬려면 저 평평한 바위에 앉아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=rock&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_361",
+        "number": 361,
+        "word": "stone",
+        "phonetic": "/stoʊn/",
+        "partOfSpeech": "noun",
+        "meaning": "돌, 돌멩이",
+        "example": "Skip a flat stone across the pond.",
+        "exampleMeaning": "연못 위로 납작한 돌을 튕겨 보아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=stone&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_362",
+        "number": 362,
+        "word": "soil",
+        "phonetic": "/sɔɪl/",
+        "partOfSpeech": "noun",
+        "meaning": "흙, 토양",
+        "example": "Flowers grow well in rich soil.",
+        "exampleMeaning": "꽃은 비옥한 흙에서 잘 자란다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=soil&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_363",
+        "number": 363,
+        "word": "hill",
+        "phonetic": "/hɪl/",
+        "partOfSpeech": "noun",
+        "meaning": "언덕",
+        "example": "We rolled down the grassy hill.",
+        "exampleMeaning": "우리는 잔디 언덕을 굴러 내려왔다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=hill&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_364",
+        "number": 364,
+        "word": "valley",
+        "phonetic": "/ˈvæli/",
+        "partOfSpeech": "noun",
+        "meaning": "계곡",
+        "example": "A clear stream runs through the valley.",
+        "exampleMeaning": "맑은 시냇물이 계곡을 따라 흐른다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=valley&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_365",
+        "number": 365,
+        "word": "cave",
+        "phonetic": "/keɪv/",
+        "partOfSpeech": "noun",
+        "meaning": "동굴",
+        "example": "Bats sleep inside the dark cave.",
+        "exampleMeaning": "박쥐들은 어두운 동굴 안에서 잔다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=cave&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_366",
+        "number": 366,
+        "word": "desert",
+        "phonetic": "/ˈdezərt/",
+        "partOfSpeech": "noun",
+        "meaning": "사막",
+        "example": "It rarely rains in the dry desert.",
+        "exampleMeaning": "메마른 사막에는 비가 거의 오지 않는다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=desert&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_367",
+        "number": 367,
+        "word": "pond",
+        "phonetic": "/pɑːnd/",
+        "partOfSpeech": "noun",
+        "meaning": "연못",
+        "example": "Green frogs jump into the pond.",
+        "exampleMeaning": "초록 개구리들이 연못으로 뛰어든다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=pond&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_368",
+        "number": 368,
+        "word": "seed",
+        "phonetic": "/siːd/",
+        "partOfSpeech": "noun",
+        "meaning": "씨앗",
+        "example": "Plant a tiny seed in the pot.",
+        "exampleMeaning": "화분에 작은 씨앗을 심어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=seed&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_369",
+        "number": 369,
+        "word": "root",
+        "phonetic": "/ruːt/",
+        "partOfSpeech": "noun",
+        "meaning": "뿌리",
+        "example": "Deep roots hold the tall tree.",
+        "exampleMeaning": "깊은 뿌리가 큰 나무를 지탱한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=root&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_370",
+        "number": 370,
+        "word": "branch",
+        "phonetic": "/bræntʃ/",
+        "partOfSpeech": "noun",
+        "meaning": "나뭇가지",
+        "example": "A bird sits on the oak branch.",
+        "exampleMeaning": "새 한 마리가 참나무 가지에 앉아 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=branch&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_371",
+        "number": 371,
+        "word": "wood",
+        "phonetic": "/wʊd/",
+        "partOfSpeech": "noun",
+        "meaning": "나무, 목재",
+        "example": "This sturdy desk is made of wood.",
+        "exampleMeaning": "이 튼튼한 책상은 나무로 만들어졌다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=wood&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_372",
+        "number": 372,
+        "word": "fire",
+        "phonetic": "/ˈfaɪər/",
+        "partOfSpeech": "noun",
+        "meaning": "불",
+        "example": "Stay safe around the camp fire.",
+        "exampleMeaning": "캠프파이어 주변에서는 안전에 주의해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=fire&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_373",
+        "number": 373,
+        "word": "smoke",
+        "phonetic": "/smoʊk/",
+        "partOfSpeech": "noun",
+        "meaning": "연기",
+        "example": "Gray smoke rises from the chimney.",
+        "exampleMeaning": "회색 연기가 굴뚝에서 피어오른다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=smoke&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_374",
+        "number": 374,
+        "word": "air",
+        "phonetic": "/er/",
+        "partOfSpeech": "noun",
+        "meaning": "공기",
+        "example": "Fresh morning air feels very good.",
+        "exampleMeaning": "상쾌한 아침 공기가 매우 기분 좋다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=air&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_375",
+        "number": 375,
+        "word": "iceberg",
+        "phonetic": "/ˈaɪsbɜːrɡ/",
+        "partOfSpeech": "noun",
+        "meaning": "빙산",
+        "example": "A huge iceberg floats on the ocean.",
+        "exampleMeaning": "거대한 빙산이 바다 위에 떠 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=iceberg&type=2",
+        "tags": [
+            "초급단어50",
+            "자연",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_376",
+        "number": 376,
+        "word": "street",
+        "phonetic": "/striːt/",
+        "partOfSpeech": "noun",
+        "meaning": "거리, 길",
+        "example": "Look both ways before crossing the street.",
+        "exampleMeaning": "길을 건너기 전에 양쪽을 살펴라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=street&type=2",
+        "tags": [
+            "초급단어50",
+            "장소",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_377",
+        "number": 377,
+        "word": "store",
+        "phonetic": "/stɔːr/",
+        "partOfSpeech": "noun",
+        "meaning": "가게",
+        "example": "Let's buy milk at the corner store.",
+        "exampleMeaning": "모퉁이 가게에서 우유를 사자.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=store&type=2",
+        "tags": [
+            "초급단어50",
+            "장소",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_378",
+        "number": 378,
+        "word": "shop",
+        "phonetic": "/ʃɑːp/",
+        "partOfSpeech": "noun",
+        "meaning": "상점, 가게",
+        "example": "The bakery shop smells like bread.",
+        "exampleMeaning": "빵집에서 빵 냄새가 난다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=shop&type=2",
+        "tags": [
+            "초급단어50",
+            "장소",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_379",
+        "number": 379,
+        "word": "bank",
+        "phonetic": "/bæŋk/",
+        "partOfSpeech": "noun",
+        "meaning": "은행",
+        "example": "Save your pocket money in a bank.",
+        "exampleMeaning": "용돈을 은행에 저축해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=bank&type=2",
+        "tags": [
+            "초급단어50",
+            "장소",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_380",
+        "number": 380,
+        "word": "station",
+        "phonetic": "/ˈsteɪʃn/",
+        "partOfSpeech": "noun",
+        "meaning": "역, 정거장",
+        "example": "The train arrives at the station.",
+        "exampleMeaning": "기차가 역에 도착한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=station&type=2",
+        "tags": [
+            "초급단어50",
+            "장소",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_381",
+        "number": 381,
+        "word": "airport",
+        "phonetic": "/ˈerpɔːrt/",
+        "partOfSpeech": "noun",
+        "meaning": "공항",
+        "example": "Airplanes take off from the airport.",
+        "exampleMeaning": "비행기가 공항에서 이륙한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=airport&type=2",
+        "tags": [
+            "초급단어50",
+            "장소",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_382",
+        "number": 382,
+        "word": "zoo",
+        "phonetic": "/zuː/",
+        "partOfSpeech": "noun",
+        "meaning": "동물원",
+        "example": "We saw lions at the city zoo.",
+        "exampleMeaning": "우리는 시립 동물원에서 사자를 보았다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=zoo&type=2",
+        "tags": [
+            "초급단어50",
+            "장소",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_383",
+        "number": 383,
+        "word": "museum",
+        "phonetic": "/mjuˈziːəm/",
+        "partOfSpeech": "noun",
+        "meaning": "박물관",
+        "example": "Old dinosaur bones are in the museum.",
+        "exampleMeaning": "오래된 공룡 뼈가 박물관에 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=museum&type=2",
+        "tags": [
+            "초급단어50",
+            "장소",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_384",
+        "number": 384,
+        "word": "farm",
+        "phonetic": "/fɑːrm/",
+        "partOfSpeech": "noun",
+        "meaning": "농장",
+        "example": "Cows and sheep live on the farm.",
+        "exampleMeaning": "소와 양이 농장에서 산다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=farm&type=2",
+        "tags": [
+            "초급단어50",
+            "장소",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_385",
+        "number": 385,
+        "word": "camp",
+        "phonetic": "/kæmp/",
+        "partOfSpeech": "noun",
+        "meaning": "캠프, 야영지",
+        "example": "We pitched a tent at the camp.",
+        "exampleMeaning": "우리는 야영지에 텐트를 쳤다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=camp&type=2",
+        "tags": [
+            "초급단어50",
+            "장소",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_386",
+        "number": 386,
+        "word": "car",
+        "phonetic": "/kɑːr/",
+        "partOfSpeech": "noun",
+        "meaning": "자동차",
+        "example": "Dad drives a silver car to work.",
+        "exampleMeaning": "아빠는 은색 자동차를 타고 출근하신다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=car&type=2",
+        "tags": [
+            "초급단어50",
+            "교통",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_387",
+        "number": 387,
+        "word": "bus",
+        "phonetic": "/bʌs/",
+        "partOfSpeech": "noun",
+        "meaning": "버스",
+        "example": "I take the yellow bus to school.",
+        "exampleMeaning": "나는 노란 버스를 타고 학교에 간다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=bus&type=2",
+        "tags": [
+            "초급단어50",
+            "교통",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_388",
+        "number": 388,
+        "word": "train",
+        "phonetic": "/treɪn/",
+        "partOfSpeech": "noun",
+        "meaning": "기차",
+        "example": "The fast train passes the bridge.",
+        "exampleMeaning": "빠른 기차가 다리를 지나간다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=train&type=2",
+        "tags": [
+            "초급단어50",
+            "교통",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_389",
+        "number": 389,
+        "word": "subway",
+        "phonetic": "/ˈsʌbweɪ/",
+        "partOfSpeech": "noun",
+        "meaning": "지하철",
+        "example": "The subway runs under the city.",
+        "exampleMeaning": "지하철은 도시 아래로 달린다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=subway&type=2",
+        "tags": [
+            "초급단어50",
+            "교통",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_390",
+        "number": 390,
+        "word": "bike",
+        "phonetic": "/baɪk/",
+        "partOfSpeech": "noun",
+        "meaning": "자전거",
+        "example": "Ride your bike safely on the path.",
+        "exampleMeaning": "길에서 안전하게 자전거를 타라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=bike&type=2",
+        "tags": [
+            "초급단어50",
+            "교통",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_391",
+        "number": 391,
+        "word": "boat",
+        "phonetic": "/boʊt/",
+        "partOfSpeech": "noun",
+        "meaning": "배, 보트",
+        "example": "A wooden boat sails on the river.",
+        "exampleMeaning": "나무 보트가 강 위를 항해한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=boat&type=2",
+        "tags": [
+            "초급단어50",
+            "교통",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_392",
+        "number": 392,
+        "word": "ship",
+        "phonetic": "/ʃɪp/",
+        "partOfSpeech": "noun",
+        "meaning": "큰 배, 선박",
+        "example": "A huge ship crosses the wide ocean.",
+        "exampleMeaning": "커다란 배가 넓은 바다를 건넌다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=ship&type=2",
+        "tags": [
+            "초급단어50",
+            "교통",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_393",
+        "number": 393,
+        "word": "plane",
+        "phonetic": "/pleɪn/",
+        "partOfSpeech": "noun",
+        "meaning": "비행기",
+        "example": "The silver plane flies above clouds.",
+        "exampleMeaning": "은빛 비행기가 구름 위를 난다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=plane&type=2",
+        "tags": [
+            "초급단어50",
+            "교통",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_394",
+        "number": 394,
+        "word": "truck",
+        "phonetic": "/trʌk/",
+        "partOfSpeech": "noun",
+        "meaning": "트럭",
+        "example": "A delivery truck carries heavy boxes.",
+        "exampleMeaning": "배달 트럭이 무거운 상자를 나른다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=truck&type=2",
+        "tags": [
+            "초급단어50",
+            "교통",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_395",
+        "number": 395,
+        "word": "wheel",
+        "phonetic": "/wiːl/",
+        "partOfSpeech": "noun",
+        "meaning": "바퀴",
+        "example": "A bicycle has two round wheels.",
+        "exampleMeaning": "자전거에는 둥근 바퀴가 두 개 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=wheel&type=2",
+        "tags": [
+            "초급단어50",
+            "교통",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_396",
+        "number": 396,
+        "word": "time",
+        "phonetic": "/taɪm/",
+        "partOfSpeech": "noun",
+        "meaning": "시간",
+        "example": "What time does the movie start?",
+        "exampleMeaning": "영화는 몇 시에 시작하나요?",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=time&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_397",
+        "number": 397,
+        "word": "day",
+        "phonetic": "/deɪ/",
+        "partOfSpeech": "noun",
+        "meaning": "날, 하루",
+        "example": "Have a wonderful day at school!",
+        "exampleMeaning": "학교에서 멋진 하루 보내세요!",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=day&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_398",
+        "number": 398,
+        "word": "week",
+        "phonetic": "/wiːk/",
+        "partOfSpeech": "noun",
+        "meaning": "주(일주일)",
+        "example": "There are seven days in a week.",
+        "exampleMeaning": "일주일에는 7일이 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=week&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_399",
+        "number": 399,
+        "word": "month",
+        "phonetic": "/mʌnθ/",
+        "partOfSpeech": "noun",
+        "meaning": "달, 개월",
+        "example": "My birthday is next month.",
+        "exampleMeaning": "내 생일은 다음 달이다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=month&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_400",
+        "number": 400,
+        "word": "year",
+        "phonetic": "/jɪr/",
+        "partOfSpeech": "noun",
+        "meaning": "년, 해",
+        "example": "A new year begins in January.",
+        "exampleMeaning": "새해는 1월에 시작된다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=year&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_401",
+        "number": 401,
+        "word": "morning",
+        "phonetic": "/ˈmɔːrnɪŋ/",
+        "partOfSpeech": "noun",
+        "meaning": "아침",
+        "example": "Birds sing early in the morning.",
+        "exampleMeaning": "새들이 이른 아침에 노래한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=morning&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_402",
+        "number": 402,
+        "word": "afternoon",
+        "phonetic": "/ˌæftərˈnuːn/",
+        "partOfSpeech": "noun",
+        "meaning": "오후",
+        "example": "We play soccer in the afternoon.",
+        "exampleMeaning": "우리는 오후에 축구를 한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=afternoon&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_403",
+        "number": 403,
+        "word": "evening",
+        "phonetic": "/ˈiːvnɪŋ/",
+        "partOfSpeech": "noun",
+        "meaning": "저녁",
+        "example": "The sky turns orange in the evening.",
+        "exampleMeaning": "저녁에는 하늘이 주황빛으로 변한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=evening&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_404",
+        "number": 404,
+        "word": "night",
+        "phonetic": "/naɪt/",
+        "partOfSpeech": "noun",
+        "meaning": "밤",
+        "example": "Stars shine brightly at night.",
+        "exampleMeaning": "별들은 밤에 밝게 빛난다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=night&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_405",
+        "number": 405,
+        "word": "today",
+        "phonetic": "/təˈdeɪ/",
+        "partOfSpeech": "noun",
+        "meaning": "오늘",
+        "example": "Today is sunny and very warm.",
+        "exampleMeaning": "오늘은 맑고 매우 따뜻하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=today&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_406",
+        "number": 406,
+        "word": "tomorrow",
+        "phonetic": "/təˈmɔːroʊ/",
+        "partOfSpeech": "noun",
+        "meaning": "내일",
+        "example": "We will visit grandma tomorrow.",
+        "exampleMeaning": "우리는 내일 할머니 댁을 방문할 것이다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=tomorrow&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_407",
+        "number": 407,
+        "word": "yesterday",
+        "phonetic": "/ˈjestərdeɪ/",
+        "partOfSpeech": "noun",
+        "meaning": "어제",
+        "example": "It rained heavily yesterday.",
+        "exampleMeaning": "어제는 비가 많이 내렸다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=yesterday&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_408",
+        "number": 408,
+        "word": "hour",
+        "phonetic": "/ˈaʊər/",
+        "partOfSpeech": "noun",
+        "meaning": "시간(60분)",
+        "example": "The trip takes one hour by car.",
+        "exampleMeaning": "그 여행은 차로 한 시간이 걸린다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=hour&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_409",
+        "number": 409,
+        "word": "minute",
+        "phonetic": "/ˈmɪnɪt/",
+        "partOfSpeech": "noun",
+        "meaning": "분(60초)",
+        "example": "Wait just one minute, please.",
+        "exampleMeaning": "잠시 1분만 기다려 주세요.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=minute&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_410",
+        "number": 410,
+        "word": "second",
+        "phonetic": "/ˈsekənd/",
+        "partOfSpeech": "noun",
+        "meaning": "초, 두 번째",
+        "example": "Count ten seconds before you start.",
+        "exampleMeaning": "시작하기 전에 10초를 세어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=second&type=2",
+        "tags": [
+            "초급단어50",
+            "시간",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_411",
+        "number": 411,
+        "word": "black",
+        "phonetic": "/blæk/",
+        "partOfSpeech": "adjective",
+        "meaning": "검은색의",
+        "example": "The night sky is deep black.",
+        "exampleMeaning": "밤하늘은 짙은 검은색이다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=black&type=2",
+        "tags": [
+            "초급단어50",
+            "색깔",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_412",
+        "number": 412,
+        "word": "white",
+        "phonetic": "/waɪt/",
+        "partOfSpeech": "adjective",
+        "meaning": "하얀색의",
+        "example": "Soft white snow covers the ground.",
+        "exampleMeaning": "부드러운 하얀 눈이 땅을 덮고 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=white&type=2",
+        "tags": [
+            "초급단어50",
+            "색깔",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_413",
+        "number": 413,
+        "word": "pink",
+        "phonetic": "/pɪŋk/",
+        "partOfSpeech": "adjective",
+        "meaning": "분홍색의",
+        "example": "Pink cherry blossoms look lovely.",
+        "exampleMeaning": "분홍색 벚꽃이 사랑스러워 보인다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=pink&type=2",
+        "tags": [
+            "초급단어50",
+            "색깔",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_414",
+        "number": 414,
+        "word": "purple",
+        "phonetic": "/ˈpɜːrpl/",
+        "partOfSpeech": "adjective",
+        "meaning": "보라색의",
+        "example": "Purple grapes hang on the vine.",
+        "exampleMeaning": "보라색 포도가 덩굴에 매달려 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=purple&type=2",
+        "tags": [
+            "초급단어50",
+            "색깔",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_415",
+        "number": 415,
+        "word": "brown",
+        "phonetic": "/braʊn/",
+        "partOfSpeech": "adjective",
+        "meaning": "갈색의",
+        "example": "A brown bear walked into the woods.",
+        "exampleMeaning": "갈색 곰이 숲속으로 걸어 들어갔다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=brown&type=2",
+        "tags": [
+            "초급단어50",
+            "색깔",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_416",
+        "number": 416,
+        "word": "gray",
+        "phonetic": "/ɡreɪ/",
+        "partOfSpeech": "adjective",
+        "meaning": "회색의",
+        "example": "Dark gray clouds bring heavy rain.",
+        "exampleMeaning": "짙은 회색 구름이 큰 비를 몰고 온다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=gray&type=2",
+        "tags": [
+            "초급단어50",
+            "색깔",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_417",
+        "number": 417,
+        "word": "gold",
+        "phonetic": "/ɡoʊld/",
+        "partOfSpeech": "noun",
+        "meaning": "금, 황금색",
+        "example": "The winner received a gold medal.",
+        "exampleMeaning": "우승자는 금메달을 받았다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=gold&type=2",
+        "tags": [
+            "초급단어50",
+            "색깔",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_418",
+        "number": 418,
+        "word": "silver",
+        "phonetic": "/ˈsɪlvər/",
+        "partOfSpeech": "noun",
+        "meaning": "은, 은색",
+        "example": "A silver coin shone in the sun.",
+        "exampleMeaning": "은색 동전이 햇빛에 반짝였다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=silver&type=2",
+        "tags": [
+            "초급단어50",
+            "색깔",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_419",
+        "number": 419,
+        "word": "circle",
+        "phonetic": "/ˈsɜːrkl/",
+        "partOfSpeech": "noun",
+        "meaning": "원, 동그라미",
+        "example": "Draw a big circle on the board.",
+        "exampleMeaning": "칠판에 큰 동그라미를 그려라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=circle&type=2",
+        "tags": [
+            "초급단어50",
+            "모양",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_420",
+        "number": 420,
+        "word": "square",
+        "phonetic": "/skwer/",
+        "partOfSpeech": "noun",
+        "meaning": "정사각형, 광장",
+        "example": "A square has four equal sides.",
+        "exampleMeaning": "정사각형은 길이가 같은 네 변을 가진다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=square&type=2",
+        "tags": [
+            "초급단어50",
+            "모양",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_421",
+        "number": 421,
+        "word": "triangle",
+        "phonetic": "/ˈtraɪæŋɡl/",
+        "partOfSpeech": "noun",
+        "meaning": "삼각형",
+        "example": "A triangle has three sharp corners.",
+        "exampleMeaning": "삼각형은 세 개의 뾰족한 모서리가 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=triangle&type=2",
+        "tags": [
+            "초급단어50",
+            "모양",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_422",
+        "number": 422,
+        "word": "line",
+        "phonetic": "/laɪn/",
+        "partOfSpeech": "noun",
+        "meaning": "선, 줄",
+        "example": "Stand in a neat line, everyone.",
+        "exampleMeaning": "모두 바른 줄로 서세요.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=line&type=2",
+        "tags": [
+            "초급단어50",
+            "모양",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_423",
+        "number": 423,
+        "word": "shape",
+        "phonetic": "/ʃeɪp/",
+        "partOfSpeech": "noun",
+        "meaning": "모양",
+        "example": "Clouds change their shape quickly.",
+        "exampleMeaning": "구름은 모양을 빠르게 바꾼다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=shape&type=2",
+        "tags": [
+            "초급단어50",
+            "모양",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_424",
+        "number": 424,
+        "word": "size",
+        "phonetic": "/saɪz/",
+        "partOfSpeech": "noun",
+        "meaning": "크기",
+        "example": "What size shoes do you wear?",
+        "exampleMeaning": "신발 사이즈가 몇인가요?",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=size&type=2",
+        "tags": [
+            "초급단어50",
+            "모양",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_425",
+        "number": 425,
+        "word": "ball",
+        "phonetic": "/bɔːl/",
+        "partOfSpeech": "noun",
+        "meaning": "공",
+        "example": "Kick the soccer ball into the goal.",
+        "exampleMeaning": "축구공을 골대 안으로 차 넣어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=ball&type=2",
+        "tags": [
+            "초급단어50",
+            "스포츠",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_426",
+        "number": 426,
+        "word": "soccer",
+        "phonetic": "/ˈsɑːkər/",
+        "partOfSpeech": "noun",
+        "meaning": "축구",
+        "example": "Boys and girls play soccer together.",
+        "exampleMeaning": "남자아이와 여자아이가 함께 축구를 한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=soccer&type=2",
+        "tags": [
+            "초급단어50",
+            "스포츠",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_427",
+        "number": 427,
+        "word": "baseball",
+        "phonetic": "/ˈbeɪsbɔːl/",
+        "partOfSpeech": "noun",
+        "meaning": "야구",
+        "example": "He hit the baseball very far.",
+        "exampleMeaning": "그는 야구공을 아주 멀리 쳤다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=baseball&type=2",
+        "tags": [
+            "초급단어50",
+            "스포츠",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_428",
+        "number": 428,
+        "word": "basketball",
+        "phonetic": "/ˈbæskɪtbɔːl/",
+        "partOfSpeech": "noun",
+        "meaning": "농구",
+        "example": "Throw the basketball through the hoop.",
+        "exampleMeaning": "농구공을 골대 안으로 던져라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=basketball&type=2",
+        "tags": [
+            "초급단어50",
+            "스포츠",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_429",
+        "number": 429,
+        "word": "tennis",
+        "phonetic": "/ˈtenɪs/",
+        "partOfSpeech": "noun",
+        "meaning": "테니스",
+        "example": "She plays tennis every Saturday.",
+        "exampleMeaning": "그녀는 매주 토요일 테니스를 친다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=tennis&type=2",
+        "tags": [
+            "초급단어50",
+            "스포츠",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_430",
+        "number": 430,
+        "word": "kite",
+        "phonetic": "/kaɪt/",
+        "partOfSpeech": "noun",
+        "meaning": "연",
+        "example": "Let's fly a kite in the park.",
+        "exampleMeaning": "공원에서 연을 날리자.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=kite&type=2",
+        "tags": [
+            "초급단어50",
+            "놀이",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_431",
+        "number": 431,
+        "word": "doll",
+        "phonetic": "/dɑːl/",
+        "partOfSpeech": "noun",
+        "meaning": "인형",
+        "example": "She made a tiny dress for her doll.",
+        "exampleMeaning": "그녀는 인형을 위해 작은 옷을 만들었다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=doll&type=2",
+        "tags": [
+            "초급단어50",
+            "놀이",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_432",
+        "number": 432,
+        "word": "toy",
+        "phonetic": "/tɔɪ/",
+        "partOfSpeech": "noun",
+        "meaning": "장난감",
+        "example": "Put your toys back in the box.",
+        "exampleMeaning": "장난감을 상자 안에 다시 넣어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=toy&type=2",
+        "tags": [
+            "초급단어50",
+            "놀이",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_433",
+        "number": 433,
+        "word": "song",
+        "phonetic": "/sɔːŋ/",
+        "partOfSpeech": "noun",
+        "meaning": "노래",
+        "example": "Everyone sang a happy birthday song.",
+        "exampleMeaning": "모두가 즐거운 생일 축하 노래를 불렀다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=song&type=2",
+        "tags": [
+            "초급단어50",
+            "예술",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_434",
+        "number": 434,
+        "word": "movie",
+        "phonetic": "/ˈmuːvi/",
+        "partOfSpeech": "noun",
+        "meaning": "영화",
+        "example": "We watched a funny cartoon movie.",
+        "exampleMeaning": "우리는 재미있는 만화 영화를 보았다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=movie&type=2",
+        "tags": [
+            "초급단어50",
+            "예술",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_435",
+        "number": 435,
+        "word": "gift",
+        "phonetic": "/ɡɪft/",
+        "partOfSpeech": "noun",
+        "meaning": "선물",
+        "example": "Wrap the birthday gift with ribbon.",
+        "exampleMeaning": "생일 선물을 리본으로 포장해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=gift&type=2",
+        "tags": [
+            "초급단어50",
+            "생활",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_436",
+        "number": 436,
+        "word": "party",
+        "phonetic": "/ˈpɑːrti/",
+        "partOfSpeech": "noun",
+        "meaning": "파티",
+        "example": "Come to my birthday party today!",
+        "exampleMeaning": "오늘 내 생일 파티에 와!",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=party&type=2",
+        "tags": [
+            "초급단어50",
+            "생활",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_437",
+        "number": 437,
+        "word": "big",
+        "phonetic": "/bɪɡ/",
+        "partOfSpeech": "adjective",
+        "meaning": "큰",
+        "example": "An elephant is a very big animal.",
+        "exampleMeaning": "코끼리는 매우 큰 동물이다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=big&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_438",
+        "number": 438,
+        "word": "small",
+        "phonetic": "/smɔːl/",
+        "partOfSpeech": "adjective",
+        "meaning": "작은",
+        "example": "A small ant can carry heavy food.",
+        "exampleMeaning": "작은 개미도 무거운 먹이를 나를 수 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=small&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_439",
+        "number": 439,
+        "word": "tall",
+        "phonetic": "/tɔːl/",
+        "partOfSpeech": "adjective",
+        "meaning": "키가 큰, 높은",
+        "example": "The tall building touches the clouds.",
+        "exampleMeaning": "높은 건물이 구름에 닿을 듯하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=tall&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_440",
+        "number": 440,
+        "word": "short",
+        "phonetic": "/ʃɔːrt/",
+        "partOfSpeech": "adjective",
+        "meaning": "짧은, 키가 작은",
+        "example": "Winter days are short and cold.",
+        "exampleMeaning": "겨울날은 짧고 춥다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=short&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_441",
+        "number": 441,
+        "word": "long",
+        "phonetic": "/lɔːŋ/",
+        "partOfSpeech": "adjective",
+        "meaning": "긴",
+        "example": "It is a long walk to the station.",
+        "exampleMeaning": "역까지는 걸어서 꽤 긴 거리다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=long&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_442",
+        "number": 442,
+        "word": "high",
+        "phonetic": "/haɪ/",
+        "partOfSpeech": "adjective",
+        "meaning": "높은",
+        "example": "The kite rose high above the trees.",
+        "exampleMeaning": "연이 나무 위로 높이 떠올랐다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=high&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_443",
+        "number": 443,
+        "word": "low",
+        "phonetic": "/loʊ/",
+        "partOfSpeech": "adjective",
+        "meaning": "낮은",
+        "example": "Speak in a low voice inside.",
+        "exampleMeaning": "실내에서는 낮은 목소리로 말해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=low&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_444",
+        "number": 444,
+        "word": "hot",
+        "phonetic": "/hɑːt/",
+        "partOfSpeech": "adjective",
+        "meaning": "뜨거운, 더운",
+        "example": "Be careful, the soup is very hot.",
+        "exampleMeaning": "조심해라, 수프가 매우 뜨겁다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=hot&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_445",
+        "number": 445,
+        "word": "cold",
+        "phonetic": "/koʊld/",
+        "partOfSpeech": "adjective",
+        "meaning": "차가운, 추운",
+        "example": "Drink cold water after exercise.",
+        "exampleMeaning": "운동 후에 차가운 물을 마셔라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=cold&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_446",
+        "number": 446,
+        "word": "new",
+        "phonetic": "/nuː/",
+        "partOfSpeech": "adjective",
+        "meaning": "새로운",
+        "example": "I got a new backpack for school.",
+        "exampleMeaning": "나는 학교에 가져갈 새 책가방을 얻었다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=new&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_447",
+        "number": 447,
+        "word": "old",
+        "phonetic": "/oʊld/",
+        "partOfSpeech": "adjective",
+        "meaning": "오래된, 늙은",
+        "example": "That old oak tree is very wise.",
+        "exampleMeaning": "저 오래된 참나무는 아주 웅장하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=old&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_448",
+        "number": 448,
+        "word": "young",
+        "phonetic": "/jʌŋ/",
+        "partOfSpeech": "adjective",
+        "meaning": "어린, 젊은",
+        "example": "Young trees need plenty of water.",
+        "exampleMeaning": "어린 나무들은 많은 물이 필요하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=young&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_449",
+        "number": 449,
+        "word": "good",
+        "phonetic": "/ɡʊd/",
+        "partOfSpeech": "adjective",
+        "meaning": "좋은, 착한",
+        "example": "Reading books is a good habit.",
+        "exampleMeaning": "책을 읽는 것은 좋은 습관이다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=good&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_450",
+        "number": 450,
+        "word": "bad",
+        "phonetic": "/bæd/",
+        "partOfSpeech": "adjective",
+        "meaning": "나쁜",
+        "example": "Too much candy is bad for teeth.",
+        "exampleMeaning": "사탕을 너무 많이 먹으면 치아에 나쁘다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=bad&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_451",
+        "number": 451,
+        "word": "nice",
+        "phonetic": "/naɪs/",
+        "partOfSpeech": "adjective",
+        "meaning": "좋은, 친절한",
+        "example": "What a nice sunny morning!",
+        "exampleMeaning": "정말 상쾌하고 좋은 아침이구나!",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=nice&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_452",
+        "number": 452,
+        "word": "pretty",
+        "phonetic": "/ˈprɪti/",
+        "partOfSpeech": "adjective",
+        "meaning": "예쁜",
+        "example": "Pretty flowers bloom in spring.",
+        "exampleMeaning": "봄에는 예쁜 꽃들이 핀다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=pretty&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_453",
+        "number": 453,
+        "word": "cute",
+        "phonetic": "/kjuːt/",
+        "partOfSpeech": "adjective",
+        "meaning": "귀여운",
+        "example": "The little puppy looks so cute.",
+        "exampleMeaning": "작은 강아지가 정말 귀여워 보인다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=cute&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_454",
+        "number": 454,
+        "word": "funny",
+        "phonetic": "/ˈfʌni/",
+        "partOfSpeech": "adjective",
+        "meaning": "재미있는, 웃긴",
+        "example": "He told a very funny joke today.",
+        "exampleMeaning": "그는 오늘 아주 웃긴 농담을 했다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=funny&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_455",
+        "number": 455,
+        "word": "sad",
+        "phonetic": "/sæd/",
+        "partOfSpeech": "adjective",
+        "meaning": "슬픈",
+        "example": "Do not feel sad, try again!",
+        "exampleMeaning": "슬퍼하지 말고 다시 도전해 봐!",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=sad&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_456",
+        "number": 456,
+        "word": "busy",
+        "phonetic": "/ˈbɪzi/",
+        "partOfSpeech": "adjective",
+        "meaning": "바쁜",
+        "example": "Bees are always busy making honey.",
+        "exampleMeaning": "벌들은 꿀을 만드느라 항상 바쁘다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=busy&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_457",
+        "number": 457,
+        "word": "easy",
+        "phonetic": "/ˈiːzi/",
+        "partOfSpeech": "adjective",
+        "meaning": "쉬운",
+        "example": "This math puzzle is very easy.",
+        "exampleMeaning": "이 수학 퍼즐은 매우 쉽다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=easy&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_458",
+        "number": 458,
+        "word": "hard",
+        "phonetic": "/hɑːrd/",
+        "partOfSpeech": "adjective",
+        "meaning": "어려운, 단단한",
+        "example": "Practice makes hard things easier.",
+        "exampleMeaning": "연습하면 어려운 일도 쉬워진다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=hard&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_459",
+        "number": 459,
+        "word": "rich",
+        "phonetic": "/rɪtʃ/",
+        "partOfSpeech": "adjective",
+        "meaning": "부유한, 풍부한",
+        "example": "Oranges are rich in vitamin C.",
+        "exampleMeaning": "오렌지에는 비타민 C가 풍부하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=rich&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_460",
+        "number": 460,
+        "word": "poor",
+        "phonetic": "/pʊr/",
+        "partOfSpeech": "adjective",
+        "meaning": "가난한, 불쌍한",
+        "example": "Help the poor puppy find a home.",
+        "exampleMeaning": "불쌍한 강아지가 집을 찾도록 도와주자.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=poor&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_461",
+        "number": 461,
+        "word": "full",
+        "phonetic": "/fʊl/",
+        "partOfSpeech": "adjective",
+        "meaning": "가득 찬, 배부른",
+        "example": "The glass is full of fresh milk.",
+        "exampleMeaning": "유리컵에 신선한 우유가 가득 차 있다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=full&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_462",
+        "number": 462,
+        "word": "empty",
+        "phonetic": "/ˈempti/",
+        "partOfSpeech": "adjective",
+        "meaning": "비어 있는",
+        "example": "Put the empty bottle in the bin.",
+        "exampleMeaning": "빈 병을 분리수거함에 넣어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=empty&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_463",
+        "number": 463,
+        "word": "wet",
+        "phonetic": "/wet/",
+        "partOfSpeech": "adjective",
+        "meaning": "젖은",
+        "example": "My shoes got wet in the rain.",
+        "exampleMeaning": "비 때문에 내 신발이 젖었다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=wet&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_464",
+        "number": 464,
+        "word": "dry",
+        "phonetic": "/draɪ/",
+        "partOfSpeech": "adjective",
+        "meaning": "마른, 건조한",
+        "example": "Hang the wet clothes to dry.",
+        "exampleMeaning": "젖은 옷을 말리기 위해 널어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=dry&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_465",
+        "number": 465,
+        "word": "loud",
+        "phonetic": "/laʊd/",
+        "partOfSpeech": "adjective",
+        "meaning": "시끄러운, 큰 소리의",
+        "example": "Thunder makes a very loud sound.",
+        "exampleMeaning": "천둥은 매우 큰 소리를 낸다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=loud&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_466",
+        "number": 466,
+        "word": "wide",
+        "phonetic": "/waɪd/",
+        "partOfSpeech": "adjective",
+        "meaning": "넓은",
+        "example": "Boats sail down the wide river.",
+        "exampleMeaning": "배들이 넓은 강을 따라 내려간다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=wide&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_467",
+        "number": 467,
+        "word": "deep",
+        "phonetic": "/diːp/",
+        "partOfSpeech": "adjective",
+        "meaning": "깊은",
+        "example": "Whales dive into the deep ocean.",
+        "exampleMeaning": "고래는 깊은 바다 속으로 잠수한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=deep&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_468",
+        "number": 468,
+        "word": "thick",
+        "phonetic": "/θɪk/",
+        "partOfSpeech": "adjective",
+        "meaning": "두꺼운",
+        "example": "This thick dictionary helps a lot.",
+        "exampleMeaning": "이 두꺼운 사전은 큰 도움이 된다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=thick&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_469",
+        "number": 469,
+        "word": "thin",
+        "phonetic": "/θɪn/",
+        "partOfSpeech": "adjective",
+        "meaning": "얇은, 마른",
+        "example": "Ice on the pond is still thin.",
+        "exampleMeaning": "연못의 얼음은 아직 얇다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=thin&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_470",
+        "number": 470,
+        "word": "round",
+        "phonetic": "/raʊnd/",
+        "partOfSpeech": "adjective",
+        "meaning": "둥근",
+        "example": "The full moon looks bright and round.",
+        "exampleMeaning": "보름달이 밝고 둥글게 보인다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=round&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_471",
+        "number": 471,
+        "word": "fresh",
+        "phonetic": "/freʃ/",
+        "partOfSpeech": "adjective",
+        "meaning": "신선한",
+        "example": "Eat fresh fruit every morning.",
+        "exampleMeaning": "매일 아침 신선한 과일을 먹어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=fresh&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_472",
+        "number": 472,
+        "word": "glad",
+        "phonetic": "/ɡlæd/",
+        "partOfSpeech": "adjective",
+        "meaning": "기쁜, 반가운",
+        "example": "I am so glad to meet you here.",
+        "exampleMeaning": "여기서 너를 만나서 정말 기쁘다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=glad&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_473",
+        "number": 473,
+        "word": "ready",
+        "phonetic": "/ˈredi/",
+        "partOfSpeech": "adjective",
+        "meaning": "준비된",
+        "example": "Are you ready for the school trip?",
+        "exampleMeaning": "학교 소풍 갈 준비가 되었니?",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=ready&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_474",
+        "number": 474,
+        "word": "sure",
+        "phonetic": "/ʃʊr/",
+        "partOfSpeech": "adjective",
+        "meaning": "확신하는",
+        "example": "Are you sure about that answer?",
+        "exampleMeaning": "그 답이 확실하니?",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=sure&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_475",
+        "number": 475,
+        "word": "same",
+        "phonetic": "/seɪm/",
+        "partOfSpeech": "adjective",
+        "meaning": "같은",
+        "example": "We are in the same class.",
+        "exampleMeaning": "우리는 같은 반이다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=same&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_476",
+        "number": 476,
+        "word": "different",
+        "phonetic": "/ˈdɪfrənt/",
+        "partOfSpeech": "adjective",
+        "meaning": "다른",
+        "example": "Every snowflake has a different shape.",
+        "exampleMeaning": "모든 눈송이는 다른 모양을 가진다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=different&type=2",
+        "tags": [
+            "초급단어50",
+            "형용사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_477",
+        "number": 477,
+        "word": "walk",
+        "phonetic": "/wɔːk/",
+        "partOfSpeech": "verb",
+        "meaning": "걷다",
+        "example": "We walk to school together.",
+        "exampleMeaning": "우리는 함께 학교까지 걸어간다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=walk&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_478",
+        "number": 478,
+        "word": "sit",
+        "phonetic": "/sɪt/",
+        "partOfSpeech": "verb",
+        "meaning": "앉다",
+        "example": "Please sit down on the chair.",
+        "exampleMeaning": "의자에 앉으세요.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=sit&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_479",
+        "number": 479,
+        "word": "stand",
+        "phonetic": "/stænd/",
+        "partOfSpeech": "verb",
+        "meaning": "서다",
+        "example": "Stand up and greet the teacher.",
+        "exampleMeaning": "일어서서 선생님께 인사해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=stand&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_480",
+        "number": 480,
+        "word": "eat",
+        "phonetic": "/iːt/",
+        "partOfSpeech": "verb",
+        "meaning": "먹다",
+        "example": "Eat plenty of vegetables daily.",
+        "exampleMeaning": "매일 채소를 충분히 먹어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=eat&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_481",
+        "number": 481,
+        "word": "drink",
+        "phonetic": "/drɪŋk/",
+        "partOfSpeech": "verb",
+        "meaning": "마시다",
+        "example": "Drink enough water every day.",
+        "exampleMeaning": "매일 충분한 물을 마셔라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=drink&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_482",
+        "number": 482,
+        "word": "read",
+        "phonetic": "/riːd/",
+        "partOfSpeech": "verb",
+        "meaning": "읽다",
+        "example": "I read a fun storybook before bed.",
+        "exampleMeaning": "나는 자기 전에 재미있는 동화책을 읽는다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=read&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_483",
+        "number": 483,
+        "word": "write",
+        "phonetic": "/raɪt/",
+        "partOfSpeech": "verb",
+        "meaning": "쓰다",
+        "example": "Write a thank-you card to Mom.",
+        "exampleMeaning": "엄마께 감사 카드를 써 드려라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=write&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_484",
+        "number": 484,
+        "word": "draw",
+        "phonetic": "/drɔː/",
+        "partOfSpeech": "verb",
+        "meaning": "그리다",
+        "example": "Draw your favorite animal here.",
+        "exampleMeaning": "여기에 네가 가장 좋아하는 동물을 그려라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=draw&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_485",
+        "number": 485,
+        "word": "open",
+        "phonetic": "/ˈoʊpən/",
+        "partOfSpeech": "verb",
+        "meaning": "열다",
+        "example": "Open the window for fresh air.",
+        "exampleMeaning": "신선한 공기를 위해 창문을 열어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=open&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_486",
+        "number": 486,
+        "word": "close",
+        "phonetic": "/kloʊz/",
+        "partOfSpeech": "verb",
+        "meaning": "닫다",
+        "example": "Close the door gently behind you.",
+        "exampleMeaning": "뒤에 있는 문을 살며시 닫아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=close&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_487",
+        "number": 487,
+        "word": "look",
+        "phonetic": "/lʊk/",
+        "partOfSpeech": "verb",
+        "meaning": "보다",
+        "example": "Look at the bright stars above.",
+        "exampleMeaning": "위에 있는 밝은 별들을 보아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=look&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_488",
+        "number": 488,
+        "word": "watch",
+        "phonetic": "/wɑːtʃ/",
+        "partOfSpeech": "verb",
+        "meaning": "지켜보다, 시청하다",
+        "example": "Watch the baby bird learn to fly.",
+        "exampleMeaning": "아기 새가 날기를 배우는 것을 지켜보아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=watch&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_489",
+        "number": 489,
+        "word": "see",
+        "phonetic": "/siː/",
+        "partOfSpeech": "verb",
+        "meaning": "보다, 보이다",
+        "example": "I can see the mountain from here.",
+        "exampleMeaning": "여기서 산이 보인다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=see&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_490",
+        "number": 490,
+        "word": "hear",
+        "phonetic": "/hɪr/",
+        "partOfSpeech": "verb",
+        "meaning": "듣다, 들리다",
+        "example": "Can you hear the bell ringing?",
+        "exampleMeaning": "종이 울리는 소리가 들리니?",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=hear&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_491",
+        "number": 491,
+        "word": "talk",
+        "phonetic": "/tɔːk/",
+        "partOfSpeech": "verb",
+        "meaning": "이야기하다",
+        "example": "Talk kindly with your classmates.",
+        "exampleMeaning": "반 친구들과 다정하게 이야기해라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=talk&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_492",
+        "number": 492,
+        "word": "tell",
+        "phonetic": "/tel/",
+        "partOfSpeech": "verb",
+        "meaning": "말해주다",
+        "example": "Tell me the truth, please.",
+        "exampleMeaning": "제발 나에게 진실을 말해 줘.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=tell&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_493",
+        "number": 493,
+        "word": "ask",
+        "phonetic": "/æsk/",
+        "partOfSpeech": "verb",
+        "meaning": "묻다, 요청하다",
+        "example": "Ask the teacher if you have questions.",
+        "exampleMeaning": "질문이 있으면 선생님께 여쭤보아라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=ask&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_494",
+        "number": 494,
+        "word": "help",
+        "phonetic": "/help/",
+        "partOfSpeech": "verb",
+        "meaning": "돕다",
+        "example": "Always help friends in need.",
+        "exampleMeaning": "어려움에 처한 친구를 항상 도와주어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=help&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_495",
+        "number": 495,
+        "word": "love",
+        "phonetic": "/lʌv/",
+        "partOfSpeech": "verb",
+        "meaning": "사랑하다",
+        "example": "We love our family very much.",
+        "exampleMeaning": "우리는 우리 가족을 매우 사랑한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=love&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_496",
+        "number": 496,
+        "word": "like",
+        "phonetic": "/laɪk/",
+        "partOfSpeech": "verb",
+        "meaning": "좋아하다",
+        "example": "I like playing music with friends.",
+        "exampleMeaning": "나는 친구들과 음악 연주하는 것을 좋아한다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=like&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_497",
+        "number": 497,
+        "word": "want",
+        "phonetic": "/wɑːnt/",
+        "partOfSpeech": "verb",
+        "meaning": "원하다",
+        "example": "I want to learn how to swim.",
+        "exampleMeaning": "나는 수영하는 법을 배우고 싶다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=want&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_498",
+        "number": 498,
+        "word": "need",
+        "phonetic": "/niːd/",
+        "partOfSpeech": "verb",
+        "meaning": "필요하다",
+        "example": "Plants need sunlight and water.",
+        "exampleMeaning": "식물은 햇빛과 물이 필요하다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=need&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_499",
+        "number": 499,
+        "word": "have",
+        "phonetic": "/hæv/",
+        "partOfSpeech": "verb",
+        "meaning": "가지다",
+        "example": "We have two cute hamsters.",
+        "exampleMeaning": "우리는 귀여운 햄스터 두 마리를 키운다.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=have&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
+        "memorized": false,
+        "wrongCount": 0
+    },
+    {
+        "id": "elem_500",
+        "number": 500,
+        "word": "give",
+        "phonetic": "/ɡɪv/",
+        "partOfSpeech": "verb",
+        "meaning": "주다",
+        "example": "Give a warm hug to your sister.",
+        "exampleMeaning": "여동생에게 따뜻한 포옹을 해 주어라.",
+        "audioUrl": "https://dict.youdao.com/dictvoice?audio=give&type=2",
+        "tags": [
+            "초급단어50",
+            "동사",
+            "초등필수"
+        ],
+        "level": "beginner",
         "memorized": false,
         "wrongCount": 0
     }

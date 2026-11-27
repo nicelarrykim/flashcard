@@ -1,14 +1,14 @@
 // js/storage.js
 // 단어장(Deck) 다중 생성 및 단어장별 학습 관리 저장소 모듈
 
-import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261127_02';
-import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261127_02';
-import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261127_02';
-import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261127_02';
-import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261127_02';
-import { FirebaseSyncManager } from './firebaseSync.js?v=20261127_02';
-import { IdbBackup } from './idbBackup.js?v=20261127_02';
-import { AdminLogger } from './adminLogger.js?v=20261127_02';
+import { DEFAULT_WORDS } from './data/defaultWords.js?v=20261127_03';
+import { TEXTBOOK_WORDS } from './data/textbookWords.js?v=20261127_03';
+import { CENKLE_VOCA_KING_DECK } from './data/cenkleVocaKing2026.js?v=20261127_03';
+import { ELEMENTARY_WORDS_50_DECK } from './data/elementaryWords50.js?v=20261127_03';
+import { MasteryManager, RANK_TYPES } from './mastery.js?v=20261127_03';
+import { FirebaseSyncManager } from './firebaseSync.js?v=20261127_03';
+import { IdbBackup } from './idbBackup.js?v=20261127_03';
+import { AdminLogger } from './adminLogger.js?v=20261127_03';
 
 const DECKS_KEY = 'vocaquest_decks_v2';
 const ACTIVE_DECK_KEY = 'vocaquest_active_deck_v2';
@@ -401,17 +401,35 @@ export class StorageManager {
           this.saveDecks(decks);
         } else if (Array.isArray(decks)) {
           const elemDeck = decks.find(d => d.id === ELEMENTARY_WORDS_50_DECK.id || d.name === ELEMENTARY_WORDS_50_DECK.name);
-          if (elemDeck && Array.isArray(elemDeck.words) && elemDeck.words.length < ELEMENTARY_WORDS_50_DECK.words.length) {
-            const existingIds = new Set(elemDeck.words.map(w => w.id || w.word));
-            let added = false;
-            ELEMENTARY_WORDS_50_DECK.words.forEach(w => {
-              if (!existingIds.has(w.id) && !existingIds.has(w.word)) {
-                elemDeck.words.push(JSON.parse(JSON.stringify(w)));
-                existingIds.add(w.id);
-                added = true;
+          if (elemDeck && Array.isArray(elemDeck.words)) {
+            let changed = false;
+            const existingSet = new Set();
+            elemDeck.words.forEach(w => {
+              if (w && typeof w.word === 'string') {
+                const lw = w.word.trim().toLowerCase();
+                if (w.word !== lw) {
+                  w.word = lw;
+                  changed = true;
+                }
+                existingSet.add(lw);
               }
+              if (w && w.id) existingSet.add(w.id);
             });
-            if (added) {
+            if (elemDeck.words.length < ELEMENTARY_WORDS_50_DECK.words.length) {
+              ELEMENTARY_WORDS_50_DECK.words.forEach(w => {
+                if (!existingSet.has(w.id) && !existingSet.has(w.word)) {
+                  elemDeck.words.push(JSON.parse(JSON.stringify(w)));
+                  existingSet.add(w.id);
+                  existingSet.add(w.word);
+                  changed = true;
+                }
+              });
+            }
+            if (elemDeck.description !== ELEMENTARY_WORDS_50_DECK.description) {
+              elemDeck.description = ELEMENTARY_WORDS_50_DECK.description;
+              changed = true;
+            }
+            if (changed) {
               this.saveDecks(decks);
             }
           }
