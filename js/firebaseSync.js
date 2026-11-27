@@ -2,8 +2,8 @@
 // VocaQuest 로컬 우선 체크포인트 동기화 모듈 (Local-First Checkpoint Sync)
 // 실시간 리스너(onSnapshot)를 배제하고, 명시적 시점([학습 끝], 프로필 변경, 수동 새로고침)에만 단발성으로 안전하게 통신합니다.
 
-import { db, isFirebaseConfigured } from './firebaseConfig.js?v=20261127_03';
-import { AdminLogger } from './adminLogger.js?v=20261127_03';
+import { db, isFirebaseConfigured } from './firebaseConfig.js?v=20261127_04';
+import { AdminLogger } from './adminLogger.js?v=20261127_04';
 import { 
   collection, 
   doc, 
@@ -573,9 +573,19 @@ export class FirebaseSyncManager {
   static mergeConquestData(localObj, remoteObj) {
     const l = localObj || {};
     const r = remoteObj || {};
+    const lUnif = Math.max(0, Number(l.unifications) || 0);
+    const rUnif = Math.max(0, Number(r.unifications) || 0);
+    const unifications = Math.max(lUnif, rUnif);
+
     const conqueredSet = new Set([0]);
-    (Array.isArray(l.conqueredCities) ? l.conqueredCities : []).forEach(id => conqueredSet.add(Number(id)));
-    (Array.isArray(r.conqueredCities) ? r.conqueredCities : []).forEach(id => conqueredSet.add(Number(id)));
+    if (lUnif > rUnif) {
+      (Array.isArray(l.conqueredCities) ? l.conqueredCities : []).forEach(id => conqueredSet.add(Number(id)));
+    } else if (rUnif > lUnif) {
+      (Array.isArray(r.conqueredCities) ? r.conqueredCities : []).forEach(id => conqueredSet.add(Number(id)));
+    } else {
+      (Array.isArray(l.conqueredCities) ? l.conqueredCities : []).forEach(id => conqueredSet.add(Number(id)));
+      (Array.isArray(r.conqueredCities) ? r.conqueredCities : []).forEach(id => conqueredSet.add(Number(id)));
+    }
 
     const lDate = l.date || '';
     const rDate = r.date || '';
@@ -594,6 +604,7 @@ export class FirebaseSyncManager {
       conqueredCities: Array.from(conqueredSet).sort((a, b) => a - b),
       date,
       defeatsToday,
+      unifications,
       updatedAt: Math.max(l.updatedAt || 0, r.updatedAt || 0, Date.now())
     };
   }

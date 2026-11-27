@@ -1,11 +1,11 @@
 // js/performance.js
 // 단어별 학습 성과 대시보드 및 나의 왕국(영지 발전 & 기사단 승급) 모듈
 
-import { StorageManager } from './storage.js?v=20261127_03';
-import { SoundManager } from './tts.js?v=20261127_03';
-import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261127_03';
-import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261127_03';
-import { SiegeGame, SiegeManager } from './games/siege.js?v=20261127_03';
+import { StorageManager } from './storage.js?v=20261127_04';
+import { SoundManager } from './tts.js?v=20261127_04';
+import { MasteryManager, RANK_TYPES, RANK_CONFIG } from './mastery.js?v=20261127_04';
+import { KingdomManager, KINGDOM_TIERS } from './kingdom.js?v=20261127_04';
+import { SiegeGame, SiegeManager } from './games/siege.js?v=20261127_04';
 
 export class PerformanceView {
   constructor(containerId) {
@@ -84,6 +84,7 @@ export class PerformanceView {
             </div>
             <h3 class="text-2xl sm:text-3xl font-black text-amber-400 flex flex-wrap items-center gap-3 tracking-tight">
               <span>🏰 삼국지 공성 타워디펜스</span>
+              ${siegeRecord.unifications > 0 ? `<span class="text-xs sm:text-sm px-3 py-1 rounded-full font-black bg-amber-500/30 text-amber-200 border border-amber-400">🏆 천하통일 ${siegeRecord.unifications}회</span>` : ''}
               <span class="text-xs sm:text-sm px-3 py-1 rounded-full font-bold ${canPlaySiege ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400' : 'bg-rose-500/25 text-rose-300 border border-rose-400'}">
                 ${canPlaySiege ? `남은 패배 기회: ${leftDefeats}/${maxDailyDefeats}회` : `오늘 패배 소진 (0/${maxDailyDefeats}회)`}
               </span>

@@ -1,9 +1,9 @@
 // js/games/quiz.js
 // 사지선다 스피드 퀴즈 게임 모듈
 
-import { StorageManager } from '../storage.js?v=20261127_03';
-import { SoundManager } from '../tts.js?v=20261127_03';
-import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261127_03';
+import { StorageManager } from '../storage.js?v=20261127_04';
+import { SoundManager } from '../tts.js?v=20261127_04';
+import { MasteryManager, RANK_CONFIG, RANK_TYPES } from '../mastery.js?v=20261127_04';
 
 export class QuizGame {
   constructor(containerId) {

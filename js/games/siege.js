@@ -5,12 +5,12 @@
 // - 아군 진격병이 적을 피해 성문에 도달하면 승리(무제한 연승 가능), 적이 전초기지 도달 시 패배(1일 4패 제한, 자정 리셋)
 // - 점령 영토 및 일일 패배 횟수 Firebase / IndexedDB 동기화
 
-import { StorageManager } from '../storage.js?v=20261127_03';
-import { SoundManager } from '../tts.js?v=20261127_03';
-import { MasteryManager, RANK_TYPES } from '../mastery.js?v=20261127_03';
-import { FirebaseSyncManager } from '../firebaseSync.js?v=20261127_03';
-import { IdbBackup } from '../idbBackup.js?v=20261127_03';
-import { RTK_CITIES, RTK_EDGES, buildRtkAdjacency, getCityBattlePath } from './rtkMapData.js?v=20261127_03';
+import { StorageManager } from '../storage.js?v=20261127_04';
+import { SoundManager } from '../tts.js?v=20261127_04';
+import { MasteryManager, RANK_TYPES } from '../mastery.js?v=20261127_04';
+import { FirebaseSyncManager } from '../firebaseSync.js?v=20261127_04';
+import { IdbBackup } from '../idbBackup.js?v=20261127_04';
+import { RTK_CITIES, RTK_EDGES, buildRtkAdjacency, getCityBattlePath } from './rtkMapData.js?v=20261127_04';
 
 // 6종 방어 타워 정의 및 등급별 병력 소모 매트릭스 (훈련병 제외, 보병부터 전투 참가)
 export const TOWER_DEFS = {
@@ -136,6 +136,7 @@ export class SiegeManager {
           conqueredCities: Array.from(set).sort((a, b) => a - b),
           date: today,
           defeatsToday: isToday ? (parsed.defeatsToday || 0) : 0,
+          unifications: Math.max(0, Number(parsed.unifications) || 0),
           updatedAt: parsed.updatedAt || Date.now()
         };
       }
@@ -145,6 +146,7 @@ export class SiegeManager {
       conqueredCities: [0],
       date: today,
       defeatsToday: 0,
+      unifications: 0,
       updatedAt: Date.now()
     };
     this.saveConquestState(fresh, false, pid);
@@ -158,6 +160,7 @@ export class SiegeManager {
       conqueredCities: Array.from(new Set([0, ...(state.conqueredCities || []).map(Number)])).sort((a, b) => a - b),
       date: state.date || this.getLocalDateStr(),
       defeatsToday: state.defeatsToday || 0,
+      unifications: Math.max(0, Number(state.unifications) || 0),
       updatedAt: Date.now()
     };
 
@@ -191,8 +194,20 @@ export class SiegeManager {
       playCount: this.isAdminProfile() ? 0 : st.defeatsToday,
       defeatsToday: this.isAdminProfile() ? 0 : st.defeatsToday,
       conqueredCount: Math.max(0, st.conqueredCities.length - 1),
+      unifications: st.unifications || 0,
       bestWave: Math.max(0, st.conqueredCities.length - 1)
     };
+  }
+
+  static startNextUnification() {
+    const st = this.getConquestState();
+    const nextUnifications = (st.unifications || 0) + 1;
+    return this.saveConquestState({
+      conqueredCities: [0],
+      date: this.getLocalDateStr(),
+      defeatsToday: st.defeatsToday,
+      unifications: nextUnifications
+    }, true);
   }
 
   static canPlay() {
@@ -440,6 +455,8 @@ export class SiegeGame {
     const isAdmin = SiegeManager.isAdminProfile();
     const conqueredSet = new Set(state.conqueredCities);
     const conqueredCount = Math.max(0, conqueredSet.size - 1);
+    const unifications = state.unifications || 0;
+    const unifHpMult = Math.pow(1.2, unifications);
     const defeatsLeft = isAdmin ? 99 : Math.max(0, SiegeManager.MAX_DAILY_DEFEATS - state.defeatsToday);
     const diffMult = this.getDifficultyMultiplier(conqueredCount).toFixed(2);
     const troopInfo = SiegeManager.getTroopPoolFromWords();
@@ -464,7 +481,10 @@ export class SiegeGame {
           <div class="flex items-center gap-2.5">
             <span class="text-xl">🗺️</span>
             <div>
-              <h2 class="text-sm sm:text-base font-black text-white">삼국지 50성 천하통일 타워디펜스</h2>
+              <h2 class="text-sm sm:text-base font-black text-white flex items-center gap-2 flex-wrap">
+                <span>삼국지 50성 천하통일 타워디펜스</span>
+                ${unifications > 0 ? `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/60 text-amber-300 text-[11px] font-black">🏆 천하통일 ${unifications}회</span>` : ''}
+              </h2>
               <p class="text-[11px] text-slate-400">우측 최상단 <strong class="text-amber-400">나의 왕국</strong>에서 연결된 도시를 침공해 성문을 함락하세요!</p>
             </div>
           </div>
@@ -474,7 +494,7 @@ export class SiegeGame {
               점령: <span class="font-mono">${conqueredCount} / 50</span>
             </div>
             <div class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-amber-400">
-              적 난이도: <span class="font-mono">${diffMult}x</span>
+              적 난이도: <span class="font-mono">${diffMult}x</span>${unifications > 0 ? ` <span class="text-rose-300 font-mono">(체력 ${unifHpMult.toFixed(2)}x)</span>` : ''}
             </div>
             <div class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-rose-300" title="하루 ${SiegeManager.MAX_DAILY_DEFEATS}패 시 종료 (자정 12시 리셋, 승리 시 무제한 계속 가능)">
               남은 패배 기회: <span>${heartsHtml}</span> ${isAdmin ? '(ADMIN 무제한)' : `(${defeatsLeft}/${SiegeManager.MAX_DAILY_DEFEATS})`}
@@ -508,10 +528,10 @@ export class SiegeGame {
         <div class="px-4 py-3 bg-slate-950/95 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
           ${conqueredCount >= 50 ? `
             <div class="text-sm font-black text-amber-400">
-              🏆 축하합니다! 삼국지 50개 도시를 모두 통일했습니다!
+              🏆 천하통일 성공! 삼국지 50개 도시를 모두 점령했습니다!
             </div>
-            <button id="siege-reset-world-btn" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-black transition">
-              🔄 천하통일 새 회차 시작
+            <button id="siege-reset-world-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white text-xs font-black transition shadow-lg">
+              🔥 ${unifications + 2}차 천하통일 도전 (적 체력 1.2배)
             </button>
           ` : selectedCity ? `
             <div class="flex items-center gap-3">
@@ -554,12 +574,10 @@ export class SiegeGame {
       }
     });
     document.getElementById('siege-reset-world-btn')?.addEventListener('click', () => {
-      if (confirm('50성 점령 기록을 초기화하고 새 회차를 시작할까요?')) {
-        SiegeManager.saveConquestState({
-          conqueredCities: [0],
-          date: SiegeManager.getLocalDateStr(),
-          defeatsToday: state.defeatsToday
-        }, true);
+      const nextUnif = unifications + 1;
+      const nextCycle = unifications + 2;
+      if (confirm(`🏆 천하통일 성공!\n${nextCycle}차 천하통일에 도전하시겠습니까?\n\n• 타이틀 획득: 천하통일 ${nextUnif}회\n• 50개 도시 정벌 정보 초기화 및 처음부터 시작\n• 적 체력 1.2배 증가 (총 ${Math.pow(1.2, nextUnif).toFixed(2)}x)`)) {
+        SiegeManager.startNextUnification();
         this.renderWorldMap();
       }
     });
@@ -659,6 +677,8 @@ export class SiegeGame {
     const state = SiegeManager.getConquestState();
     const conqueredCount = Math.max(0, state.conqueredCities.length - 1);
     this.conqueredCount = conqueredCount;
+    this.unifications = state.unifications || 0;
+    this.unificationHpMult = Math.pow(1.2, this.unifications);
     this.diffMult = this.getDifficultyMultiplier(conqueredCount);
 
     const pool = SiegeManager.getTroopPoolFromWords();
@@ -1371,10 +1391,11 @@ export class SiegeGame {
     const speedMult = isBoss ? 0.78 : kind === 'heavy' ? 0.78 : kind === 'fast' ? 1.55 : 1.05;
 
     // 점령 영토 10개 미만(0~9개)까지는 초반 적응을 위해 적 체력 절반(0.5x), 이동 속도 추가 절반(0.25x) 적용
+    // 천하통일 회수마다 적 체력 1.2배 누적 증가, 몹 이동 속도는 기존 대비 2/3 감소(1/3 적용)
     const earlyHpMult = (this.conqueredCount || 0) < 10 ? 0.5 : 1.0;
     const earlySpeedMult = (this.conqueredCount || 0) < 10 ? 0.25 : 1.0;
-    const hp = baseHp * hpMult * earlyHpMult;
-    const speed = 1.32 * speedMult * (1 + Math.min(0.45, (this.diffMult - 1) * 0.15)) * earlySpeedMult;
+    const hp = baseHp * hpMult * earlyHpMult * (this.unificationHpMult || 1);
+    const speed = 1.32 * (1 / 3) * speedMult * (1 + Math.min(0.45, (this.diffMult - 1) * 0.15)) * earlySpeedMult;
 
     const spawnPos = this.getPathWorldPos(spec?.batchOffset || 0);
     this.enemies.push({
@@ -1505,24 +1526,51 @@ export class SiegeGame {
     if (isVictory) {
       const updated = SiegeManager.recordVictory(this.battleCity.id);
       const conqueredCount = Math.max(0, updated.conqueredCities.length - 1);
+      const curUnif = updated.unifications || 0;
       SoundManager.playTone('fanfare');
       if (typeof window.confetti === 'function') {
         window.confetti({ particleCount: 110, spread: 80, origin: { y: 0.6 } });
       }
 
-      overlay.innerHTML = `
-        <div class="bg-slate-900 border-2 border-emerald-500 rounded-3xl p-6 text-center max-w-xs w-full shadow-2xl space-y-3">
-          <div class="text-5xl">🚩</div>
-          <h3 class="text-xl font-black text-emerald-400">${this.battleCity.name} 함락 성공!</h3>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            아군 병사가 적 성문에 무사히 도달했습니다!<br>
-            점령 영토: <strong class="text-white">${conqueredCount} / 50</strong> (승리 시 계속 진격 가능!)
-          </p>
-          <button id="td-res-map-btn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-sm shadow-lg">
-            🗺️ 월드맵으로 (계속 진격)
-          </button>
-        </div>
-      `;
+      if (conqueredCount >= 50) {
+        const nextUnif = curUnif + 1;
+        const nextCycle = curUnif + 2;
+        overlay.innerHTML = `
+          <div class="bg-slate-900 border-2 border-amber-400 rounded-3xl p-6 text-center max-w-xs w-full shadow-2xl space-y-3">
+            <div class="text-5xl">🏆</div>
+            <h3 class="text-xl font-black text-amber-400">천하통일 성공!</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              50개 도시를 모두 점령했습니다!<br>
+              <strong class="text-white">${nextCycle}차 천하통일</strong>에 도전하시겠습니까?<br>
+              <span class="text-[11px] text-amber-300 block mt-1">
+                도전 시 <strong>'천하통일 ${nextUnif}회'</strong> 타이틀과 함께 도시 정벌 정보가 초기화되며, 적의 체력이 <strong>1.2배</strong>(${Math.pow(1.2, nextUnif).toFixed(2)}x) 강해집니다.
+              </span>
+            </p>
+            <div class="flex flex-col gap-2">
+              <button id="td-res-next-unif-btn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white font-black text-sm shadow-lg">
+                🔥 ${nextCycle}차 천하통일 도전하기
+              </button>
+              <button id="td-res-map-btn" class="w-full py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm">
+                🗺️ 월드맵으로 돌아가기
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        overlay.innerHTML = `
+          <div class="bg-slate-900 border-2 border-emerald-500 rounded-3xl p-6 text-center max-w-xs w-full shadow-2xl space-y-3">
+            <div class="text-5xl">🚩</div>
+            <h3 class="text-xl font-black text-emerald-400">${this.battleCity.name} 함락 성공!</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              아군 병사가 적 성문에 무사히 도달했습니다!<br>
+              점령 영토: <strong class="text-white">${conqueredCount} / 50</strong> (승리 시 계속 진격 가능!)
+            </p>
+            <button id="td-res-map-btn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-sm shadow-lg">
+              🗺️ 월드맵으로 (계속 진격)
+            </button>
+          </div>
+        `;
+      }
     } else {
       const updated = SiegeManager.recordDefeat();
       const isAdmin = SiegeManager.isAdminProfile();
@@ -1552,6 +1600,10 @@ export class SiegeGame {
     }
 
     overlay.classList.remove('hidden');
+    document.getElementById('td-res-next-unif-btn')?.addEventListener('click', () => {
+      SiegeManager.startNextUnification();
+      this.renderWorldMap();
+    });
     document.getElementById('td-res-map-btn')?.addEventListener('click', () => this.renderWorldMap());
     document.getElementById('td-res-retry-btn')?.addEventListener('click', () => this.startBattle(this.battleCity));
   }
